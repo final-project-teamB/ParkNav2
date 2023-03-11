@@ -63,8 +63,8 @@ jobs:
        ## gradle build
     - name: Build with Gradle
       run: 
-        chmod +x ./gradlew
-        ./gradlew build
+        chmod +x gradlew
+        gradlew build
 
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작
