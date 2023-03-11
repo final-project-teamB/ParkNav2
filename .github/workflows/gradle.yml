@@ -89,11 +89,10 @@ jobs:
         password: ${{ secrets.KEY }}
         port: 22
         script: |
-          sudo docker stop prod-server
-          sudo docker rm prod-server
-          sudo docker image rm ${{ secrets.DOCKER_REPO }}
-          sudo docker pull ${{ secrets.DOCKER_REPO }}
-          sudo docker run -d -p 80:8080 ${{ secrets.DOCKER_REPO }}
+          sudo docker stop $(docker ps -a -q) 
+          sudo docker rm $(docker ps -a -q)
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+          sudo docker run -d -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
       
       
       
