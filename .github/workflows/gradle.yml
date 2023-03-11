@@ -24,15 +24,6 @@ jobs:
     # 누군가 만들어 놓은 Actions를 사용하기 위해 uses 키워드 사용
     steps:
     - uses: actions/checkout@v3
-    
-    # CI 시작
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      
-      # with로 Actions에 값 전달
-      with:
-        java-version: 17
-        distribution: 'temurin'
         
     # push 할때마다 다시 gradle을 install하지 않기 위한 설정
     # 해당 프로젝트의 gradle값이 변경됐을 경우에만 install
@@ -44,6 +35,15 @@ jobs:
           ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: ${{ runner.os }}-gradle-
+
+    # CI 시작
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      
+      # with로 Actions에 값 전달
+      with:
+        java-version: 17
+        distribution: 'temurin'
 
     ## create application.properties
     - name: make application.properties
