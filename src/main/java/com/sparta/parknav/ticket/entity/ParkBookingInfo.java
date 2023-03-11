@@ -13,30 +13,27 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class TktPrchsInfo {
+public class ParkBookingInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private LocalDateTime prchs_date;
+    private LocalDateTime startTime;
+
+    @Column(nullable = false)
+    private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USERS_ID", nullable = false)
     private Users users;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USERS_ID", nullable = false)
+    @JoinColumn(name = "PARK_INFO_ID", nullable = false)
     private ParkInfo parkInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USERS_ID", nullable = false)
+    @JoinColumn(name = "CAR_ID", nullable = false)
     private Car car;
-
-    @Builder
-    private TktPrchsInfo(LocalDateTime prchs_date, Users users) {
-        this.prchs_date = prchs_date;
-        this.users = users;
-    }
 }
