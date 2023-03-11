@@ -34,17 +34,15 @@ jobs:
         
     # push 할때마다 다시 gradle을 install하지 않기 위한 설정
     # 해당 프로젝트의 gradle값이 변경됐을 경우에만 install
-#     - name: Cache Gradle packages
-#         uses: actions/cache@v2
-#         with:
-#           path: |
-#             ~/.gradle/caches
-#             ~/.gradle/wrapper
-#           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-#           restore-keys: ${{ runner.os }}-gradle-
-#       - name: Grant execute permission for gradlew
-#         run: chmod +x gradlew
-        
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: ${{ runner.os }}-gradle-
+
     ## create application.properties
     - name: make application.properties
       if: contains(github.ref, 'ci-cd-test') # branch가 ci-cd-tests 때
