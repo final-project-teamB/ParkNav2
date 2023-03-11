@@ -55,8 +55,8 @@ jobs:
       if: contains(github.ref, 'ci-cd-test')
       run: |          
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+          docker build  -t ${{ secrets.DOCKER_REPO }}/parkNav .
+          docker push ${{ secrets.DOCKER_REPO }}/parkNav
       
       
       # 서버에서 Docker 이미지 실행
