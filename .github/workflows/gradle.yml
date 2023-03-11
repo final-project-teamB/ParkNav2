@@ -34,7 +34,8 @@ jobs:
           ~/.gradle/caches
           ~/.gradle/wrapper
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: ${{ runner.os }}-gradle-
+        restore-keys: |
+          ${{ runner.os }}-gradle-
 
     # CI 시작
     - name: Set up JDK 17
