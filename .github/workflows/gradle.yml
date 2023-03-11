@@ -64,9 +64,9 @@ jobs:
     - name: Build with Gradle
       run: 
         chmod +x ./gradlew
+        ./gradlew build
         # 아래는 테슽트 코드까지 빌드할때 사용
         # ./gradlew clean :server:build -Pprofile=dev
-        ./gradlew build
 
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작
