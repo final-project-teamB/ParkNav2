@@ -77,7 +77,7 @@ jobs:
         ./gradlew build
 
       # Spring 어플리케이션 Docker Image 빌드
-      # CD 시작
+      # CD 시작 
     - name: Docker build
       if: contains(github.ref, 'CI-CD-Test')
       run: |          
