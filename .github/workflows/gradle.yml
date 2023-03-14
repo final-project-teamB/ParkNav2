@@ -98,7 +98,7 @@ jobs:
         port: 22
         script: |
           sudo usermod -aG docker $USER
-          exec su -l $USER
+          sudo exec su -l $USER
           sudo docker stop $(docker ps -a -q) 
           sudo docker rm $(docker ps -a -q)
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
