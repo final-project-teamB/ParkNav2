@@ -48,7 +48,6 @@ jobs:
 
     ## create application.properties
     - name: make application.properties
-      if: contains(github.ref, 'develop') # branch가 develop 때
       run: |
         
         # spring의 resources 경로로 이동
