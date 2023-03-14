@@ -4,14 +4,14 @@
 # Repo Action 페이지에 나타날 이름 
 name: Spring Boot & Gradle CI/CD 
 
-# Event Trigger 
+# Event Trigger
 # dev branch에 push 또는 pull request가 발생할 경우 동작
 # branch 단위 외에도, tag나 cron 식 등을 사용할 수 있음 
 on:
   push:
     branches: [ develop ]
   pull_request:
-    branches: [ develop ]
+    branches: [ develop ] 
 
 jobs:
   build:
@@ -55,10 +55,18 @@ jobs:
         cd ./src/main/resources 
         
         # application.properties 파일 생성
-        touch ./application.properties 
+        touch ./application.yml
+        
+        touch ./application-common.yml 
+        
+        touch ./application-db.yml 
         
         # GitHub-Actions에서 설정한 값을 application.properties 파일에 쓰기
-        echo "${{ secrets.PROPERTIES_DEV }}" >> ./application.properties 
+        echo "${{ secrets.YML_DEV }}" >> ./application.yml 
+        
+        echo "${{ secrets.COMMON_DEV }}" >> ./application-common.yml 
+        
+        echo "${{ secrets.DB_DEV }}" >> ./application-db.yml 
       shell: bash
       
        ## gradle build
@@ -69,7 +77,7 @@ jobs:
         ./gradlew build
 
       # Spring 어플리케이션 Docker Image 빌드
-      # CD 시작
+      # CD 시작 
     - name: Docker build
       if: contains(github.ref, 'develop')
       run: |          
@@ -89,6 +97,8 @@ jobs:
         password: ${{ secrets.KEY }}
         port: 22
         script: |
+          sudo usermod -aG docker $USER
+          sudo exec su -l $USER
           sudo docker stop $(docker ps -a -q) 
           sudo docker rm $(docker ps -a -q)
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
