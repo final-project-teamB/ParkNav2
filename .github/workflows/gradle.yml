@@ -78,7 +78,6 @@ jobs:
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작 
     - name: Docker build
-      if: contains(github.ref, 'develop')
       run: |          
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build --build-arg DEPENDENCY=build/dependency -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
@@ -89,7 +88,6 @@ jobs:
       # HOST_DEV = 퍼블릭 IPv4 DNS , USERNAME = ubuntu, KEY = pem 키 전체
     - name: EC2 Docker Run
       uses: appleboy/ssh-action@master
-      if: contains(github.ref, 'develop')
       with:
         host: ${{ secrets.HOST_DEV }}
         username: ${{ secrets.USERNAME }}
