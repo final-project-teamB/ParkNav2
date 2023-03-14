@@ -10,7 +10,7 @@ name: Spring Boot & Gradle CI/CD
 on:
   push:
     branches: [ CI-CD-Test ]
-  pull_request:
+  pull_request: 
     branches: [ CI-CD-Test ]
 
 jobs:
