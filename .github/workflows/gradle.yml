@@ -9,9 +9,9 @@ name: Spring Boot & Gradle CI/CD
 # branch 단위 외에도, tag나 cron 식 등을 사용할 수 있음 
 on:
   push:
-    branches: [ CI-CD-Test ]
+    branches: [ develop ]
   pull_request:
-    branches: [ CI-CD-Test ] 
+    branches: [ develop ] 
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
 
     ## create application.properties
     - name: make application.properties
-      if: contains(github.ref, 'CI-CD-Test') # branch가 develop 때
+      if: contains(github.ref, 'develop') # branch가 develop 때
       run: |
         
         # spring의 resources 경로로 이동
@@ -79,7 +79,7 @@ jobs:
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작 
     - name: Docker build
-      if: contains(github.ref, 'CI-CD-Test')
+      if: contains(github.ref, 'develop')
       run: |          
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build --build-arg DEPENDENCY=build/dependency -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
@@ -90,7 +90,7 @@ jobs:
       # HOST_DEV = 퍼블릭 IPv4 DNS , USERNAME = ubuntu, KEY = pem 키 전체
     - name: EC2 Docker Run
       uses: appleboy/ssh-action@master
-      if: contains(github.ref, 'CI-CD-Test')
+      if: contains(github.ref, 'develop')
       with:
         host: ${{ secrets.HOST_DEV }}
         username: ${{ secrets.USERNAME }}
