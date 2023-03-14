@@ -11,7 +11,7 @@ on:
   push:
     branches: [ CI-CD-Test ]
   pull_request:
-    branches: [ CI-CD-Test ]
+    branches: [ CI-CD-Test ] 
 
 jobs:
   build:
