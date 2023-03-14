@@ -38,7 +38,7 @@ $(document).ready(function () {
                 map.panTo(moveLatLon);
             } catch (error) {
                 alert("현재 위치 기반 검색을 하시려면 위치정보를 켜주세요!");
-                $("#mylocation").prop("checked",false);
+                $("#mylocation").prop("checked", false);
                 return;
             }
         } else {
@@ -112,7 +112,11 @@ async function searchData() {
     const available = $('#available').prop('checked');
     const mylocation = $('#mylocation').prop('checked');
     const keyword = $('#keyword').val();
-    let url ="";
+    let url = "";
+    if (!mylocation && keyword == "") {
+        alert("검색어를 입력해주세요");
+        return;
+    }
     if (mylocation) {
         //크롬 위치 정보 동의 하지 않을경우 catch로 나오게 됨
         try {
@@ -134,7 +138,7 @@ function axiosMapRenderFromKakao(url) {
     //axios로 URL을 호출
     axios.get(url)
         .then(function (response) {
-            const data = response.data;
+            const data = response.data.data;
 
             //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
             if (data.length == 0) {
@@ -155,7 +159,7 @@ function axiosMapRenderFromKakao(url) {
             var map = new kakao.maps.Map(mapContainer, mapOption);
 
             // 마커 이미지 생성
-            var markerImage = new kakao.maps.MarkerImage('./img/location.png', new kakao.maps.Size(50, 50), {
+            var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(50, 50), {
                 offset: new kakao.maps.Point(25, 26)
             });
 
@@ -175,7 +179,12 @@ function axiosMapRenderFromKakao(url) {
                 //클릭 이벤트 리스너가 작동되면 해당 주차장의 이름을 input 요소에 표시
                 var handleClickMarker = function () {
                     $("#parking-lot-name").attr("value", item.name);
-                    $("#parking-lot-address").attr("value", item.address);
+                    //도로명주소가 없을경우 지번주소로 입력
+                    let address = item.address1;
+                    if (address == "") {
+                        address = item.address2;
+                    }
+                    $("#parking-lot-address").attr("value", address);
                     $("#parking-lot-price").attr("value", item.price);
                 };
 

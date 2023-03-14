@@ -1,13 +1,11 @@
 package com.sparta.parknav.global.data;
 
+import com.sparta.parknav.parking.dto.KakaoSearchDto;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -62,5 +60,30 @@ public class KakaoMapService {
             }
         }
         return null;
+    }
+
+    public KakaoSearchDto getKakaoSearch(String searchKeyword) {
+        //카카오 API키
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "KakaoAK " + API_KEY);
+
+        //요청 URL과 검색어를 담음
+        String url = "https://dapi.kakao.com/v2/local/search/keyword.json?query=" + searchKeyword;
+        //RestTemplate를 이용해
+        RestTemplate restTemplate = new RestTemplate();
+        //HTTPHeader를 설정해줘야 하기때문에 생성함
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        //ResTemplate를 이용해 요청을 보내고 KakaoSearchDto로 받아 response에 담음
+        ResponseEntity<KakaoSearchDto> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                KakaoSearchDto.class
+        );
+
+        return response.getBody();
     }
 }
