@@ -148,8 +148,8 @@
                 <div class="col-md-12">
                     <form>
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="현재 위치로 검색을 원할 경우 비워두세요" aria-label="Search"
-                                   id="searchKeyword" aria-describedby="basic-addon2">
+                            <input type="text" class="form-control" placeholder="검색어" aria-label="Search"
+                                   id="keyword" aria-describedby="basic-addon2">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" id="SearchButton" type="button">
                                     검색
@@ -170,7 +170,7 @@
                                             <i class="far fa-clock"></i> 주차시간
                                         </div>
                                     </div>
-                                    <select class="form-control" id="parkingTime">
+                                    <select class="form-control" id="parktime">
                                         <option value="1">1시간</option>
                                         <option value="2">2시간</option>
                                         <option value="3">3시간</option>
@@ -184,7 +184,7 @@
                                             <i class="fas fa-won-sign"></i> 주차요금
                                         </div>
                                     </div>
-                                    <select class="form-control" id="parkingFee">
+                                    <select class="form-control" id="charge">
                                         <option value="1000">1000원</option>
                                         <option value="2000">2000원</option>
                                         <option value="3000">3000원</option>
@@ -198,17 +198,24 @@
                                             <i class="fas fa-car"></i> 주차장유형
                                         </div>
                                     </div>
-                                    <select class="form-control" id="parkingType">
+                                    <select class="form-control" id="type">
                                         <option value="1">노외</option>
                                         <option value="2">노상</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-3 mb-3 align-items-center">
+                            <div class="col-md-1 mb-1 align-items-center">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="availableCheck"
+                                    <input class="form-check-input" type="checkbox" id="available"
                                            value="available">
-                                    <label class="form-check-label" for="availableCheck">주차 가능</label>
+                                    <label class="form-check-label" for="available">주차 가능</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1 mb-1 align-items-center">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="mylocation"
+                                           value="mylocation">
+                                    <label class="form-check-label" for="mylocation">현위치</label>
                                 </div>
                             </div>
                         </div>
@@ -223,4 +230,3 @@
 
     </div>
 </div>
-
