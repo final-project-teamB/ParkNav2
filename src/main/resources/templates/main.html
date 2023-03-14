@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>Title</title>
+    <!-- Map API -->
+    <script th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?'+'appkey='+${@environment.getProperty('kakaoKey')}}"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- bootstrap-datepicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- js -->
+    <script src="/js/main.js"></script>
+
+</head>
+
+<body>
+
+<div class="container-fluid">
+    <nav class="navbar navbar-light my-2" style="background-color: #e3f2fd;">
+        <a class="navbar-brand" href="#">
+
+            <span class="material-icons">local_parking</span>
+            Parknav
+        </a>
+    </nav>
+    <div class="row">
+        <!-- 사용자 정보창 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4 class="card-title">주차장 정보</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" id="parking-lot-id" value="1">
+                                <label for="parking-lot-name">주차장 이름:</label>
+                                <input type="text" class="form-control" id="parking-lot-name" placeholder="주차장 이름"
+                                       readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="parking-lot-address">주차장 주소:</label>
+                                <input type="text" class="form-control" id="parking-lot-address" placeholder="주차장 주소"
+                                       readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="parking-lot-price">주차 요금:</label>
+                                <input type="text" class="form-control" id="parking-lot-price" placeholder="주차 요금"
+                                       readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="start-date">시작 날짜:</label>
+                                <input type="text" class="form-control datepicker" id="start-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="start-time">시작 시간:</label>
+                                <select class="form-control" id="start-time">
+                                    <option value="00:00:00">12:00 AM</option>
+                                    <option value="01:00:00">1:00 AM</option>
+                                    <option value="02:00:00">2:00 AM</option>
+                                    <option value="03:00:00">3:00 AM</option>
+                                    <option value="04:00:00">4:00 AM</option>
+                                    <option value="05:00:00">5:00 AM</option>
+                                    <option value="06:00:00">6:00 AM</option>
+                                    <option value="07:00:00">7:00 AM</option>
+                                    <option value="08:00:00">8:00 AM</option>
+                                    <option value="09:00:00">9:00 AM</option>
+                                    <option value="10:00:00">10:00 AM</option>
+                                    <option value="11:00:00">11:00 AM</option>
+                                    <option value="12:00:00">12:00 PM</option>
+                                    <option value="13:00:00">1:00 PM</option>
+                                    <option value="14:00:00">2:00 PM</option>
+                                    <option value="15:00:00">3:00 PM</option>
+                                    <option value="16:00:00">4:00 PM</option>
+                                    <option value="17:00:00">5:00 PM</option>
+                                    <option value="18:00:00">6:00 PM</option>
+                                    <option value="19:00:00">7:00 PM</option>
+                                    <option value="20:00:00">8:00 PM</option>
+                                    <option value="21:00:00">9:00 PM</option>
+                                    <option value="22:00:00">10:00 PM</option>
+                                    <option value="23:00:00">11:00 PM</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="exit-date">종료 날짜:</label>
+                                <input type="text" class="form-control datepicker" id="exit-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="exit-time">종료 시간:</label>
+                                <select class="form-control" id="exit-time">
+                                    <option value="00:00:00">12:00 AM</option>
+                                    <option value="01:00:00">1:00 AM</option>
+                                    <option value="02:00:00">2:00 AM</option>
+                                    <option value="03:00:00">3:00 AM</option>
+                                    <option value="04:00:00">4:00 AM</option>
+                                    <option value="05:00:00">5:00 AM</option>
+                                    <option value="06:00:00">6:00 AM</option>
+                                    <option value="07:00:00">7:00 AM</option>
+                                    <option value="08:00:00">8:00 AM</option>
+                                    <option value="09:00:00">9:00 AM</option>
+                                    <option value="10:00:00">10:00 AM</option>
+                                    <option value="11:00:00">11:00 AM</option>
+                                    <option value="12:00:00">12:00 PM</option>
+                                    <option value="13:00:00">1:00 PM</option>
+                                    <option value="14:00:00">2:00 PM</option>
+                                    <option value="15:00:00">3:00 PM</option>
+                                    <option value="16:00:00">4:00 PM</option>
+                                    <option value="17:00:00">5:00 PM</option>
+                                    <option value="18:00:00">6:00 PM</option>
+                                    <option value="19:00:00">7:00 PM</option>
+                                    <option value="20:00:00">8:00 PM</option>
+                                    <option value="21:00:00">9:00 PM</option>
+                                    <option value="22:00:00">10:00 PM</option>
+                                    <option value="23:00:00">11:00 PM</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="button" id="parking_reservation" class="btn btn-primary">주차예약</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검색바와 지도 -->
+        <div class="col-md-9">
+            <div class="row">
+                <!-- 검색바 -->
+                <div class="col-md-12">
+                    <form>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="검색어" aria-label="Search"
+                                   id="keyword" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" id="SearchButton" type="button">
+                                    검색
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- select box와 체크박스 -->
+                <div class="col-md-12">
+                    <form>
+                        <div class="form-row">
+                            <div class="col-md-2 mb-3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="far fa-clock"></i> 주차시간
+                                        </div>
+                                    </div>
+                                    <select class="form-control" id="parktime">
+                                        <option value="1">1시간</option>
+                                        <option value="2">2시간</option>
+                                        <option value="3">3시간</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-won-sign"></i> 주차요금
+                                        </div>
+                                    </div>
+                                    <select class="form-control" id="charge">
+                                        <option value="1000">1000원</option>
+                                        <option value="2000">2000원</option>
+                                        <option value="3000">3000원</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="fas fa-car"></i> 주차장유형
+                                        </div>
+                                    </div>
+                                    <select class="form-control" id="type">
+                                        <option value="1">노외</option>
+                                        <option value="2">노상</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 mb-1 align-items-center">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="available"
+                                           value="available">
+                                    <label class="form-check-label" for="available">주차 가능</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1 mb-1 align-items-center">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="mylocation"
+                                           value="mylocation">
+                                    <label class="form-check-label" for="mylocation">현위치</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- 지도 -->
+                <div class="col-md-12">
+                    <div id="map" style="width:100%;height:690px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
