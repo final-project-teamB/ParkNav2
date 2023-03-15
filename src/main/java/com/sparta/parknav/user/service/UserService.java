@@ -3,7 +3,6 @@ package com.sparta.parknav.user.service;
 import com.sparta.parknav.global.exception.CustomException;
 import com.sparta.parknav.global.exception.ErrorType;
 import com.sparta.parknav.global.jwt.JwtUtil;
-import com.sparta.parknav.global.jwt.JwtUtilAdmin;
 import com.sparta.parknav.global.response.ApiResponseDto;
 import com.sparta.parknav.global.response.MsgType;
 import com.sparta.parknav.global.response.ResponseUtils;
@@ -29,7 +28,6 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final JwtUtilAdmin jwtUtilAdmin;
 
     public ApiResponseDto<Void> signup(SignupRequestDto requestDto) {
 
@@ -78,7 +76,7 @@ public class UserService {
             throw new CustomException(ErrorType.NOT_MATCHING_INFO);
         }
 
-        String token = jwtUtilAdmin.createToken(admin.getAdminId());
+        String token = jwtUtil.createToken(admin.getAdminId());
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
 
         return ResponseUtils.ok(MsgType.LOGIN_SUCCESSFULLY);

@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,14 +27,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // 주차 현황 조회 요청이라면 다음 필터로 넘어간다.
-        if (request.getRequestURI().equals("/api/mgt")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         // request 에 담긴 토큰을 가져온다.
-        String token = jwtUtil.resolveToken(request);
+        String token = "";
+        if (Objects.equals(request.getHeader(JwtUtil.AUTHORIZATION_HEADER), "")) {
+            token = jwtUtil.resolveAdminToken(request);
+        }
+        else token = jwtUtil.resolveToken(request);
 
         // 토큰이 null 이면 다음 필터로 넘어간다
         if (token == null) {
