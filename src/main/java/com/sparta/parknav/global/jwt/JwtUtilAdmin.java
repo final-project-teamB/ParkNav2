@@ -1,6 +1,6 @@
 package com.sparta.parknav.global.jwt;
 
-import com.sparta.parknav.global.security.UserDetailsServiceImpl;
+import com.sparta.parknav.global.security.AdminDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ import java.util.Date;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtUtil {
+public class JwtUtilAdmin {
 
-    private final UserDetailsServiceImpl userDetailsService;
+    private final AdminDetailsServiceImpl adminDetailsService;
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -50,12 +50,12 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String userId) {
+    public String createToken(String adminId) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(userId)
+                        .setSubject(adminId)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
@@ -85,8 +85,8 @@ public class JwtUtil {
     }
 
     // 인증 객체 생성
-    public Authentication createAuthentication(String userId) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+    public Authentication createAuthentication(String adminId) {
+        UserDetails userDetails = adminDetailsService.loadUserByUsername(adminId);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }

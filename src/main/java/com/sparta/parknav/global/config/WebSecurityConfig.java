@@ -1,7 +1,9 @@
 package com.sparta.parknav.global.config;
 
+import com.sparta.parknav.global.jwt.JwtAuthAdminFilter;
 import com.sparta.parknav.global.jwt.JwtAuthFilter;
 import com.sparta.parknav.global.jwt.JwtUtil;
+import com.sparta.parknav.global.jwt.JwtUtilAdmin;
 import com.sparta.parknav.global.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -25,6 +27,7 @@ import java.util.Arrays;
 public class WebSecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final JwtUtilAdmin jwtUtilAdmin;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,9 +51,11 @@ public class WebSecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests().antMatchers("/api/users/**").permitAll()
+                .antMatchers("/api/admins/login").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthAdminFilter(jwtUtilAdmin), JwtAuthFilter.class);
 
 
         http.cors().configurationSource(request -> {

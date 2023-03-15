@@ -18,22 +18,22 @@ import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthAdminFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtUtilAdmin jwtUtilAdmin;
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // 주차 현황 조회 요청이라면 다음 필터로 넘어간다.
-        if (request.getRequestURI().equals("/api/mgt")) {
+        // 주차 현황 조회(관리자 권한) 요청이 아니라면 다음 필터로 넘어간다.
+        if (!request.getRequestURI().equals("/api/mgt")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         // request 에 담긴 토큰을 가져온다.
-        String token = jwtUtil.resolveToken(request);
+        String token = jwtUtilAdmin.resolveToken(request);
 
         // 토큰이 null 이면 다음 필터로 넘어간다
         if (token == null) {
@@ -43,14 +43,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         // 토큰이 유효하지 않으면 다음 필터로 넘어간다
-        if (!jwtUtil.validateToken(token)) {
+        if (!jwtUtilAdmin.validateToken(token)) {
             request.setAttribute("exception", ErrorType.NOT_VALID_TOKEN);
             filterChain.doFilter(request, response);
             return;
         }
 
         // 유효한 토큰이라면, 토큰으로부터 사용자 정보를 가져온다.
-        Claims info = jwtUtil.getUserInfoFromToken(token);
+        Claims info = jwtUtilAdmin.getUserInfoFromToken(token);
         try {
             setAuthentication(info.getSubject());   // 사용자 정보로 인증 객체 만들기
         } catch (UsernameNotFoundException e) {
@@ -61,9 +61,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     }
 
-    private void setAuthentication(String userId) {
+    private void setAuthentication(String adminId) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        Authentication authentication = jwtUtil.createAuthentication(userId); // 인증 객체 만들기
+        Authentication authentication = jwtUtilAdmin.createAuthentication(adminId); // 인증 객체 만들기
         context.setAuthentication(authentication);
 
         SecurityContextHolder.setContext(context);
