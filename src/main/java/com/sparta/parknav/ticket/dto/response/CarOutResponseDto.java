@@ -1,5 +1,6 @@
-package com.sparta.parknav.ticket.entity.dto;
+package com.sparta.parknav.ticket.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
