@@ -1,6 +1,6 @@
 package com.sparta.parknav.global.security;
 
-import com.sparta.parknav.users.entity.Users;
+import com.sparta.parknav.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,16 +10,16 @@ import java.util.Collection;
 
 public class UserDetailsImpl implements UserDetails {
 
-    private final Users user;
-    private final String usersId;
+    private final User user;
+    private final String userId;
 
     // 인증이 완료된 사용자 추가하기
-    public UserDetailsImpl(Users user, String usersId) {
+    public UserDetailsImpl(User user, String userId) {
         this.user = user;
-        this.usersId = usersId;
+        this.userId = userId;
     }
 
-    public Users getUser() {
+    public User getUser() {
         return user;
     }
 
@@ -40,7 +40,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.usersId;
+        return this.userId;
     }
 
     @Override
