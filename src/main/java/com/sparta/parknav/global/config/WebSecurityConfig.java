@@ -47,7 +47,7 @@ public class WebSecurityConfig {
         // 기본 설정인 Session 방식 사용하지 않고 JWT 방식 사용
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.authorizeRequests().antMatchers("/api/user/**").permitAll()
+        http.authorizeRequests().antMatchers("/api/users/**").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
