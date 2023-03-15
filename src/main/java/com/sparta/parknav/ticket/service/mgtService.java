@@ -45,7 +45,7 @@ public class mgtService {
         int nowInt = Integer.parseInt(now.format(DateTimeFormatter.ofPattern("MMddHHmmss")));
         // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
         int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, nowInt);
-
+ 
         ParkInfo parkInfo = parkInfoRepository.findById(requestDto.getParkId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
