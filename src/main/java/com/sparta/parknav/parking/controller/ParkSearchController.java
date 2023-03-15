@@ -1,8 +1,8 @@
 package com.sparta.parknav.parking.controller;
 
 import com.sparta.parknav.global.response.ApiResponseDto;
+import com.sparta.parknav.parking.dto.ParkOperInfoDto;
 import com.sparta.parknav.parking.dto.ParkSearchRequestDto;
-import com.sparta.parknav.parking.dto.ParkSearchResponseDto;
 import com.sparta.parknav.parking.service.ParkSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,7 +24,7 @@ public class ParkSearchController {
 
     @ResponseBody
     @GetMapping("/api/parks")
-    public ApiResponseDto<List<ParkSearchResponseDto>> serchPark(ParkSearchRequestDto parkSearchRequestDto){
+    public ApiResponseDto<List<ParkOperInfoDto>> serchPark(ParkSearchRequestDto parkSearchRequestDto){
 
         return parkSearchService.searchPark(parkSearchRequestDto);
 
