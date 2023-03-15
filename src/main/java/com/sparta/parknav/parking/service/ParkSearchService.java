@@ -7,6 +7,7 @@ import com.sparta.parknav.global.response.ResponseUtils;
 import com.sparta.parknav.parking.dto.*;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
+import com.sparta.parknav.parking.entity.ParkType;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,12 @@ public class ParkSearchService {
         }
 
         //lo,la 값을 기준으로 주변 3키로미터 이내의 주차장 검색
-        List<Object[]> result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 3000);
+        List<Object[]> result ;
+        if (parkSearchRequestDto.getType()==1) {
+            result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 3000);
+        }else{
+            result = parkInfoRepository.findParkInfoWithOperInfoAndType(lo, la, 3000, ParkType.fromValue(parkSearchRequestDto.getType()));
+        }
         for (Object[] row : result) {
             ParkSearchResponseDto parkOperInfoDto = calculateChrg((ParkOperInfo) row[0], (ParkInfo) row[1], parkSearchRequestDto.getParktime());
             if (parkOperInfoDto.getTotCharge() <= parkSearchRequestDto.getCharge()){
