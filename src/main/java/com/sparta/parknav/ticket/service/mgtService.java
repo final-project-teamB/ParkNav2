@@ -58,8 +58,7 @@ public class mgtService {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
 
-        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null
-                , 0,null);
+        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0,null);
         parkMgtInfoRepository.save(mgtSave);
 
         return ResponseUtils.ok(CarInResponseDto.of(requestDto.getCarNum(),now), MsgType.ENTER_SUCCESSFULLY);
