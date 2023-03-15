@@ -1,4 +1,4 @@
-package com.sparta.parknav.ticket.service;
+package com.sparta.parknav.management.service;
 
 import com.sparta.parknav.global.exception.CustomException;
 import com.sparta.parknav.global.exception.ErrorType;
@@ -9,12 +9,11 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkMgtInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
-import com.sparta.parknav.ticket.dto.request.CarNumRequestDto;
-import com.sparta.parknav.ticket.dto.response.CarInResponseDto;
-import com.sparta.parknav.ticket.dto.response.CarOutResponseDto;
-import com.sparta.parknav.ticket.dto.response.ParkMgtResponseDto;
+import com.sparta.parknav.management.dto.request.CarNumRequestDto;
+import com.sparta.parknav.management.dto.response.CarInResponseDto;
+import com.sparta.parknav.management.dto.response.CarOutResponseDto;
+import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
 import com.sparta.parknav.ticket.entity.ParkBookingInfo;
-import com.sparta.parknav.ticket.repository.CarRepository;
 import com.sparta.parknav.ticket.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
