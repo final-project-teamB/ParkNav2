@@ -21,7 +21,7 @@ public enum ParkType {
             case 3:
                 return PARKING.value;
             default:
-                throw new CustomException(ErrorType.DUPLICATED_USERID);
+                throw new CustomException(ErrorType.NOT_FOUND_PARK_TYPE);
         }
     }
 }
