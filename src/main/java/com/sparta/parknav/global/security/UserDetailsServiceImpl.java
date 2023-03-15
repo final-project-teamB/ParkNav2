@@ -1,8 +1,8 @@
 package com.sparta.parknav.global.security;
 
 import com.sparta.parknav.global.exception.ErrorType;
-import com.sparta.parknav.users.entity.Users;
-import com.sparta.parknav.users.repository.UsersRepository;
+import com.sparta.parknav.user.entity.User;
+import com.sparta.parknav.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,14 +13,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UsersRepository usersRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String usersId) throws UsernameNotFoundException {
-        Users user = usersRepository.findByUsersId(usersId)
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException(ErrorType.NOT_FOUND_USER.getMsg()));   // 사용자가 DB 에 없으면 예외처리
 
-        return new UserDetailsImpl(user, user.getUsersId());   // 사용자 정보를 UserDetails 로 반환
+        return new UserDetailsImpl(user, user.getUserId());   // 사용자 정보를 UserDetails 로 반환
     }
 
 }

@@ -1,4 +1,4 @@
-package com.sparta.parknav.users.dto;
+package com.sparta.parknav.user.dto;
 
 import lombok.Getter;
 
@@ -16,5 +16,4 @@ public class SignupRequestDto {
     @Pattern(regexp = "^[a-zA-Z0-9~!@#$%^&*()_+=?,./<>{}\\[\\]\\-]{8,16}$", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
     private String password;
 
-    private Boolean isAdmin;
 }

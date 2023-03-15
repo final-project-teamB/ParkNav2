@@ -1,6 +1,6 @@
 package com.sparta.parknav.ticket.entity;
 
-import com.sparta.parknav.users.entity.Users;
+import com.sparta.parknav.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,5 +21,5 @@ public class Car {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USERS_ID", nullable = false)
-    private Users users;
+    private User user;
 }

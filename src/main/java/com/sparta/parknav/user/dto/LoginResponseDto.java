@@ -1,4 +1,4 @@
-package com.sparta.parknav.users.dto;
+package com.sparta.parknav.user.dto;
 
 import lombok.Builder;
 import lombok.Getter;
