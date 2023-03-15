@@ -21,7 +21,7 @@ public class mgtController {
 
     @PostMapping("enter")
     public ApiResponseDto<CarInResponseDto> enter(@AuthenticationPrincipal AdminDetailsImpl adminDetails , @RequestBody CarNumRequestDto requestDto) {
-        return mgtService.enter(adminDetails.getUser(),requestDto);
+        return mgtService.enter(requestDto);
     }
 
     @PutMapping("exit")
