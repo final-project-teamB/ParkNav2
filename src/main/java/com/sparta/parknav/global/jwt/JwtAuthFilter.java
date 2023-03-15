@@ -15,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,18 +23,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        // 주차 현황 조회 요청이라면 다음 필터로 넘어간다.
-        if (request.getRequestURI().equals("/api/mgt")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         // request 에 담긴 토큰을 가져온다.
-        String token = jwtUtil.resolveToken(request);
+        String token = "";
+        if (Objects.equals(request.getHeader(JwtUtil.AUTHORIZATION_HEADER), "")) {
+            token = jwtUtil.resolveAdminToken(request);
+        }
+        else token = jwtUtil.resolveToken(request);
 
         // 토큰이 null 이면 다음 필터로 넘어간다
         if (token == null) {
@@ -52,7 +50,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 유효한 토큰이라면, 토큰으로부터 사용자 정보를 가져온다.
         Claims info = jwtUtil.getUserInfoFromToken(token);
         try {
-            setAuthentication(info.getSubject());   // 사용자 정보로 인증 객체 만들기
+            if (request.getRequestURI().contains("/api/mgt")) {
+                setAdminAuthentication(info.getSubject());
+            } else {
+                setAuthentication(info.getSubject());   // 사용자 정보로 인증 객체 만들기
+            }
+
         } catch (UsernameNotFoundException e) {
             request.setAttribute("exception", ErrorType.NOT_FOUND_USER);
         }
@@ -69,4 +72,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.setContext(context);
     }
 
+    private void setAdminAuthentication(String userId) {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        Authentication authentication = jwtUtil.createAdminAuthentication(userId); // 인증 객체 만들기
+        context.setAuthentication(authentication);
+
+        SecurityContextHolder.setContext(context);
+    }
 }

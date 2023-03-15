@@ -1,7 +1,9 @@
 package com.sparta.parknav.parking.entity;
 
 import com.sparta.parknav.ticket.entity.Car;
+import com.sparta.parknav.ticket.entity.ParkBookingInfo;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,16 +23,42 @@ public class ParkMgtInfo {
     @JoinColumn(name = "park_info_id")
     private ParkInfo parkInfo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id")
-    private Car car;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "park_booking_info_id")
+    private ParkBookingInfo parkBookingInfo;
 
     @Column(nullable = false)
     private LocalDateTime enterTime;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime exitTime;
 
-    @Column(nullable = false)
+    @Column
     private int charge;
+
+    @Column(nullable = false)
+    private String carNum;
+
+    @Builder
+    private ParkMgtInfo(ParkInfo parkInfo, String carNum, LocalDateTime enterTime
+            , LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo) {
+        this.parkInfo = parkInfo;
+        this.carNum = carNum;
+        this.enterTime = enterTime;
+        this.exitTime = exitTime;
+        this.charge = charge;
+        this.parkBookingInfo = parkBookingInfo;
+    }
+
+    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime
+            , LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo) {
+        return builder()
+                .parkInfo(parkInfo)
+                .carNum(carNum)
+                .enterTime(enterTime)
+                .exitTime(exitTime)
+                .charge(charge)
+                .parkBookingInfo(parkBookingInfo)
+                .build();
+    }
 }

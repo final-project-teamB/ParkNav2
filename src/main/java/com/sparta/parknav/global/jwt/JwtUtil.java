@@ -1,5 +1,6 @@
 package com.sparta.parknav.global.jwt;
 
+import com.sparta.parknav.global.security.AdminDetailsServiceImpl;
 import com.sparta.parknav.global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -24,8 +25,11 @@ import java.util.Date;
 public class JwtUtil {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final AdminDetailsServiceImpl adminDetailsService;
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String ADMIN_HEADER = "Admin";
+
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long TOKEN_TIME = 60 * 60 * 1000L;
 
@@ -43,6 +47,14 @@ public class JwtUtil {
     // header 토큰을 가져오기
     public String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    public String resolveAdminToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(ADMIN_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
         }
@@ -87,6 +99,11 @@ public class JwtUtil {
     // 인증 객체 생성
     public Authentication createAuthentication(String userId) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    public Authentication createAdminAuthentication(String userId) {
+        UserDetails userDetails = adminDetailsService.loadUserByUsername(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }

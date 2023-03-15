@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class ParknavApplication {
-    @RequestMapping("/api/user/hello")
+    @RequestMapping("/api/users/hello")
     String hello() {
         return "Hello World!";
     }
