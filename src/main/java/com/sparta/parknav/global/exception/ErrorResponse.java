@@ -2,6 +2,8 @@ package com.sparta.parknav.global.exception;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 
 @Getter
 public class ErrorResponse {
@@ -28,10 +30,24 @@ public class ErrorResponse {
                 .msg(msg)
                 .build();
     }
-    public static ErrorResponse of(String msg,int status){
+
+    public static ErrorResponse of(String msg, int status){
         return ErrorResponse.builder()
                 .status(status)
                 .msg(msg)
+                .build();
+    }
+
+    public static ErrorResponse of(BindingResult bindingResult) {
+        String message = "";
+
+        if (bindingResult.hasErrors()) {
+            message = bindingResult.getAllErrors().get(0).getDefaultMessage();
+        }
+
+        return ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .msg(message)
                 .build();
     }
 
