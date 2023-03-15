@@ -30,10 +30,10 @@ public class ParkMgtInfo {
     @Column(nullable = false)
     private LocalDateTime enterTime;
 
-    @Column()
+    @Column
     private LocalDateTime exitTime;
 
-    @Column()
+    @Column
     private int charge;
 
     @Column(nullable = false)

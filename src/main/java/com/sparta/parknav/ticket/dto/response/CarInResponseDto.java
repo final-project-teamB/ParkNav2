@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class CarInResponseDto {
 
     private String carNum;
-    @CreatedDate
     private LocalDateTime enterTime;
 
     @Builder

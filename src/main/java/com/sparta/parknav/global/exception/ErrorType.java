@@ -16,7 +16,6 @@ public enum ErrorType {
     NOT_PARKING_SPACE(400, "주차할 공간이 없습니다."),
     NOT_ADMIN_USER(400, "관리자가 아닙니다.")
     ;
-    ;
     private int code;
     private String msg;
 
