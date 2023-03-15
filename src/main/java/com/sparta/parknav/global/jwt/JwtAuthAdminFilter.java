@@ -61,9 +61,9 @@ public class JwtAuthAdminFilter extends OncePerRequestFilter {
 
     }
 
-    private void setAuthentication(String userId) {
+    private void setAuthentication(String adminId) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        Authentication authentication = jwtUtilAdmin.createAuthentication(userId); // 인증 객체 만들기
+        Authentication authentication = jwtUtilAdmin.createAuthentication(adminId); // 인증 객체 만들기
         context.setAuthentication(authentication);
 
         SecurityContextHolder.setContext(context);
