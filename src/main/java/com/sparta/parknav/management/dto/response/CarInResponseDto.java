@@ -1,9 +1,7 @@
-package com.sparta.parknav.ticket.dto.response;
+package com.sparta.parknav.management.dto.response;
 
-import com.sparta.parknav.ticket.entity.Car;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 

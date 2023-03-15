@@ -1,6 +1,6 @@
 package com.sparta.parknav.ticket.entity;
 
-import com.sparta.parknav.ticket.dto.request.CarNumRequestDto;
+import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.user.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity

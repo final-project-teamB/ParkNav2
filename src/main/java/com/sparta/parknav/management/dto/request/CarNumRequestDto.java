@@ -1,4 +1,4 @@
-package com.sparta.parknav.ticket.dto.request;
+package com.sparta.parknav.management.dto.request;
 
 import lombok.Getter;
 
