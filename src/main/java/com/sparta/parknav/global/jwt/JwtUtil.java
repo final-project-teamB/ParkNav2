@@ -28,7 +28,7 @@ public class JwtUtil {
     private final AdminDetailsServiceImpl adminDetailsService;
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String Admin_HEADER = "Admin";
+    public static final String ADMIN_HEADER = "Admin";
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long TOKEN_TIME = 60 * 60 * 1000L;
@@ -54,7 +54,7 @@ public class JwtUtil {
     }
 
     public String resolveAdminToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(Admin_HEADER);
+        String bearerToken = request.getHeader(ADMIN_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
         }
