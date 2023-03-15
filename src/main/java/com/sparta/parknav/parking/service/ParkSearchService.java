@@ -21,10 +21,9 @@ public class ParkSearchService {
     private final KakaoMapService kakaoMapService;
     private final ParkInfoRepository parkInfoRepository;
 
-    public ApiResponseDto<List<ParkOperInfoDto>> searchPark(ParkSearchRequestDto parkSearchRequestDto) {
+    public ApiResponseDto<List<ParkSearchResponseDto>> searchPark(ParkSearchRequestDto parkSearchRequestDto) {
         String lo, la;
-        List<ParkOperInfoDto> parkOperInfoDtos = new ArrayList<>();
-        List<ParkSearchResponseDto> parkSearchResponseDtos = new ArrayList<>();
+        List<ParkSearchResponseDto> parkOperInfoDtos = new ArrayList<>();
 
         //검색 키워드가 Null이 아닐경우는 키워드로 검색 이외에는 현위치 기반 검색
         if (parkSearchRequestDto.getKeyword() != null) {
@@ -45,7 +44,7 @@ public class ParkSearchService {
         //lo,la 값을 기준으로 주변 3키로미터 이내의 주차장 검색
         List<Object[]> result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 3000);
         for (Object[] row : result) {
-            ParkOperInfoDto parkOperInfoDto = calculateChrg((ParkOperInfo) row[0], (ParkInfo) row[1], parkSearchRequestDto.getParktime());
+            ParkSearchResponseDto parkOperInfoDto = calculateChrg((ParkOperInfo) row[0], (ParkInfo) row[1], parkSearchRequestDto.getParktime());
             if (parkOperInfoDto.getTotCharge() <= parkSearchRequestDto.getCharge()){
                 parkOperInfoDtos.add(parkOperInfoDto);
             }
@@ -55,25 +54,25 @@ public class ParkSearchService {
 
     }
 
-    public ParkOperInfoDto calculateChrg(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int parktime) {
+    public ParkSearchResponseDto calculateChrg(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int parktime) {
         int parkTimeMin = parktime * 60;
 
         //기본 요금만 있는 경우 ( 시간제한 x )
         if (parkOperInfo.getChargeBsTime() == 0 && parkOperInfo.getChargeAditUnitTime() == 0) {
-            return ParkOperInfoDto.of(parkOperInfo, parkInfo, parkOperInfo.getChargeBsChrg());
+            return ParkSearchResponseDto.of(parkOperInfo, parkInfo, parkOperInfo.getChargeBsChrg());
         }
 
         //기본 시간보다 적은경우
         if (parkTimeMin <= parkOperInfo.getChargeBsTime()) {
-            return ParkOperInfoDto.of(parkOperInfo, parkInfo, parkOperInfo.getChargeBsChrg());
+            return ParkSearchResponseDto.of(parkOperInfo, parkInfo, parkOperInfo.getChargeBsChrg());
         }
 
         //추가 시간이 없는 경우
         if (parkOperInfo.getChargeAditUnitTime() == 0) {
-            return ParkOperInfoDto.of(parkOperInfo, parkInfo, parkOperInfo.getChargeBsChrg());
+            return ParkSearchResponseDto.of(parkOperInfo, parkInfo, parkOperInfo.getChargeBsChrg());
         }
 
-        return ParkOperInfoDto.of(parkOperInfo, parkInfo, ((((parkTimeMin - parkOperInfo.getChargeBsTime()) / parkOperInfo.getChargeAditUnitTime())) * parkOperInfo.getChargeAditUnitChrg()) + parkOperInfo.getChargeBsChrg());
+        return ParkSearchResponseDto.of(parkOperInfo, parkInfo, ((((parkTimeMin - parkOperInfo.getChargeBsTime()) / parkOperInfo.getChargeAditUnitTime())) * parkOperInfo.getChargeAditUnitChrg()) + parkOperInfo.getChargeBsChrg());
     }
 
 }

@@ -7,7 +7,6 @@ import lombok.Getter;
 
 @Getter
 public class ParkSearchResponseDto {
-
     private Long id;
     private int chargeAditUnitChrg;
     private int chargeAditUnitTime;
@@ -29,35 +28,33 @@ public class ParkSearchResponseDto {
     private int totCharge;
 
     @Builder
-    private ParkSearchResponseDto(ParkOperInfoDto parkOperInfoDto,int totCharge) {
-        this.id = parkOperInfoDto.getId();
-        this.chargeAditUnitChrg =  parkOperInfoDto.getChargeAditUnitChrg();
-        this.chargeAditUnitTime = parkOperInfoDto.getChargeAditUnitTime();
-        this.chargeBsChrg = parkOperInfoDto.getChargeBsChrg();
-        this.chargeBsTime = parkOperInfoDto.getChargeBsTime();
-        this.cmprtCo = parkOperInfoDto.getCmprtCo();
-        this.parkCtgy = parkOperInfoDto.getParkCtgy();
-        this.satClose = parkOperInfoDto.getSatClose();
-        this.satOpen = parkOperInfoDto.getSatOpen();
-        this.sunClose = parkOperInfoDto.getSunClose();
-        this.sunOpen = parkOperInfoDto.getSunOpen();
-        this.weekdayClose = parkOperInfoDto.getWeekdayClose();
-        this.weekdayOpen = parkOperInfoDto.getWeekdayOpen();
-        this.address1 = parkOperInfoDto.getAddress1();
-        this.address2 = parkOperInfoDto.getAddress2();
-        this.la = parkOperInfoDto.getLa();
-        this.lo = parkOperInfoDto.getLo();
-        this.name = parkOperInfoDto.getName();
+    private ParkSearchResponseDto(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int totCharge) {
+        this.id = parkOperInfo.getId();
+        this.chargeAditUnitChrg =  parkOperInfo.getChargeAditUnitChrg();
+        this.chargeAditUnitTime = parkOperInfo.getChargeAditUnitTime();
+        this.chargeBsChrg = parkOperInfo.getChargeBsChrg();
+        this.chargeBsTime = parkOperInfo.getChargeBsTime();
+        this.cmprtCo = parkOperInfo.getCmprtCo();
+        this.parkCtgy = parkOperInfo.getParkCtgy();
+        this.satClose = parkOperInfo.getSatClose();
+        this.satOpen = parkOperInfo.getSatOpen();
+        this.sunClose = parkOperInfo.getSunClose();
+        this.sunOpen = parkOperInfo.getSunOpen();
+        this.weekdayClose = parkOperInfo.getWeekdayClose();
+        this.weekdayOpen = parkOperInfo.getWeekdayOpen();
+        this.address1 = parkInfo.getAddress1();
+        this.address2 = parkInfo.getAddress2();
+        this.la = parkInfo.getLa();
+        this.lo = parkInfo.getLo();
+        this.name = parkInfo.getName();
         this.totCharge = totCharge;
     }
 
-    public static ParkSearchResponseDto of(ParkOperInfoDto parkOperInfoDto,int totCharge){
+    public static ParkSearchResponseDto of(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int totCharge){
         return ParkSearchResponseDto.builder()
-                .parkOperInfoDto(parkOperInfoDto)
+                .parkOperInfo(parkOperInfo)
+                .parkInfo(parkInfo)
                 .totCharge(totCharge)
                 .build();
     }
-
-
-
 }
