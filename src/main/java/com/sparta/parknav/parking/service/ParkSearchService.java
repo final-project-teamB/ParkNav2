@@ -44,11 +44,13 @@ public class ParkSearchService {
 
         //lo,la 값을 기준으로 주변 3키로미터 이내의 주차장 검색
         List<Object[]> result ;
+        //주차장 유형에 따라 쿼리를 다르게 지정
         if (parkSearchRequestDto.getType()==1) {
             result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 3000);
         }else{
             result = parkInfoRepository.findParkInfoWithOperInfoAndType(lo, la, 3000, ParkType.fromValue(parkSearchRequestDto.getType()));
         }
+        //쿼리 결과로 받은 값을 조회 한 시간만큼 금액을 더해서 DTO에 저장
         for (Object[] row : result) {
             ParkSearchResponseDto parkOperInfoDto = calculateChrg((ParkOperInfo) row[0], (ParkInfo) row[1], parkSearchRequestDto.getParktime());
             if (parkOperInfoDto.getTotCharge() <= parkSearchRequestDto.getCharge()){

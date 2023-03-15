@@ -141,7 +141,6 @@ function axiosMapRenderFromKakao(url) {
     axios.get(url)
         .then(function (response) {
             const data = response.data.data;
-            console.log(data);
             //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
             if (data.length == 0) {
                 data.push({la: "37.5546788388674", lo: "126.970606917394"});
