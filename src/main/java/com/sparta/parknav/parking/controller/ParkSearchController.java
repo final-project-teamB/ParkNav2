@@ -1,8 +1,8 @@
 package com.sparta.parknav.parking.controller;
 
 import com.sparta.parknav.global.response.ApiResponseDto;
-import com.sparta.parknav.parking.dto.ParkSearchRequestDto;
 import com.sparta.parknav.parking.dto.ParkSearchResponseDto;
+import com.sparta.parknav.parking.dto.ParkSearchRequestDto;
 import com.sparta.parknav.parking.service.ParkSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
