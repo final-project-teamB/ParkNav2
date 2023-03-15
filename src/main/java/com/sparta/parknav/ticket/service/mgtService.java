@@ -16,7 +16,6 @@ import com.sparta.parknav.ticket.dto.response.ParkMgtResponseDto;
 import com.sparta.parknav.ticket.entity.ParkBookingInfo;
 import com.sparta.parknav.ticket.repository.CarRepository;
 import com.sparta.parknav.ticket.repository.ParkBookingInfoRepository;
-import com.sparta.parknav.user.entity.Admin;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,9 +28,8 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
-public class mgtService {
-
-    private final CarRepository carRepository;
+public class MgtService {
+    
     private final ParkBookingInfoRepository parkBookingInfoRepository;
     private final ParkInfoRepository parkInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
@@ -64,7 +62,8 @@ public class mgtService {
         return ResponseUtils.ok(CarInResponseDto.of(requestDto.getCarNum(),now), MsgType.ENTER_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<CarOutResponseDto> exit(User user, CarNumRequestDto requestDto) {
+    public ApiResponseDto<CarOutResponseDto> exit(CarNumRequestDto requestDto) {
+
 
         return null;
     }
