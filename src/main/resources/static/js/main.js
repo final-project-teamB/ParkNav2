@@ -1,3 +1,5 @@
+//지도 전역변수 초기화
+var map;
 $(document).ready(function () {
     // 시작 날짜를 datepicker로 초기화
     $('#start-date').datepicker({
@@ -88,7 +90,7 @@ $(document).ready(function () {
             level: 3
         };
     // 지도 생성 및 객체 리턴
-    var map = new kakao.maps.Map(mapContainer, mapOption);
+    map = new kakao.maps.Map(mapContainer, mapOption);
 });
 
 //navigator.geolocation은 비동기 방식이라 동기방식으로 변경하기위해 promise 사용
@@ -139,10 +141,10 @@ function axiosMapRenderFromKakao(url) {
     axios.get(url)
         .then(function (response) {
             const data = response.data.data;
-
+            console.log(data);
             //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
             if (data.length == 0) {
-                data.push({la: "33.450701", lo: "126.570667"});
+                data.push({la: "37.5546788388674", lo: "126.970606917394"});
                 alert("결과가 없습니다");
             }
 
@@ -156,7 +158,7 @@ function axiosMapRenderFromKakao(url) {
                 };
 
             // 지도 생성 및 객체 리턴
-            var map = new kakao.maps.Map(mapContainer, mapOption);
+            map = new kakao.maps.Map(mapContainer, mapOption);
 
             // 마커 이미지 생성
             var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(50, 50), {
@@ -185,7 +187,7 @@ function axiosMapRenderFromKakao(url) {
                         address = item.address2;
                     }
                     $("#parking-lot-address").attr("value", address);
-                    $("#parking-lot-price").attr("value", item.price);
+                    $("#parking-lot-price").attr("value", item.totCharge);
                 };
 
                 // 마커에 클릭 이벤트 리스너 추가
