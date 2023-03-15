@@ -1,5 +1,6 @@
 package com.sparta.parknav.global.jwt;
 
+import com.sparta.parknav.global.security.AdminDetailsServiceImpl;
 import com.sparta.parknav.global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -24,6 +25,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final AdminDetailsServiceImpl adminDetailsService;
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -87,6 +89,11 @@ public class JwtUtil {
     // 인증 객체 생성
     public Authentication createAuthentication(String userId) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    public Authentication createAdminAuthentication(String userId) {
+        UserDetails userDetails = adminDetailsService.loadUserByUsername(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }

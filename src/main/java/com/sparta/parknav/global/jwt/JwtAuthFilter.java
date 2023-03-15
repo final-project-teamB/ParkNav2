@@ -52,7 +52,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // 유효한 토큰이라면, 토큰으로부터 사용자 정보를 가져온다.
         Claims info = jwtUtil.getUserInfoFromToken(token);
         try {
-            setAuthentication(info.getSubject());   // 사용자 정보로 인증 객체 만들기
+            if (request.getRequestURI().contains("/api/mgt")) {
+                setAdminAuthentication(info.getSubject());
+            } else {
+                setAuthentication(info.getSubject());   // 사용자 정보로 인증 객체 만들기
+            }
+
         } catch (UsernameNotFoundException e) {
             request.setAttribute("exception", ErrorType.NOT_FOUND_USER);
         }
@@ -69,4 +74,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.setContext(context);
     }
 
+    private void setAdminAuthentication(String userId) {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        Authentication authentication = jwtUtil.createAdminAuthentication(userId); // 인증 객체 만들기
+        context.setAuthentication(authentication);
+
+        SecurityContextHolder.setContext(context);
+    }
 }
