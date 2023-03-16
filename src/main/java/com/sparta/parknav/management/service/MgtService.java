@@ -15,6 +15,7 @@ import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
 import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
+import com.sparta.parknav.user.entity.Admin;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,10 +58,10 @@ public class MgtService {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
 
-        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0,parkBookingNow);
+        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
         parkMgtInfoRepository.save(mgtSave);
 
-        return ResponseUtils.ok(CarInResponseDto.of(requestDto.getCarNum(),now), MsgType.ENTER_SUCCESSFULLY);
+        return ResponseUtils.ok(CarInResponseDto.of(requestDto.getCarNum(), now), MsgType.ENTER_SUCCESSFULLY);
     }
 
     @Transactional
@@ -67,7 +69,7 @@ public class MgtService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(),requestDto.getCarNum());
+        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(), requestDto.getCarNum());
         if (parkMgtInfo.getExitTime() != null) {
             throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
         }
@@ -83,13 +85,18 @@ public class MgtService {
         ParkingFeeCalculator parkingFeeCalculator = ParkingFeeCalculator.of(basicTime, basicCharge, additionalTime, additionalCharge);
         int charge = parkingFeeCalculator.calculateParkingFee(minutes);
 
-        parkMgtInfo.update(charge,now);
-        return ResponseUtils.ok(CarOutResponseDto.of(charge,now), MsgType.EXIT_SUCCESSFULLY);
+        parkMgtInfo.update(charge, now);
+        return ResponseUtils.ok(CarOutResponseDto.of(charge, now), MsgType.EXIT_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<ParkMgtResponseDto> mgtPage(User user) {
-
-        return null;
+    @Transactional
+    public ApiResponseDto<List<ParkMgtResponseDto>> mgtPage(Admin admin) {
+        List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoId(admin.getParkInfo().getId());
+        List<ParkMgtResponseDto> parkMgtResponseDtos = new ArrayList<>();
+        for (ParkMgtInfo p : parkMgtInfos) {
+            parkMgtResponseDtos.add(ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()));
+        }
+        return ResponseUtils.ok(parkMgtResponseDtos, MsgType.SEARCH_SUCCESSFULLY);
     }
 
     private static ParkBookingInfo getParkBookingInfo(CarNumRequestDto requestDto, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {
@@ -109,7 +116,7 @@ public class MgtService {
         // 2~5시 예약
         int bookingNowCnt = 0;
         for (ParkBookingInfo p : parkBookingInfo) {
-            if ((p.getStartTime().minusHours(1).isEqual(now)||p.getStartTime().minusHours(1).isBefore(now))&&p.getEndTime().isAfter(now)) {
+            if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
                 if (Objects.equals(p.getCarNum(), carNum)) {
                     continue;
                 }
