@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
     List<ParkMgtInfo> findAllByParkInfoId(Long parkId);
+    int countByParkInfoIdAndExitTimeIsNull(Long id);
 }
