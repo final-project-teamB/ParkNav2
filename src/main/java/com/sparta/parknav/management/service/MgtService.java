@@ -2,7 +2,6 @@ package com.sparta.parknav.management.service;
 
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
-import com.sparta.parknav.global.calculator.ParkingFeeCalculator;
 import com.sparta.parknav.global.exception.CustomException;
 import com.sparta.parknav.global.exception.ErrorType;
 import com.sparta.parknav.global.response.ApiResponseDto;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -67,7 +65,26 @@ public class MgtService {
     @Transactional
     public ApiResponseDto<CarOutResponseDto> exit(CarNumRequestDto requestDto) {
 
+        LocalDateTime now = LocalDateTime.now();
 
+        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(),requestDto.getCarNum());
+        if (parkMgtInfo.getExitTime() != null) {
+            throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
+        }
+
+        int basicTime = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeBsTime();
+        int basicCharge = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeBsChrg();
+        int additionalTime = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeAditUnitTime();
+        int additionalCharge = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeAditUnitChrg();
+
+        Duration duration = Duration.between(parkMgtInfo.getEnterTime(), now);
+        long minutes = duration.toMinutes();
+
+        ParkingFeeCalculator parkingFeeCalculator = ParkingFeeCalculator.of(basicTime, basicCharge, additionalTime, additionalCharge);
+        int charge = parkingFeeCalculator.calculateParkingFee(minutes);
+
+        parkMgtInfo.update(charge,now);
+        return ResponseUtils.ok(CarOutResponseDto.of(charge,now), MsgType.EXIT_SUCCESSFULLY);
     }
 
     public ApiResponseDto<ParkMgtResponseDto> mgtPage(User user) {

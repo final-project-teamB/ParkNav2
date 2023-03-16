@@ -14,6 +14,7 @@ public enum ErrorType {
     NOT_FOUND_PARK_TYPE(400, "유효하지 않은 값입니다."),
     NOT_FOUND_PARK(400, "등록된 주차장이 없습니다."),
     NOT_PARKING_SPACE(400, "주차할 공간이 없습니다."),
+    ALREADY_TAKEN_OUT_CAR(400,"이미 출차된 차량입니다.")
     ;
     private int code;
     private String msg;

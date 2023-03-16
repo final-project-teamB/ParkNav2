@@ -60,4 +60,9 @@ public class ParkMgtInfo {
                 .parkBookingInfo(parkBookingInfo)
                 .build();
     }
+
+    public void update(int charge, LocalDateTime exitTime) {
+        this.charge = charge;
+        this.exitTime = exitTime;
+    }
 }
