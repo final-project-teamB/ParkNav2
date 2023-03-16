@@ -59,7 +59,7 @@ $(document).ready(function () {
             alert("주차장을 선택해 주세요.")
             return false;
         }
-        if (startDate == "" || startDate == "" || endDate == "" || endTime == "") {
+        if (startDate == "" || startTime == "" || endDate == "" || endTime == "") {
             alert("예약 시간을 확인해주세요.")
             return false;
         }
