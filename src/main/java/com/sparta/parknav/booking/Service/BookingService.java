@@ -12,6 +12,7 @@ import com.sparta.parknav.global.response.ApiResponseDto;
 import com.sparta.parknav.global.response.MsgType;
 import com.sparta.parknav.global.response.ResponseUtils;
 import com.sparta.parknav.parking.entity.ParkInfo;
+import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
@@ -62,9 +63,8 @@ public class BookingService {
 
         // 주차 시간 구하기
         int bookingTime = getBookingTime(requestDto);
-
-        // 주차 요금 = ((주차 시간 - 기본 시간) / 추가시간) * 추가요금 + 기본요금
-        int charge = ((bookingTime - parkOperInfo.getChargeBsTime()) / parkOperInfo.getChargeAditUnitTime()) * parkOperInfo.getChargeAditUnitChrg() + parkOperInfo.getChargeBsChrg();
+        // 주차 요금 구하기
+        int charge = ParkingFeeCalculator.calculateParkingFee(bookingTime, parkOperInfo);
 
         BookingInfoResponseDto responseDto = BookingInfoResponseDto.of(available, booking, charge);
 
