@@ -1,7 +1,6 @@
 package com.sparta.parknav.parking.entity;
 
-import com.sparta.parknav.ticket.entity.Car;
-import com.sparta.parknav.ticket.entity.ParkBookingInfo;
+import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
