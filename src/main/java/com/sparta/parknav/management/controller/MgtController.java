@@ -19,17 +19,17 @@ public class MgtController {
 
     private final MgtService mgtService;
 
-    @PostMapping("enter")
+    @PostMapping("/enter")
     public ApiResponseDto<CarInResponseDto> enter(@RequestBody CarNumRequestDto requestDto) {
         return mgtService.enter(requestDto);
     }
 
-    @PutMapping("exit")
-    public ApiResponseDto<CarOutResponseDto> exit(@AuthenticationPrincipal AdminDetailsImpl adminDetails, @RequestBody CarNumRequestDto requestDto) {
+    @PutMapping("/exit")
+    public ApiResponseDto<CarOutResponseDto> exit(@RequestBody CarNumRequestDto requestDto) {
         return mgtService.exit(requestDto);
     }
 
-    @GetMapping("page")
+    @GetMapping("/check")
     public ApiResponseDto<ParkMgtResponseDto> mgtPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return mgtService.mgtPage(userDetails.getUser());
     }
