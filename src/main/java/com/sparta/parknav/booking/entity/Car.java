@@ -1,4 +1,4 @@
-package com.sparta.parknav.ticket.entity;
+package com.sparta.parknav.booking.entity;
 
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.user.entity.User;
