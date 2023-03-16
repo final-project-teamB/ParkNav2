@@ -9,6 +9,7 @@ import com.sparta.parknav.global.response.MsgType;
 import com.sparta.parknav.global.response.ResponseUtils;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkMgtInfo;
+import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
@@ -16,7 +17,6 @@ import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
 import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
 import com.sparta.parknav.user.entity.Admin;
-import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -73,17 +73,12 @@ public class MgtService {
         if (parkMgtInfo.getExitTime() != null) {
             throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
         }
-
-        int basicTime = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeBsTime();
-        int basicCharge = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeBsChrg();
-        int additionalTime = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeAditUnitTime();
-        int additionalCharge = parkMgtInfo.getParkInfo().getParkOperInfo().getChargeAditUnitChrg();
+        ParkOperInfo parkOperInfo = parkMgtInfo.getParkInfo().getParkOperInfo();
 
         Duration duration = Duration.between(parkMgtInfo.getEnterTime(), now);
         long minutes = duration.toMinutes();
 
-        ParkingFeeCalculator parkingFeeCalculator = ParkingFeeCalculator.of(basicTime, basicCharge, additionalTime, additionalCharge);
-        int charge = parkingFeeCalculator.calculateParkingFee(minutes);
+        int charge = ParkingFeeCalculator.calculateParkingFee(minutes,parkOperInfo);
 
         parkMgtInfo.update(charge, now);
         return ResponseUtils.ok(CarOutResponseDto.of(charge, now), MsgType.EXIT_SUCCESSFULLY);
