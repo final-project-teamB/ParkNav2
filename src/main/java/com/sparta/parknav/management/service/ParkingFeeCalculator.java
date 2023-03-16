@@ -1,5 +1,6 @@
 package com.sparta.parknav.management.service;
 
+import com.sparta.parknav.parking.entity.ParkOperInfo;
 import lombok.Builder;
 
 public class ParkingFeeCalculator {
@@ -7,6 +8,7 @@ public class ParkingFeeCalculator {
     private int basicTime;
     private int additionalCharge;
     private int additionalUnitTime;
+
     @Builder
     private ParkingFeeCalculator(int basicCharge, int basicTime, int additionalCharge, int additionalUnitTime) {
         this.basicCharge = basicCharge;
@@ -15,12 +17,21 @@ public class ParkingFeeCalculator {
         this.additionalUnitTime = additionalUnitTime;
     }
 
-    public static ParkingFeeCalculator of(int charge_bs_time,int charge_bs_chrg, int charge_adit_unit_time, int charge_adit_unit_chrg) {
+    public static ParkingFeeCalculator of(int chargeBsTime,int chargeBsChrg, int chargeAditUnitTime, int chargeAditUnitChrg) {
         return builder()
-                .basicCharge(charge_bs_chrg)
-                .basicTime(charge_bs_time)
-                .additionalUnitTime(charge_adit_unit_time)
-                .additionalCharge(charge_adit_unit_chrg)
+                .basicCharge(chargeBsTime)
+                .basicTime(chargeBsChrg)
+                .additionalUnitTime(chargeAditUnitTime)
+                .additionalCharge(chargeAditUnitChrg)
+                .build();
+    }
+
+    public static ParkingFeeCalculator from(ParkOperInfo parkOperInfo) {
+        return builder()
+                .basicCharge(parkOperInfo.getChargeBsChrg())
+                .basicTime(parkOperInfo.getChargeBsTime())
+                .additionalCharge(parkOperInfo.getChargeAditUnitChrg())
+                .additionalUnitTime(parkOperInfo.getChargeAditUnitTime())
                 .build();
     }
 
