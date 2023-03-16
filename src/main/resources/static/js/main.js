@@ -49,36 +49,49 @@ $(document).ready(function () {
     });
 
     //예약버튼을 누를경우 이벤트
-    $('#parking_reservation').click(function () {
+    $('#parking_reservation_check').click(function () {
         const id = $('#parking-lot-id').val();
         const startDate = $('#start-date').val();
         const startTime = $('#start-time').val();
         const endDate = $('#exit-date').val();
         const endTime = $('#exit-time').val();
-        if (id == "" || startDate == "" || startDate == "" || endDate == "" || endTime == "") {
+        if (id == "" ){
+            alert("주차장을 선택해 주세요.")
+            return false;
+        }
+        if (startDate == "" || startDate == "" || endDate == "" || endTime == "") {
             alert("예약 시간을 확인해주세요.")
             return false;
         }
 
         //받은 시간값을 DateTime형식으로 변환
-        const startDateTime = new Date(startDate + " " + startTime);
-        const endDateTime = new Date(endDate + " " + endTime);
+        const startDateTime = startDate + "T" + startTime;
+        const endDateTime = endDate + "T" + endTime;
         if (startDateTime >= endDateTime) {
             alert("종료 시간이 시작 시간보다 같거나 빠릅니다.");
             return false;
         }
-        const data = {
-            id: id,
+        const body = {
             startDate: startDateTime,
             endDate: endDateTime,
         };
-        axios.post("/api/booking", data)
+        const params = new URLSearchParams(body).toString();
+        // 주차예약 버튼 클릭 시 모달창 띄우기
+        $('#reservation-modal').modal('show');
+        axios.get(`/api/booking/${id}?${params}`)
             .then(response => {
-                console.log(response.data);
+                const data = response.data;
+                $("#parking-lot-available-modal").attr("value", data.data.available);
+                $("#parking-lot-booking-modal").attr("value", data.data.booking);
+                $("#parking-lot-price-modal").attr("value", data.data.charge+"원");
+
             })
             .catch(error => {
-                console.log(error);
+                alert("조회 에러입니다")
+                return false;
             });
+
+
     });
 
     //처음 접속 시 지도 기본값 출력
@@ -141,6 +154,7 @@ function axiosMapRenderFromKakao(url) {
     axios.get(url)
         .then(function (response) {
             const data = response.data.data;
+            console.log(data);
             //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
             if (data.length == 0) {
                 data.push({la: "37.5546788388674", lo: "126.970606917394"});
@@ -163,9 +177,12 @@ function axiosMapRenderFromKakao(url) {
             var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(50, 50), {
                 offset: new kakao.maps.Point(25, 26)
             });
-
+            // 결과값이 한 화면에 보이게 LatLngBounds 객체 생성
+            var bounds = new kakao.maps.LatLngBounds();
             // 받아온 데이터를 이용하여 마커 생성
             data.forEach(function (item) {
+                //bound에 좌표값 추가
+                bounds.extend(new kakao.maps.LatLng(item.la, item.lo));
                 var marker = new kakao.maps.Marker({
                     // 마커를 표시할 지도 객체
                     map: map,
@@ -185,13 +202,20 @@ function axiosMapRenderFromKakao(url) {
                     if (address == "") {
                         address = item.address2;
                     }
+                    $("#parking-lot-id").attr("value", item.id);
                     $("#parking-lot-address").attr("value", address);
-                    $("#parking-lot-price").attr("value", item.totCharge);
+                    $("#parking-lot-price").attr("value", item.totCharge+"원");
+                    $("#parking-lot-total-spots").attr("value",item.cmprtCo+"대");
+                    $("#parking-lot-operation-hours").attr("value",item.weekdayOpen+" ~ "+item.weekdayClose);
+                    $("#parking-lot-basic-price").attr("value",item.chargeBsTime+"분 "+item.chargeBsChrg+"원");
+                    $("#parking-lot-additional-price").attr("value",item.chargeAditUnitTime+"분당 "+item.chargeAditUnitChrg+"원");
                 };
 
                 // 마커에 클릭 이벤트 리스너 추가
                 kakao.maps.event.addListener(marker, 'click', handleClickMarker);
             });
+            //bound를 셋팅하여 결과가 한 화면에 보이게 설정
+            map.setBounds(bounds);
         });
 
 }
