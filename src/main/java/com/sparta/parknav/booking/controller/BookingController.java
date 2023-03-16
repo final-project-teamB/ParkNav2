@@ -1,6 +1,6 @@
 package com.sparta.parknav.booking.controller;
 
-import com.sparta.parknav.booking.Service.BookingService;
+import com.sparta.parknav.booking.service.BookingService;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
 import com.sparta.parknav.booking.dto.BookingResponseDto;

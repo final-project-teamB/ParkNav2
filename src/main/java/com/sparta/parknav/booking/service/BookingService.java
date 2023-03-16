@@ -1,4 +1,4 @@
-package com.sparta.parknav.booking.Service;
+package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
