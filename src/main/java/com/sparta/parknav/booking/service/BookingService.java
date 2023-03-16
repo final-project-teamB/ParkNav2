@@ -1,7 +1,8 @@
-package com.sparta.parknav.booking.Service;
+package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
+import com.sparta.parknav.booking.dto.BookingResponseDto;
 import com.sparta.parknav.booking.entity.Car;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.CarRepository;
@@ -72,7 +73,7 @@ public class BookingService {
         return ResponseUtils.ok(responseDto, MsgType.SEARCH_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<Void> bookingPark(Long id, BookingInfoRequestDto requestDto, User user) {
+    public ApiResponseDto<BookingResponseDto> bookingPark(Long id, BookingInfoRequestDto requestDto, User user) {
 
         // 선택한 시간이 현재 시간 이전인 경우 예외처리
         if (LocalDateTime.now().compareTo(requestDto.getStartDate()) > 0) {
@@ -89,9 +90,7 @@ public class BookingService {
 
         ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
 
-        parkBookingInfoRepository.save(bookingInfo);
-
-        return ResponseUtils.ok(MsgType.BOOKING_SUCCESSFULLY);
+        return ResponseUtils.ok(BookingResponseDto.of(parkBookingInfoRepository.save(bookingInfo).getId()), MsgType.BOOKING_SUCCESSFULLY);
     }
 
     @Transactional

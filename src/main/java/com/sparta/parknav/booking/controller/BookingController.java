@@ -1,8 +1,9 @@
 package com.sparta.parknav.booking.controller;
 
-import com.sparta.parknav.booking.Service.BookingService;
+import com.sparta.parknav.booking.service.BookingService;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
+import com.sparta.parknav.booking.dto.BookingResponseDto;
 import com.sparta.parknav.global.response.ApiResponseDto;
 import com.sparta.parknav.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +23,9 @@ public class BookingController {
     }
 
     @PostMapping("/{park-id}")
-    public ApiResponseDto<Void> bookingPark(@PathVariable(name = "park-id") Long id,
-                                            @RequestBody BookingInfoRequestDto requestDto,
-                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponseDto<BookingResponseDto> bookingPark(@PathVariable(name = "park-id") Long id,
+                                                          @RequestBody BookingInfoRequestDto requestDto,
+                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return bookingService.bookingPark(id, requestDto, userDetails.getUser());
     }
 
