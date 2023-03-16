@@ -1,5 +1,6 @@
 package com.sparta.parknav.booking.entity;
 
+import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.user.entity.User;
 import lombok.AccessLevel;
@@ -38,8 +39,7 @@ public class ParkBookingInfo {
 
 
     @Builder
-    private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime
-            , User user, ParkInfo parkInfo, String carNum) {
+    private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.user = user;
@@ -47,15 +47,14 @@ public class ParkBookingInfo {
         this.carNum =carNum;
     }
 
-    public static ParkBookingInfo of(LocalDateTime startTime, LocalDateTime endTime
-            , User user, ParkInfo parkInfo, String carNum) {
-        return builder()
-                .startTime(startTime)
-                .endTime(endTime)
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum) {
+        return ParkBookingInfo.builder()
+                .startTime(requestDto.getStartDate())
+                .endTime(requestDto.getEndDate())
                 .user(user)
                 .parkInfo(parkInfo)
                 .carNum(carNum)
                 .build();
-
     }
+
 }

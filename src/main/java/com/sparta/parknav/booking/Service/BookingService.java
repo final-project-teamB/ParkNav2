@@ -2,15 +2,21 @@ package com.sparta.parknav.booking.Service;
 
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
+import com.sparta.parknav.booking.entity.Car;
+import com.sparta.parknav.booking.entity.ParkBookingInfo;
+import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.global.exception.CustomException;
 import com.sparta.parknav.global.exception.ErrorType;
 import com.sparta.parknav.global.response.ApiResponseDto;
 import com.sparta.parknav.global.response.MsgType;
 import com.sparta.parknav.global.response.ResponseUtils;
+import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
+import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
+import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +30,8 @@ public class BookingService {
     private final ParkBookingInfoRepository parkBookingInfoRepository;
     private final ParkOperInfoRepository parkOperInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
+    private final ParkInfoRepository parkInfoRepository;
+    private final CarRepository carRepository;
 
     public ApiResponseDto<BookingInfoResponseDto> getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
@@ -61,6 +69,28 @@ public class BookingService {
         BookingInfoResponseDto responseDto = BookingInfoResponseDto.of(available, booking, charge);
 
         return ResponseUtils.ok(responseDto, MsgType.SEARCH_SUCCESSFULLY);
+    }
+
+    public ApiResponseDto<Void> bookingPark(Long id, BookingInfoRequestDto requestDto, User user) {
+
+        // 선택한 시간이 현재 시간 이전인 경우 예외처리
+        if (LocalDateTime.now().compareTo(requestDto.getStartDate()) > 0) {
+            throw new CustomException(ErrorType.NOT_AVAILABLE_TIME);
+        }
+
+        ParkInfo parkInfo = parkInfoRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK)
+        );
+
+        Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_CAR)
+        );
+
+        ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
+
+        parkBookingInfoRepository.save(bookingInfo);
+
+        return ResponseUtils.ok(MsgType.BOOKING_SUCCESSFULLY);
     }
 
 

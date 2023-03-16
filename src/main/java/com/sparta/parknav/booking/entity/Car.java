@@ -18,23 +18,28 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false,length = 20)
+    @Column(nullable = false, length = 20)
     private String carNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USERS_ID", nullable = false)
     private User user;
 
+    @Column(nullable = false)
+    private Boolean isUsing;
+
     @Builder
-    private Car(String carNum, User user) {
+    private Car(String carNum, User user, Boolean isUsing) {
         this.carNum = carNum;
         this.user = user;
+        this.isUsing = isUsing;
     }
 
-    public static Car of(CarNumRequestDto requestDto, User user) {
+    public static Car of(CarNumRequestDto requestDto, User user, Boolean isUsing) {
         return builder()
                 .carNum(requestDto.getCarNum())
                 .user(user)
+                .isUsing(isUsing)
                 .build();
     }
 }
