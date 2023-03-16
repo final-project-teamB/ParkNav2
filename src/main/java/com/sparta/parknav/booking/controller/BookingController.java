@@ -28,4 +28,10 @@ public class BookingController {
         return bookingService.bookingPark(id, requestDto, userDetails.getUser());
     }
 
+    @DeleteMapping("/{booking-id}")
+    public ApiResponseDto<Void> cancelBooking(@PathVariable(name = "booking-id") Long id,
+                                              @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return bookingService.cancelBooking(id, userDetails.getUser());
+    }
+
 }

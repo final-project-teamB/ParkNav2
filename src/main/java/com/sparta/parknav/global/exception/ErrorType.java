@@ -16,7 +16,9 @@ public enum ErrorType {
     NOT_PARKING_SPACE(400, "주차할 공간이 없습니다."),
     ALREADY_TAKEN_OUT_CAR(400,"이미 출차된 차량입니다."),
     NOT_AVAILABLE_TIME(400, "예약 시작 시간은 현재 시간 이전일 수 없습니다."),
-    NOT_FOUND_CAR(400, "등록된 차량이 없습니다.")
+    NOT_FOUND_CAR(400, "등록된 차량이 없습니다."),
+    NOT_FOUND_BOOKING(400, "예약 내역이 존재하지 않습니다."),
+    NOT_BOOKING_USER(400, "본인이 예약한 내역이 아닙니다.")
     ;
 
     private int code;

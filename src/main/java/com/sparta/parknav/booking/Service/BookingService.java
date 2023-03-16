@@ -11,8 +11,8 @@ import com.sparta.parknav.global.exception.ErrorType;
 import com.sparta.parknav.global.response.ApiResponseDto;
 import com.sparta.parknav.global.response.MsgType;
 import com.sparta.parknav.global.response.ResponseUtils;
-import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.management.service.ParkingFeeCalculator;
+import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
@@ -20,6 +20,7 @@ import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -93,6 +94,22 @@ public class BookingService {
         return ResponseUtils.ok(MsgType.BOOKING_SUCCESSFULLY);
     }
 
+    @Transactional
+    public ApiResponseDto<Void> cancelBooking(Long id, User user) {
+
+        ParkBookingInfo bookingInfo = parkBookingInfoRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_BOOKING)
+        );
+
+        if (!bookingInfo.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorType.NOT_BOOKING_USER);
+        }
+
+        parkBookingInfoRepository.deleteById(id);
+
+        return ResponseUtils.ok(MsgType.CANCEL_SUCCESSFULLY);
+    }
+
 
     private boolean checkOperation(DayOfWeek dayOfWeek, ParkOperInfo parkOperInfo) {
 
@@ -124,5 +141,4 @@ public class BookingService {
 
         return  parkingDay * 1440 + parkingTime;
     }
-
 }
