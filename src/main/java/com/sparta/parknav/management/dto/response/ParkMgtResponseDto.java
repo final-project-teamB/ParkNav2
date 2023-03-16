@@ -1,7 +1,9 @@
 package com.sparta.parknav.management.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -9,7 +11,9 @@ import java.time.LocalDateTime;
 public class ParkMgtResponseDto {
 
     private String carNum;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime enterTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime exitTime;
     private int charge;
 
@@ -21,5 +25,14 @@ public class ParkMgtResponseDto {
         this.enterTime = enterTime;
         this.exitTime = exitTime;
         this.charge = charge;
+    }
+
+    public static ParkMgtResponseDto of(String carNum, LocalDateTime enterTime, LocalDateTime exitTime, int charge) {
+        return builder()
+                .carNum(carNum)
+                .enterTime(enterTime)
+                .exitTime(exitTime)
+                .charge(charge)
+                .build();
     }
 }
