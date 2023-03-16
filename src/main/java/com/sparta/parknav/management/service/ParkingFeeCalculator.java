@@ -46,5 +46,21 @@ public class ParkingFeeCalculator {
 
         return parkingFee;
     }
+
+    public static int calculateParkingFee(long parkingTime, ParkOperInfo parkOperInfo) {
+
+        ParkingFeeCalculator calculator = ParkingFeeCalculator.from(parkOperInfo);
+
+        int parkingFee = calculator.basicCharge;
+
+        if (parkingTime > calculator.basicTime) {
+            long additionalTime = parkingTime - calculator.basicTime;
+            int additionalFee = (int) Math.ceil((double) additionalTime / calculator.additionalUnitTime) * calculator.additionalCharge;
+            parkingFee += additionalFee;
+        }
+
+        return parkingFee;
+    }
+
 }
 
