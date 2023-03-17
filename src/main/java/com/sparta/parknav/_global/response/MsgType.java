@@ -13,7 +13,9 @@ public enum MsgType {
     NOT_OPEN_NOW("현재 운영중이 아닙니다."),
     NOT_OPEN_SELECT_DATE("선택하신 시간에는 운영하지 않습니다."),
     BOOKING_SUCCESSFULLY("예약이 완료되었습니다."),
-    CANCEL_SUCCESSFULLY("예약이 취소되었습니다.")
+    CANCEL_SUCCESSFULLY("예약이 취소되었습니다."),
+    REGISTRATION_SUCCESSFULLY("차량 등록 성공"),
+    REP_REG_SUCCESSFULLY("대표 차량 등록 성공")
     ;
 
     private final String msg;
