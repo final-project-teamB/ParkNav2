@@ -1,8 +1,8 @@
-package com.sparta.parknav.global.config;
+package com.sparta.parknav._global.config;
 
-import com.sparta.parknav.global.jwt.JwtAuthFilter;
-import com.sparta.parknav.global.jwt.JwtUtil;
-import com.sparta.parknav.global.security.CustomAuthenticationEntryPoint;
+import com.sparta.parknav._global.jwt.JwtAuthFilter;
+import com.sparta.parknav._global.jwt.JwtUtil;
+import com.sparta.parknav._global.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +51,7 @@ public class WebSecurityConfig {
         http.authorizeRequests().antMatchers("/api/users/**").permitAll()
                 .antMatchers("/api/admins/login").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/booking/**").permitAll()
+                .antMatchers("/login").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
