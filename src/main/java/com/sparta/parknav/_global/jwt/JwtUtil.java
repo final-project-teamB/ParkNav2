@@ -1,7 +1,7 @@
-package com.sparta.parknav.global.jwt;
+package com.sparta.parknav._global.jwt;
 
-import com.sparta.parknav.global.security.AdminDetailsServiceImpl;
-import com.sparta.parknav.global.security.UserDetailsServiceImpl;
+import com.sparta.parknav._global.security.AdminDetailsServiceImpl;
+import com.sparta.parknav._global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;

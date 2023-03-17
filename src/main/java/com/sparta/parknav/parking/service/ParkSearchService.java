@@ -1,9 +1,9 @@
 package com.sparta.parknav.parking.service;
 
-import com.sparta.parknav.global.data.KakaoMapService;
-import com.sparta.parknav.global.response.ApiResponseDto;
-import com.sparta.parknav.global.response.MsgType;
-import com.sparta.parknav.global.response.ResponseUtils;
+import com.sparta.parknav._global.data.KakaoMapService;
+import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.MsgType;
+import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.parking.dto.*;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;

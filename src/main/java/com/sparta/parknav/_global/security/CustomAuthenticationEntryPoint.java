@@ -1,9 +1,9 @@
-package com.sparta.parknav.global.security;
+package com.sparta.parknav._global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.parknav.global.exception.ErrorResponse;
-import com.sparta.parknav.global.exception.ErrorType;
-import com.sparta.parknav.global.response.ResponseUtils;
+import com.sparta.parknav._global.exception.ErrorResponse;
+import com.sparta.parknav._global.exception.ErrorType;
+import com.sparta.parknav._global.response.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

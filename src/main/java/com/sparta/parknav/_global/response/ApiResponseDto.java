@@ -1,7 +1,7 @@
-package com.sparta.parknav.global.response;
+package com.sparta.parknav._global.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sparta.parknav.global.exception.ErrorResponse;
+import com.sparta.parknav._global.exception.ErrorResponse;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,6 +1,6 @@
-package com.sparta.parknav.global.security;
+package com.sparta.parknav._global.security;
 
-import com.sparta.parknav.global.exception.ErrorType;
+import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav.user.entity.Admin;
 import com.sparta.parknav.user.repository.AdminRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.sparta.parknav.management.controller;
 
-import com.sparta.parknav.global.response.ApiResponseDto;
-import com.sparta.parknav.global.security.AdminDetailsImpl;
+import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.security.AdminDetailsImpl;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
