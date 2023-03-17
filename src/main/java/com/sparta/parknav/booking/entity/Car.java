@@ -35,11 +35,15 @@ public class Car {
         this.isUsing = isUsing;
     }
 
-    public static Car of(CarNumRequestDto requestDto, User user, Boolean isUsing) {
+    public static Car of(String carNum, User user, Boolean isUsing) {
         return builder()
-                .carNum(requestDto.getCarNum())
+                .carNum(carNum)
                 .user(user)
                 .isUsing(isUsing)
                 .build();
+    }
+
+    public void update(Boolean isUsing) {
+        this.isUsing = isUsing;
     }
 }
