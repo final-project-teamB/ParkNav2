@@ -17,12 +17,12 @@ public class CarRegController {
     private final CarRegService carRegService;
 
     @PostMapping("/reg")
-    public ApiResponseDto<Void> regist(@AuthenticationPrincipal UserDetailsImpl userDetails , @RequestBody CarRegist carRegist) {
-        return carRegService.regist(userDetails.getUser(),carRegist);
+    public ApiResponseDto<Void> regist(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CarRegist carRegist) {
+        return carRegService.regist(userDetails.getUser(), carRegist);
     }
 
-    @PutMapping("rep")
-    public ApiResponseDto<MsgType> representative(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CarRegist carRegist) {
+    @PutMapping(value = "/rep")
+    public ApiResponseDto<Void> representative(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CarRegist carRegist) {
         return carRegService.representative(userDetails.getUser(), carRegist);
     }
 }

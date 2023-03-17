@@ -1,5 +1,7 @@
 package com.sparta.parknav.management.service;
 
+import com.sparta.parknav._global.exception.CustomException;
+import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.response.ResponseUtils;
@@ -19,23 +21,33 @@ public class CarRegService {
     private final CarRepository carRepository;
 
     @Transactional
-    public ApiResponseDto<Void> regist(User user, CarRegist carRegistration) {
+    public ApiResponseDto<Void> regist(User user, CarRegist carRegist) {
 
         // 대표차량인 차량 find
-        Car car = carRepository.findByUserAndCarNumAndIsUsingIs(user, carRegistration.getCarNum(), true);
+        Car car = carRepository.findByUserAndCarNumAndIsUsingIs(user, carRegist.getCarNum(), true);
         if (car == null) {
-            car = Car.of(carRegistration.getCarNum(), user, true);
+            car = Car.of(carRegist.getCarNum(), user, true);
         } else {
-            if (carRegistration.getIsUsing()) {
+            if (carRegist.getIsUsing()) {
                 car.update(false);
             }
-            car = Car.of(carRegistration.getCarNum(), user, carRegistration.getIsUsing());
+            car = Car.of(carRegist.getCarNum(), user, carRegist.getIsUsing());
         }
         carRepository.save(car);
         return ResponseUtils.ok(MsgType.REGISTRATION_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<MsgType> representative(User user, CarRegist carRegist) {
-        return null;
+    @Transactional
+    public ApiResponseDto<Void> representative(User user, CarRegist carRegist) {
+
+        Car car = carRepository.findByUserAndIsUsingIs(user, true);
+        if (car == null) {
+            throw new CustomException(ErrorType.NOT_FOUND_CAR);
+        }
+        car.update(false);
+
+        Car newCar = Car.of(carRegist.getCarNum(), user, true);
+        carRepository.save(newCar);
+        return ResponseUtils.ok(MsgType.REP_REG_SUCCESSFULLY);
     }
 }

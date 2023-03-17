@@ -6,5 +6,5 @@ import lombok.Getter;
 public class CarRegist {
 
     private String carNum;
-    private Boolean isUsing;
+    private Boolean isUsing=true;
 }
