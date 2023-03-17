@@ -1,7 +1,7 @@
-package com.sparta.parknav.global.exception;
+package com.sparta.parknav._global.exception;
 
-import com.sparta.parknav.global.response.ApiResponseDto;
-import com.sparta.parknav.global.response.ResponseUtils;
+import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.ResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

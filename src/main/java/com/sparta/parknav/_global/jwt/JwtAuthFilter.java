@@ -1,6 +1,6 @@
-package com.sparta.parknav.global.jwt;
+package com.sparta.parknav._global.jwt;
 
-import com.sparta.parknav.global.exception.ErrorType;
+import com.sparta.parknav._global.exception.ErrorType;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

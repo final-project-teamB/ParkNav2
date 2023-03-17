@@ -1,4 +1,4 @@
-package com.sparta.parknav.global.response;
+package com.sparta.parknav._global.response;
 
 import lombok.Getter;
 

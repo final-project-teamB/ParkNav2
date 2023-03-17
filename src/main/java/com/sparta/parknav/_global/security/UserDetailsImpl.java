@@ -1,6 +1,6 @@
-package com.sparta.parknav.global.security;
+package com.sparta.parknav._global.security;
 
-import com.sparta.parknav.user.entity.Admin;
+import com.sparta.parknav.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,25 +8,25 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AdminDetailsImpl implements UserDetails {
+public class UserDetailsImpl implements UserDetails {
 
-    private final Admin admin;
-    private final String adminId;
+    private final User user;
+    private final String userId;
 
     // 인증이 완료된 사용자 추가하기
-    public AdminDetailsImpl(Admin admin, String adminId) {
-        this.admin = admin;
-        this.adminId = adminId;
+    public UserDetailsImpl(User user, String userId) {
+        this.user = user;
+        this.userId = userId;
     }
 
-    public Admin getUser() {
-        return admin;
+    public User getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_ADMIN");
+        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_USER");
         Collection<GrantedAuthority> authorities = new ArrayList<>();   // 사용자 권한을 GrantedAuthority 로 추상화
         authorities.add(simpleGrantedAuthority);
 
@@ -40,7 +40,7 @@ public class AdminDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.adminId;
+        return this.userId;
     }
 
     @Override

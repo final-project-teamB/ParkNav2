@@ -1,7 +1,7 @@
 package com.sparta.parknav.parking.entity;
 
-import com.sparta.parknav.global.exception.CustomException;
-import com.sparta.parknav.global.exception.ErrorType;
+import com.sparta.parknav._global.exception.CustomException;
+import com.sparta.parknav._global.exception.ErrorType;
 
 public enum ParkType {
     ALL("전체"),

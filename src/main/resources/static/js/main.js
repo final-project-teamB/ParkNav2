@@ -67,8 +67,19 @@ $(document).ready(function () {
         //받은 시간값을 DateTime형식으로 변환
         const startDateTime = startDate + "T" + startTime;
         const endDateTime = endDate + "T" + endTime;
+        const now = new Date();
+        const startDateTimetoDate = new Date(startDateTime);
+        // 년월일시까지만 비교할 현재 시간
+        const nowTimeHours = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
+        // 년월일시까지만 비교할 사용자 입력 시간
+        const userStartDateTimeHours = new Date(startDateTimetoDate.getFullYear(), startDateTimetoDate.getMonth(), startDateTimetoDate.getDate(), startDateTimetoDate.getHours());
+
         if (startDateTime >= endDateTime) {
             alert("종료 시간이 시작 시간보다 같거나 빠릅니다.");
+            return false;
+        }
+        if (startDateTimetoDate.getTime() < nowTimeHours.getTime()) {
+            alert("현재 시간 이후로만 선택 가능합니다")
             return false;
         }
         const body = {
@@ -90,6 +101,21 @@ $(document).ready(function () {
                 alert("조회 에러입니다")
                 return false;
             });
+
+
+    });
+    $('#parking_reservation').click(function () {
+        available = parseInt($("#parking-lot-available-modal").val(),10);
+        booking =  parseInt($("#parking-lot-booking-modal").val(),10);
+        total = parseInt($("#parking-lot-total-spots").val(),10);
+        if(isNaN(available)||isNaN(booking)){
+            alert("운영시간이 아닙니다" +
+                "");
+        }
+        if (available+booking > total){
+            alert("예약 할 수 없습니다");
+            return false;
+        }
 
 
     });

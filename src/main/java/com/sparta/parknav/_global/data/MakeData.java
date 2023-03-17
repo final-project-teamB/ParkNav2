@@ -1,4 +1,4 @@
-package com.sparta.parknav.global.data;
+package com.sparta.parknav._global.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

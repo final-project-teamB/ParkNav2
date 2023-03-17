@@ -2,11 +2,11 @@ package com.sparta.parknav.management.service;
 
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
-import com.sparta.parknav.global.exception.CustomException;
-import com.sparta.parknav.global.exception.ErrorType;
-import com.sparta.parknav.global.response.ApiResponseDto;
-import com.sparta.parknav.global.response.MsgType;
-import com.sparta.parknav.global.response.ResponseUtils;
+import com.sparta.parknav._global.exception.CustomException;
+import com.sparta.parknav._global.exception.ErrorType;
+import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.MsgType;
+import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkMgtInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;

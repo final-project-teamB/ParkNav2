@@ -1,4 +1,4 @@
-package com.sparta.parknav.global.exception;
+package com.sparta.parknav._global.exception;
 
 import lombok.Getter;
 

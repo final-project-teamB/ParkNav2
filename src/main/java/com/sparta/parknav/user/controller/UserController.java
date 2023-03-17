@@ -1,6 +1,6 @@
 package com.sparta.parknav.user.controller;
 
-import com.sparta.parknav.global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav.user.dto.LoginRequestDto;
 import com.sparta.parknav.user.dto.SignupRequestDto;
 import com.sparta.parknav.user.service.UserService;
