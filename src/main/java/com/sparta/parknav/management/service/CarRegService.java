@@ -29,17 +29,9 @@ public class CarRegService {
         if (dupCar !=null) {
             throw new CustomException(ErrorType.ALREADY_REG_CAR);
         }
-        //대표 차량이 있는지 확인
-        Car repCar = carRepository.findByUserAndIsUsingIs(user, true);
-        Boolean rep = carRegist.getIsUsing();
-        if (repCar != null) {
-            if (carRegist.getIsUsing()) {
-                repCar.update(false);
-            }
-        } else {
-            rep = true;
-        }
-        Car car = Car.of(carRegist.getCarNum(), user, rep);
+        // 차량이 있는지 확인 -> 차량이 없으면 대표차량으로 등록
+        boolean repCar = carRepository.existsByUser(user);
+        Car car = Car.of(carRegist.getCarNum(), user, !repCar);
 
         carRepository.save(car);
         return ResponseUtils.ok(MsgType.REGISTRATION_SUCCESSFULLY);
