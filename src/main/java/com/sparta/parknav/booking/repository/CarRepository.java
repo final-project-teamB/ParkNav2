@@ -4,6 +4,7 @@ import com.sparta.parknav.booking.entity.Car;
 import com.sparta.parknav.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CarRepository extends JpaRepository<Car, Long> {
@@ -15,4 +16,6 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     boolean existsByUser(User user);
 
     Car findByUserAndCarNum(User user, String carNum);
+
+    List<Car> findByUserIdOrderByIsUsingDesc(Long userId);
 }
