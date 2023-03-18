@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,12 +22,12 @@ public class MgtController {
     private final MgtService mgtService;
 
     @PostMapping("/enter")
-    public ApiResponseDto<CarInResponseDto> enter(@RequestBody CarNumRequestDto requestDto) {
+    public ApiResponseDto<CarInResponseDto> enter(@Valid @RequestBody CarNumRequestDto requestDto) {
         return mgtService.enter(requestDto);
     }
 
     @PutMapping("/exit")
-    public ApiResponseDto<CarOutResponseDto> exit(@RequestBody CarNumRequestDto requestDto) {
+    public ApiResponseDto<CarOutResponseDto> exit(@Valid @RequestBody CarNumRequestDto requestDto) {
         return mgtService.exit(requestDto);
     }
 
