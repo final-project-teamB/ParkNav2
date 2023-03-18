@@ -12,5 +12,7 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     Car findByUserAndIsUsingIs(User user, Boolean isUsing);
 
+    boolean existsByUser(User user);
+
     Car findByUserAndCarNum(User user, String carNum);
 }
