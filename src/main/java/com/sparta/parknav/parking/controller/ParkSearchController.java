@@ -22,6 +22,11 @@ public class ParkSearchController {
         return "main";
     }
 
+    @GetMapping("/admin")
+    public String admin(){
+        return "admin";
+    }
+
     @ResponseBody
     @GetMapping("/api/parks")
     public ApiResponseDto<List<ParkSearchResponseDto>> serchPark(ParkSearchRequestDto parkSearchRequestDto){
