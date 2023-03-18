@@ -8,10 +8,10 @@ import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.parking.entity.ParkInfo;
-import com.sparta.parknav.parking.entity.ParkMgtInfo;
+import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
-import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
+import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,22 +38,25 @@ public class MgtService {
 
     @Transactional
     public ApiResponseDto<CarInResponseDto> enter(CarNumRequestDto requestDto, Admin user) {
-
+        // SCENARIO ENTER 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
-        if (parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(),requestDto.getCarNum()).isPresent()) {
+        // SCENARIO ENTER 2
+        Optional<ParkMgtInfo> park = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
+        if (park.isPresent() && park.get().getExitTime() == null) {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
 
         // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
+        // SCENARIO ENTER 3
         List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
         LocalDateTime now = LocalDateTime.now();
         // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
         int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now);
         // 예약된 차량 찾기
         ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
-
+        // SCENARIO ENTER 5
         ParkInfo parkInfo = parkInfoRepository.findById(requestDto.getParkId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
@@ -73,17 +77,17 @@ public class MgtService {
 
     @Transactional
     public ApiResponseDto<CarOutResponseDto> exit(CarNumRequestDto requestDto, Admin user) {
-
+        // SCENARIO EXIT 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
 
         LocalDateTime now = LocalDateTime.now();
-
-        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
+        // SCENARIO EXIT 2
+        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
         );
-
+        // SCENARIO EXIT 3
         if (parkMgtInfo.getExitTime() != null) {
             throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
         }
@@ -92,7 +96,7 @@ public class MgtService {
         Duration duration = Duration.between(parkMgtInfo.getEnterTime(), now);
         long minutes = duration.toMinutes();
 
-        int charge = ParkingFeeCalculator.calculateParkingFee(minutes,parkOperInfo);
+        int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
         parkMgtInfo.update(charge, now);
         return ResponseUtils.ok(CarOutResponseDto.of(charge, now), MsgType.EXIT_SUCCESSFULLY);

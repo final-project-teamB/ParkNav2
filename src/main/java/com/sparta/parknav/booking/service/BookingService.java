@@ -19,7 +19,7 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkMgtInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
-import com.sparta.parknav.parking.repository.ParkMgtInfoRepository;
+import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;

@@ -6,9 +6,11 @@ $(document).ready(function () {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
         $("#logout-button").show();
+        $("#mypage-button").show();
     }else{
         $("#login-button").show();
         $("#logout-button").hide();
+        $("#mypage-button").hide();
     }
     // 시작 날짜를 datepicker로 초기화
     $('#start-date').datepicker({
@@ -186,6 +188,10 @@ $(document).ready(function () {
         } else {
             return false;
         }
+    });
+
+    $('#mypage-button').click(function () {
+        window.location.href="/mypage";
     });
 
     //처음 접속 시 지도 기본값 출력

@@ -1,6 +1,6 @@
-package com.sparta.parknav.parking.repository;
+package com.sparta.parknav.management.repository;
 
-import com.sparta.parknav.parking.entity.ParkMgtInfo;
+import com.sparta.parknav.management.entity.ParkMgtInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
 
     int countByParkInfoIdAndExitTimeIsNull(Long id);
 
-    Optional<ParkMgtInfo> findByParkInfoIdAndCarNum(Long parkId, String carNum);
+    Optional<ParkMgtInfo> findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(Long parkId, String carNum);
 
     Optional<ParkMgtInfo> findByParkBookingInfoId(Long id);
 }
