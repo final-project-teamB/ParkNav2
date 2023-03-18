@@ -54,7 +54,6 @@ $(document).ready(function () {
                 });
         } else {
             alert("올바른 차량번호 형식이 아닙니다.");
-
         }
     });
 
@@ -62,7 +61,6 @@ $(document).ready(function () {
         const carnum = $(this).parent().prev().prev().text();
         console.log(carnum); // 다라마1234
     });
-
 
 });
 
