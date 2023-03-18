@@ -41,6 +41,9 @@ public class MgtService {
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
+        if (parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(),requestDto.getCarNum()).isPresent()) {
+            throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
+        }
 
         // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
         List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
@@ -58,7 +61,7 @@ public class MgtService {
         List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
         // 이 주차장에 현재 입차되어있는 차량 수
         int mgtNum = getMgtNum(parkMgtInfo);
-        if (bookingNowCnt + mgtNum == cmprtCoNum) {
+        if (bookingNowCnt + mgtNum >= cmprtCoNum) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
 
@@ -77,7 +80,10 @@ public class MgtService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(), requestDto.getCarNum());
+        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findByParkInfoIdAndCarNum(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_CAR)
+        );
+
         if (parkMgtInfo.getExitTime() != null) {
             throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
         }
