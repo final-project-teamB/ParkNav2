@@ -9,7 +9,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo,Long> {
+
     List<ParkBookingInfo> findAllByParkInfoId(Long parkId);
+
+    List<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id);
 
     @Query(value = "SELECT COUNT(p) FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
             "AND ((p.startTime >= :startTime and p.startTime < :endTime) " +
