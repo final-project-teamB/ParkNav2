@@ -113,9 +113,17 @@ $(document).ready(function () {
     });
 
     $('#parking_reservation').click(function () {
+        const id =  $("#parking-lot-id").val();
         available = parseInt($("#parking-lot-available-modal").val(),10);
         booking =  parseInt($("#parking-lot-booking-modal").val(),10);
         total = parseInt($("#parking-lot-total-spots").val(),10);
+        const startDate = $('#start-date').val() + "T" +  $('#start-time').val();
+        const endDate = $('#exit-date').val() + "T" + $('#exit-time').val();
+        const body = {
+            startDate : startDate,
+            endDate : endDate
+        }
+
         if(isNaN(available)||isNaN(booking)){
             alert("운영시간이 아닙니다");
             return false;
@@ -124,6 +132,23 @@ $(document).ready(function () {
             alert("예약 할 수 없습니다");
             return false;
         }
+
+        axios.post(`/api/booking/${id}`, body)
+            .then(response => {
+                console.log(response)
+                if(response.data.msg === "예약이 완료되었습니다.") {
+                    alert(response.data.msg);
+                    $('#reservation-modal').modal('hide');
+                } else {
+                    alert("예약에 실패했습니다.")
+                    return false;
+                }
+            })
+            .catch(error => {
+                // console.log(error);
+                alert(error.response.data.error.msg)
+                return false;
+            });
     });
 
     //로그인 버튼 클릭시
