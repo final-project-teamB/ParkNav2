@@ -10,5 +10,5 @@ public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
     List<ParkMgtInfo> findAllByParkInfoId(Long parkId);
     int countByParkInfoIdAndExitTimeIsNull(Long id);
 
-    Optional<ParkMgtInfo> findByParkInfoIdAndCarNum(Long parkId, String carNum);
+    Optional<ParkMgtInfo> findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(Long parkId, String carNum);
 }
