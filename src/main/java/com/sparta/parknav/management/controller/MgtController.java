@@ -8,6 +8,7 @@ import com.sparta.parknav.management.dto.response.CarOutResponseDto;
 import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
 import com.sparta.parknav.management.service.MgtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,7 @@ public class MgtController {
     }
 
     @GetMapping("/check")
-    public ApiResponseDto<List<ParkMgtResponseDto>> mgtPage(@AuthenticationPrincipal AdminDetailsImpl userDetails,
+    public ApiResponseDto<Page<ParkMgtResponseDto>> mgtPage(@AuthenticationPrincipal AdminDetailsImpl userDetails,
                                                             @RequestParam int page,
                                                             @RequestParam int size) {
         return mgtService.mgtPage(userDetails.getUser(), page-1, size);

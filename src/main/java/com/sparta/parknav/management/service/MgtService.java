@@ -107,13 +107,13 @@ public class MgtService {
     }
 
     @Transactional
-    public ApiResponseDto<List<ParkMgtResponseDto>> mgtPage(Admin admin, int page, int size) {
+    public ApiResponseDto<Page<ParkMgtResponseDto>> mgtPage(Admin admin, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoId(admin.getParkInfo().getId(), pageable);
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
                 .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
                 .collect(Collectors.toList());
-        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos).getContent(),
+        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos),
                 MsgType.SEARCH_SUCCESSFULLY);
     }
 
