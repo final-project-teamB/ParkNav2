@@ -110,26 +110,20 @@ $(document).ready(function () {
                 alert("조회 에러입니다")
                 return false;
             });
-
-
-
-
-
     });
+
     $('#parking_reservation').click(function () {
         available = parseInt($("#parking-lot-available-modal").val(),10);
         booking =  parseInt($("#parking-lot-booking-modal").val(),10);
         total = parseInt($("#parking-lot-total-spots").val(),10);
         if(isNaN(available)||isNaN(booking)){
-            alert("운영시간이 아닙니다" +
-                "");
+            alert("운영시간이 아닙니다");
+            return false;
         }
         if (available+booking > total){
             alert("예약 할 수 없습니다");
             return false;
         }
-
-
     });
 
     //로그인 버튼 클릭시
@@ -167,8 +161,6 @@ $(document).ready(function () {
         } else {
             return false;
         }
-
-
     });
 
     //처음 접속 시 지도 기본값 출력
