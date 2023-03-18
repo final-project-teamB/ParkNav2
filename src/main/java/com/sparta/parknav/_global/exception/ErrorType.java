@@ -19,7 +19,10 @@ public enum ErrorType {
     NOT_FOUND_CAR(400, "등록된 차량이 없습니다."),
     NOT_FOUND_BOOKING(400, "예약 내역이 존재하지 않습니다."),
     NOT_BOOKING_USER(400, "본인이 예약한 내역이 아닙니다."),
-    NOT_MGT_USER(400, "해당 주차장의 관리자가 아닙니다")
+    NOT_MGT_USER(400, "해당 주차장의 관리자가 아닙니다"),
+    ALREADY_REG_CAR(400, "이미 등록된 차량입니다."),
+    ALREADY_ENTER_CAR(400, "이미 입차된 차량입니다."),
+    ALREADY_REG_REP_CAR(400, "이미 대표로 등록된 차량입니다."),
     ;
 
     private int code;
