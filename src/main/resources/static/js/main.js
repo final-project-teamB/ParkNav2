@@ -1,6 +1,15 @@
 //지도 전역변수 초기화
 var map;
+const token = localStorage.getItem('Authorization');
 $(document).ready(function () {
+    if (token && token !== '') {
+        axios.defaults.headers.common['Authorization'] = token;
+        $("#login-button").hide();
+        $("#logout-button").show();
+    }else{
+        $("#login-button").show();
+        $("#logout-button").hide();
+    }
     // 시작 날짜를 datepicker로 초기화
     $('#start-date').datepicker({
         format: 'yyyy-mm-dd',
@@ -103,6 +112,9 @@ $(document).ready(function () {
             });
 
 
+
+
+
     });
     $('#parking_reservation').click(function () {
         available = parseInt($("#parking-lot-available-modal").val(),10);
@@ -114,6 +126,45 @@ $(document).ready(function () {
         }
         if (available+booking > total){
             alert("예약 할 수 없습니다");
+            return false;
+        }
+
+
+    });
+
+    //로그인 버튼 클릭시
+    $('#login-btn').click(function () {
+        const userId = $("#username").val();
+        const password = $("#password").val();
+        const body = {
+            userId: userId,
+            password: password,
+        };
+
+        axios.post("/api/users/login", body)
+            .then(response => {
+                if(response.data.msg === '로그인이 완료되었습니다.') {
+                    const token = response.headers.authorization;
+                    axios.defaults.headers.common['Authorization'] = response.headers.authorization;
+                    localStorage.setItem('Authorization', token);
+                    window.location.reload();
+                } else {
+                    alert('로그인에 실패하셨습니다. 다시 로그인해 주세요.')
+                    return false;
+                }
+            })
+            .catch(error => {
+                // console.log(error);
+                alert(error.response.data.error.msg)
+                return false;
+            });
+    });
+
+    $('#logout-button').click(function () {
+        if (confirm("로그아웃 하시겠습니까?")) {
+            localStorage.setItem('Authorization', '');
+            window.location.reload();
+        } else {
             return false;
         }
 

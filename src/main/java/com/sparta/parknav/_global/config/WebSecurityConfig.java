@@ -52,6 +52,8 @@ public class WebSecurityConfig {
                 .antMatchers("/api/admins/login").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/booking/**").permitAll()
                 .antMatchers("/login").permitAll()
+                .antMatchers("/main").permitAll()
+                .antMatchers("/img/**").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
