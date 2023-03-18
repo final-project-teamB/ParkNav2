@@ -22,13 +22,13 @@ public class MgtController {
     private final MgtService mgtService;
 
     @PostMapping("/enter")
-    public ApiResponseDto<CarInResponseDto> enter(@Valid @RequestBody CarNumRequestDto requestDto) {
-        return mgtService.enter(requestDto);
+    public ApiResponseDto<CarInResponseDto> enter(@Valid @RequestBody CarNumRequestDto requestDto, @AuthenticationPrincipal AdminDetailsImpl adminDetails) {
+        return mgtService.enter(requestDto, adminDetails.getUser());
     }
 
     @PutMapping("/exit")
-    public ApiResponseDto<CarOutResponseDto> exit(@Valid @RequestBody CarNumRequestDto requestDto) {
-        return mgtService.exit(requestDto);
+    public ApiResponseDto<CarOutResponseDto> exit(@Valid @RequestBody CarNumRequestDto requestDto, @AuthenticationPrincipal AdminDetailsImpl adminDetails) {
+        return mgtService.exit(requestDto, adminDetails.getUser());
     }
 
     @GetMapping("/check")

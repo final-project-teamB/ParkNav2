@@ -36,7 +36,11 @@ public class MgtService {
     private final ParkMgtInfoRepository parkMgtInfoRepository;
 
     @Transactional
-    public ApiResponseDto<CarInResponseDto> enter(CarNumRequestDto requestDto) {
+    public ApiResponseDto<CarInResponseDto> enter(CarNumRequestDto requestDto, Admin user) {
+
+        if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
+            throw new CustomException(ErrorType.NOT_MGT_USER);
+        }
 
         // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
         List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
@@ -65,7 +69,11 @@ public class MgtService {
     }
 
     @Transactional
-    public ApiResponseDto<CarOutResponseDto> exit(CarNumRequestDto requestDto) {
+    public ApiResponseDto<CarOutResponseDto> exit(CarNumRequestDto requestDto, Admin user) {
+
+        if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
+            throw new CustomException(ErrorType.NOT_MGT_USER);
+        }
 
         LocalDateTime now = LocalDateTime.now();
 
