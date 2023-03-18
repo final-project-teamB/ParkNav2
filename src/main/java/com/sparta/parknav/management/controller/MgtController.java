@@ -32,7 +32,9 @@ public class MgtController {
     }
 
     @GetMapping("/check")
-    public ApiResponseDto<List<ParkMgtResponseDto>> mgtPage(@AuthenticationPrincipal AdminDetailsImpl userDetails) {
-        return mgtService.mgtPage(userDetails.getUser());
+    public ApiResponseDto<List<ParkMgtResponseDto>> mgtPage(@AuthenticationPrincipal AdminDetailsImpl userDetails,
+                                                            @RequestParam int page,
+                                                            @RequestParam int size) {
+        return mgtService.mgtPage(userDetails.getUser(), page-1, size);
     }
 }
