@@ -75,11 +75,6 @@ public class BookingService {
 
     public ApiResponseDto<BookingResponseDto> bookingPark(Long id, BookingInfoRequestDto requestDto, User user) {
 
-        // 선택한 시간이 현재 시간 이전인 경우 예외처리
-        if (LocalDateTime.now().compareTo(requestDto.getStartDate()) > 0) {
-            throw new CustomException(ErrorType.NOT_AVAILABLE_TIME);
-        }
-
         ParkInfo parkInfo = parkInfoRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
