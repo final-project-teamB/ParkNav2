@@ -148,7 +148,7 @@ function myCarList(){
                 );
             })
             if(data.length==0){
-                $("#existing-car-numbers").append(`<tr><td colspan="4">등록 된 차량이 없습니다</td></tr>`)
+                $("#existing-car-numbers").append(`<tr><td colspan="4">등록된 차량이 없습니다</td></tr>`)
             }
         })
         .catch(error => {
