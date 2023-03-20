@@ -18,4 +18,6 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     Car findByUserAndCarNum(User user, String carNum);
 
     List<Car> findByUserIdOrderByIsUsingDesc(Long userId);
+
+    Optional<Car> findFirstByUserIdAndIsUsingFalse(Long userId);
 }

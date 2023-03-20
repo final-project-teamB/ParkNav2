@@ -7,6 +7,7 @@ import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.booking.entity.Car;
 import com.sparta.parknav.booking.repository.CarRepository;
+import com.sparta.parknav.management.dto.request.CarNumDeleteRequestDto;
 import com.sparta.parknav.management.dto.request.CarRegist;
 import com.sparta.parknav.management.dto.response.CarListResponseDto;
 import com.sparta.parknav.user.entity.User;
@@ -68,5 +69,21 @@ public class CarRegService {
         }
 
         return ResponseUtils.ok(carListResponseDtos,MsgType.SEARCH_SUCCESSFULLY);
+    }
+
+    @Transactional
+    public ApiResponseDto<Void> carDelete(CarNumDeleteRequestDto carNumDeleteRequestDto, User user) {
+        Car delCar = carRepository.findByUserAndCarNum(user, carNumDeleteRequestDto.getCarNum());
+        if (delCar == null) {
+            throw new CustomException(ErrorType.NOT_FOUND_CAR);
+        }
+        //대표차량이 삭제되었을때 다른 차량을 대표차량으로 등록
+        if (delCar.getIsUsing()) {
+            Optional<Car> car = carRepository.findFirstByUserIdAndIsUsingFalse(user.getId());
+            car.ifPresent(value -> value.update(true));
+        }
+        carRepository.delete(delCar);
+        return  ResponseUtils.ok(MsgType.REP_DEL_SUCCESSFULLY);
+
     }
 }
