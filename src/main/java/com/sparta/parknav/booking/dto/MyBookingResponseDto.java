@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Getter
 public class MyBookingResponseDto {
 
+    private Long bookingId;
+
     private Long parkId;
 
     private String parkName;
@@ -28,7 +30,8 @@ public class MyBookingResponseDto {
     private StatusType status;
 
     @Builder
-    private MyBookingResponseDto(Long parkId, String parkName, String carNum, LocalDateTime startDate, LocalDateTime endDate, Integer charge, StatusType status) {
+    private MyBookingResponseDto(Long bookingId, Long parkId, String parkName, String carNum, LocalDateTime startDate, LocalDateTime endDate, Integer charge, StatusType status) {
+        this.bookingId = bookingId;
         this.parkId = parkId;
         this.parkName = parkName;
         this.carNum = carNum;
@@ -40,6 +43,7 @@ public class MyBookingResponseDto {
 
     public static MyBookingResponseDto of(ParkBookingInfo parkBookingInfo, Integer charge, StatusType status) {
         return builder()
+                .bookingId(parkBookingInfo.getId())
                 .parkId(parkBookingInfo.getParkInfo().getId())
                 .parkName(parkBookingInfo.getParkInfo().getName())
                 .carNum(parkBookingInfo.getCarNum())
