@@ -7,11 +7,11 @@ $(document).ready(function () {
     }, function (error) {
         // 응답 에러 직전 호출되는 콜백
         const errorMsg = error.response.data?.error?.msg;
-        console.log(errorMsg);
         if (errorMsg === "토큰이 유효하지 않습니다." || errorMsg === "토큰이 없습니다." || errorMsg === undefined) {
             alert("로그인이 만료 되었습니다 재 로그인 해주세요")
             localStorage.removeItem("Authorization_admin");
-            window.location.href="/main";
+            window.location.reload();
+            return false;
         }
         return Promise.reject(error);
     });
@@ -45,10 +45,9 @@ $(document).ready(function () {
                 }
             })
             .catch(error => {
-                console.log(error.response.data.error.msg)
+                console.log(error.response.data.error.msg);
                 return false;
             });
-
     }else{
         $("#loginModal").modal('show');
         $("#login-button").show();
