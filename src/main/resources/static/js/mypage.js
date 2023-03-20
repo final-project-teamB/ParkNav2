@@ -69,6 +69,7 @@ $(document).ready(function () {
         axios.put("/api/car/rep",{carNum : carNum})
             .then(response => {
                 alert(response.data.msg);
+                myCarList();
             })
             .catch(error => {
                 console.log(error.response.data.error.msg)
