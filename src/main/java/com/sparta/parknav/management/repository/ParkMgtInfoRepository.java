@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
+
     List<ParkMgtInfo> findAllByParkInfoId(Long parkId);
     Page<ParkMgtInfo> findAllByParkInfoId(Long parkId, Pageable pageable);
     int countByParkInfoIdAndExitTimeIsNull(Long id);
 
     Optional<ParkMgtInfo> findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(Long parkId, String carNum);
+
+    Optional<ParkMgtInfo> findByParkBookingInfoId(Long id);
 }

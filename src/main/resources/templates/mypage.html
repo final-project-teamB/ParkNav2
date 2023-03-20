@@ -17,6 +17,9 @@
     <!-- Axios -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
+    <!-- Moment -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
     <!-- js -->
     <script src="/js/mypage.js"></script>
 </head>
@@ -29,7 +32,7 @@
         </a>
         <div class="ml-auto">
             <button class="btn btn-outline-success mx-2" id="register-button" data-toggle="modal"
-                    data-target="#car-register-modal">차량등록
+                    data-target="#car-register-modal">차량관리
             </button>
             <button class="btn btn-outline-info mx-2" id="main-button">메인으로</button>
         </div>
@@ -45,7 +48,7 @@
                     <th>차량번호</th>
                     <th>예약일시</th>
                     <th>주차요금</th>
-                    <th>버튼</th>
+                    <th>관리</th>
                 </tr>
                 </thead>
                 <tbody id="parking-list">
@@ -92,7 +95,7 @@
                     </div>
                 </form>
                 <div class="mt-4">
-                    <table class="table table-hover">
+                    <table class="table table-hover text-center">
                         <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -148,6 +151,40 @@
         </div>
     </div>
 </div>
-
+<!-- 예약확인 모달 -->
+<div class="modal fade" id="reservation-modal" tabindex="-1" role="dialog" aria-labelledby="reservation-modal-label"
+     aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">예약확인</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="parking-lot-available-modal">현재 예약가능 건수:</label>
+                        <input type="text" class="form-control" id="parking-lot-available-modal"
+                               placeholder="예약 가능 건수"
+                               readonly>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="parking-lot-booking-modal">선택 시간 예약 건수:</label>
+                        <input type="text" class="form-control" id="parking-lot-booking-modal"
+                               placeholder="선택 시간 예약 건수"
+                               readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -2,6 +2,41 @@
 var map;
 const token = localStorage.getItem('Authorization');
 $(document).ready(function () {
+    axios.interceptors.response.use(function (response) {
+        // 응답 성공 직전 호출되는 콜백
+        return response;
+    }, function (error) {
+        // 응답 에러 직전 호출되는 콜백
+        const errorMsg = error.response.data?.error?.msg;
+        if (errorMsg === "토큰이 유효하지 않습니다." || errorMsg === "토큰이 없습니다." || errorMsg === undefined) {
+            alert("로그인이 만료 되었습니다 재 로그인 해주세요")
+            localStorage.removeItem("Authorization");
+            window.location.href="/main";
+            return false;
+        }
+        return Promise.reject(error);
+    });
+
+    // 현재 날짜를 가져오기
+    var now = new Date();
+    var dd = String(now.getDate()).padStart(2, '0');
+    var mm = String(now.getMonth() + 1).padStart(2, '0');
+    var yyyy = now.getFullYear();
+    // 날짜를 yyyy-mm-dd 형식으로 조합
+    var todayStr = yyyy + '-' + mm + '-' + dd;
+    // 시작 날짜 input의 기본값을 오늘 날짜로 설정
+    $('#start-date').val(todayStr);
+    // 종료 날짜 input의 기본값을 오늘 날짜로 설정
+    $('#exit-date').val(todayStr);
+    // 시작 시간과 종료 시간을 설정합니다.
+    var startTime = now.getHours() + ':00:00';
+    // 시작 시간과 종료 시간의 옵션 중 선택된 것을 해제합니다.
+    $('#start-time, #exit-time').find('option:selected').prop('selected', false);
+    // 현재 시간에 해당하는 시작 시간의 옵션을 선택합니다.
+    $('#start-time').find('option[value="' + startTime + '"]').prop('selected', true);
+    // 현재 시간 + 1시간에 해당하는 종료 시간의 옵션을 선택합니다.
+    $('#exit-time').find('option[value="' + startTime + '"]').prop('selected', true);
+
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
@@ -106,7 +141,6 @@ $(document).ready(function () {
                 $("#parking-lot-available-modal").attr("value", data.data.available);
                 $("#parking-lot-booking-modal").attr("value", data.data.booking);
                 $("#parking-lot-price-modal").attr("value", data.data.charge+"원");
-
             })
             .catch(error => {
                 alert("조회 에러입니다")
@@ -147,8 +181,7 @@ $(document).ready(function () {
                 }
             })
             .catch(error => {
-                // console.log(error);
-                alert(error.response.data.error.msg)
+                alert(error.response.data.error.msg);
                 return false;
             });
     });
@@ -175,8 +208,7 @@ $(document).ready(function () {
                 }
             })
             .catch(error => {
-                // console.log(error);
-                alert(error.response.data.error.msg)
+                alert(error.response.data.error.msg);
                 return false;
             });
     });
@@ -310,7 +342,6 @@ function axiosMapRenderFromKakao(url) {
                     $("#parking-lot-basic-price").attr("value",item.chargeBsTime+"분 "+item.chargeBsChrg+"원");
                     $("#parking-lot-additional-price").attr("value",item.chargeAditUnitTime+"분당 "+item.chargeAditUnitChrg+"원");
                 };
-
                 // 마커에 클릭 이벤트 리스너 추가
                 kakao.maps.event.addListener(marker, 'click', handleClickMarker);
             });

@@ -1,6 +1,22 @@
 const token = localStorage.getItem('Authorization_admin');
 
 $(document).ready(function () {
+    axios.interceptors.response.use(function (response) {
+        // 응답 성공 직전 호출되는 콜백
+        return response;
+    }, function (error) {
+        // 응답 에러 직전 호출되는 콜백
+        const errorMsg = error.response.data?.error?.msg;
+        if (errorMsg === "토큰이 유효하지 않습니다." || errorMsg === "토큰이 없습니다." || errorMsg === undefined) {
+            alert("로그인이 만료 되었습니다 재 로그인 해주세요")
+            localStorage.removeItem("Authorization_admin");
+            window.location.reload();
+            return false;
+        }
+        return Promise.reject(error);
+    });
+
+    localStorage.removeItem("Authorization");
     $("#parking-list").empty();
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;
@@ -29,10 +45,9 @@ $(document).ready(function () {
                 }
             })
             .catch(error => {
-                alert(error.response.data.error.msg)
+                console.log(error.response.data.error.msg);
                 return false;
             });
-
     }else{
         $("#loginModal").modal('show');
         $("#login-button").show();
@@ -42,7 +57,8 @@ $(document).ready(function () {
 
     $('#logout-button').click(function () {
         if (confirm("로그아웃 하시겠습니까?")) {
-            localStorage.setItem('Authorization_admin', '');
+            // 로컬 스토리지에서 토큰 삭제
+            localStorage.removeItem("Authorization_admin");
             window.location.reload();
         } else {
             return false;

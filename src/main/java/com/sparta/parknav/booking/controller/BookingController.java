@@ -1,5 +1,6 @@
 package com.sparta.parknav.booking.controller;
 
+import com.sparta.parknav.booking.dto.MyBookingResponseDto;
 import com.sparta.parknav.booking.service.BookingService;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
@@ -9,6 +10,8 @@ import com.sparta.parknav._global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +36,11 @@ public class BookingController {
     public ApiResponseDto<Void> cancelBooking(@PathVariable(name = "booking-id") Long id,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return bookingService.cancelBooking(id, userDetails.getUser());
+    }
+
+    @GetMapping("/mypage")
+    public ApiResponseDto<List<MyBookingResponseDto>> getMyBooking(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return bookingService.getMyBooking(userDetails.getUser());
     }
 
 }
