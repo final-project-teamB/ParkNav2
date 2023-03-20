@@ -22,32 +22,7 @@ $(document).ready(function () {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
         $("#logout-button").show();
-
-        axios.get("/api/mgt/check")
-            .then(response => {
-                const data = response.data.data;
-                console.log(data);
-                let num = 1;
-                data.map((item)=>{
-                    $("#parking-list").append(`
-                    <tr>
-                        <td>${num++}</td>
-                        <td>${item.carNum}</td>
-                        <td>${item.enterTime}</td>
-                        <td>${item.exitTime==null?"-":item.exitTime}</td>
-                        <td>${item.exitTime==null?"-":item.charge+"원"}</td>
-                        <td>${item.exitTime==null?"주차":"출차"}</td>
-                    </tr>`
-                    );
-                })
-                if(data.length==0){
-                    $("#parking-list").append(`<tr><td colspan="6">데이터가 없습니다</td></tr>`)
-                }
-            })
-            .catch(error => {
-                console.log(error.response.data.error.msg);
-                return false;
-            });
+        parkingLotList(1,10)
     }else{
         $("#loginModal").modal('show');
         $("#login-button").show();
@@ -66,31 +41,93 @@ $(document).ready(function () {
     });
 
     $('#login-btn').click(function () {
-        const userId = $("#username").val();
-        const password = $("#password").val();
-        const body = {
-            userId: userId,
-            password: password,
-        };
+        adminLogin();
+    });
 
-        axios.post("/api/admins/login", body)
-            .then(response => {
-                console.log(response)
-                if(response.data.msg === '로그인이 완료되었습니다.') {
-                    const token = response.headers.authorization;
-                    axios.defaults.headers.common['Authorization'] = response.headers.authorization;
-                    localStorage.setItem('Authorization_admin', token);
-                    window.location.reload();
-                } else {
-                    alert('로그인에 실패하셨습니다. 다시 로그인해 주세요.')
-                    return false;
-                }
-            })
-            .catch(error => {
-                alert(error.response.data.error.msg)
-                return false;
-            });
+    //모달 비밀번호에서 Enter 키 입력 시 이벤트
+    $('#password').keypress(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            adminLogin();
+        }
+    });
+
+    //모달 아이디에서 Enter 키 입력 시 이벤트
+    $('#username').keypress(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            $('#password').focus();
+        }
     });
 
 });
+function parkingLotList(page,size){
+    const body={
+        page: page,
+        size: size
+    }
+    const params = new URLSearchParams(body).toString();
+    axios.get(`/api/mgt/check?${params}`)
+        .then(response => {
+            console.log(response);
+            const data = response.data.data.content;
+            console.log(data);
+            let num = 1;
+            data.map((item)=>{
+                $("#parking-list").append(`
+                    <tr>
+                        <td>${num++}</td>
+                        <td>${item.carNum}</td>
+                        <td>${item.enterTime}</td>
+                        <td>${item.exitTime==null?"-":item.exitTime}</td>
+                        <td>${item.exitTime==null?"-":item.charge+"원"}</td>
+                        <td>${item.exitTime==null?"주차":"출차"}</td>
+                    </tr>`
+                );
+            })
+            if(data.length==0){
+                $("#parking-list").append(`<tr><td colspan="6">데이터가 없습니다</td></tr>`)
+            }
+        })
+        .catch(error => {
+            console.log(error.response.data.error.msg);
+            return false;
+        });
+}
+function adminLogin(){
+    const userId = $("#username").val();
+    const password = $("#password").val();
+    if(userId ===""){
+        alert("아이디를 입력해주세요");
+        $("#username").focus();
+        return false;
+    }
+    if(password ===""){
+        alert("패스워드를 입력해주세요");
+        $("#password").focus();
+        return false;
+    }
+    const body = {
+        userId: userId,
+        password: password,
+    };
+    console.log(body);
 
+    axios.post("/api/admins/login", body)
+        .then(response => {
+            console.log(response)
+            if(response.data.msg === '로그인이 완료되었습니다.') {
+                const token = response.headers.authorization;
+                axios.defaults.headers.common['Authorization'] = response.headers.authorization;
+                localStorage.setItem('Authorization_admin', token);
+                window.location.reload();
+            } else {
+                alert('로그인에 실패하셨습니다. 다시 로그인해 주세요.')
+                return false;
+            }
+        })
+        .catch(error => {
+            alert(error.response.data.error.msg)
+            return false;
+        });
+}
