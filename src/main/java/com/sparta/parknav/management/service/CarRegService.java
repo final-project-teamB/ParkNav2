@@ -7,12 +7,14 @@ import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.booking.entity.Car;
 import com.sparta.parknav.booking.repository.CarRepository;
+import com.sparta.parknav.management.dto.request.CarNumDeleteRequestDto;
 import com.sparta.parknav.management.dto.request.CarRegist;
 import com.sparta.parknav.management.dto.response.CarListResponseDto;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class CarRegService {
 
         //등록된 차량인지 확인
         Car dupCar = carRepository.findByUserAndCarNum(user, carRegist.getCarNum());
-        if (dupCar !=null) {
+        if (dupCar != null) {
             throw new CustomException(ErrorType.ALREADY_REG_CAR);
         }
         // 차량이 있는지 확인 -> 차량이 없으면 대표차량으로 등록
@@ -63,10 +65,25 @@ public class CarRegService {
         List<CarListResponseDto> carListResponseDtos = new ArrayList<>();
         List<Car> cars = carRepository.findByUserIdOrderByIsUsingDesc(user.getId());
 
-        for (Car car : cars){
+        for (Car car : cars) {
             carListResponseDtos.add(CarListResponseDto.of(car));
         }
 
-        return ResponseUtils.ok(carListResponseDtos,MsgType.SEARCH_SUCCESSFULLY);
+        return ResponseUtils.ok(carListResponseDtos, MsgType.SEARCH_SUCCESSFULLY);
+    }
+    @Transactional
+    public ApiResponseDto<Void> carDelete(CarNumDeleteRequestDto carNumDeleteRequestDto, User user) {
+        Car delCar = carRepository.findByUserAndCarNum(user, carNumDeleteRequestDto.getCarNum());
+        if (delCar == null) {
+            throw new CustomException(ErrorType.NOT_FOUND_CAR);
+        }
+        //대표차량이 삭제되었을때 다른 차량을 대표차량으로 등록
+        if (delCar.getIsUsing()) {
+            Optional<Car> car = carRepository.findFirstByUserIdAndIsUsingFalse(user.getId());
+            car.ifPresent(value -> value.update(true));
+        }
+        carRepository.delete(delCar);
+        return  ResponseUtils.ok(MsgType.REP_DEL_SUCCESSFULLY);
+
     }
 }

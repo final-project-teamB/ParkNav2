@@ -3,6 +3,7 @@ package com.sparta.parknav.management.controller;
 import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.security.UserDetailsImpl;
+import com.sparta.parknav.management.dto.request.CarNumDeleteRequestDto;
 import com.sparta.parknav.management.dto.request.CarRegist;
 import com.sparta.parknav.management.dto.response.CarListResponseDto;
 import com.sparta.parknav.management.service.CarRegService;
@@ -27,6 +28,11 @@ public class CarRegController {
     @PutMapping(value = "/rep")
     public ApiResponseDto<Void> representative(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody CarRegist carRegist) {
         return carRegService.representative(userDetails.getUser(), carRegist);
+    }
+
+    @DeleteMapping(value = "/reg")
+    public ApiResponseDto<Void> deletecar(@AuthenticationPrincipal UserDetailsImpl userDetails , @RequestBody CarNumDeleteRequestDto carNumDeleteRequestDto) {
+        return carRegService.carDelete(carNumDeleteRequestDto,userDetails.getUser());
     }
 
     @GetMapping(value = "/check")
