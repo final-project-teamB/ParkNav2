@@ -18,15 +18,19 @@ import com.sparta.parknav.management.dto.response.CarOutResponseDto;
 import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
 import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -103,14 +107,16 @@ public class MgtService {
     }
 
     @Transactional
-    public ApiResponseDto<List<ParkMgtResponseDto>> mgtPage(Admin admin) {
-        List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoId(admin.getParkInfo().getId());
-        List<ParkMgtResponseDto> parkMgtResponseDtos = new ArrayList<>();
-        for (ParkMgtInfo p : parkMgtInfos) {
-            parkMgtResponseDtos.add(ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()));
-        }
-        return ResponseUtils.ok(parkMgtResponseDtos, MsgType.SEARCH_SUCCESSFULLY);
+    public ApiResponseDto<Page<ParkMgtResponseDto>> mgtPage(Admin admin, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoId(admin.getParkInfo().getId(), pageable);
+        List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
+                .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
+                .collect(Collectors.toList());
+        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos),
+                MsgType.SEARCH_SUCCESSFULLY);
     }
+
 
     private static ParkBookingInfo getParkBookingInfo(CarNumRequestDto requestDto, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {
         ParkBookingInfo parkBookingNow = null;
@@ -118,6 +124,7 @@ public class MgtService {
             if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
                 if (Objects.equals(p.getCarNum(), requestDto.getCarNum())) {
                     parkBookingNow = p;
+                    break;
                 }
             }
         }

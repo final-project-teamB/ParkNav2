@@ -31,7 +31,7 @@ public class CarRegService {
 
         //등록된 차량인지 확인
         Car dupCar = carRepository.findByUserAndCarNum(user, carRegist.getCarNum());
-        if (dupCar !=null) {
+        if (dupCar != null) {
             throw new CustomException(ErrorType.ALREADY_REG_CAR);
         }
         // 차량이 있는지 확인 -> 차량이 없으면 대표차량으로 등록
