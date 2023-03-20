@@ -1,6 +1,20 @@
 const token = localStorage.getItem('Authorization');
 
 $(document).ready(function () {
+    axios.interceptors.response.use(function (response) {
+        // 응답 성공 직전 호출되는 콜백
+        return response;
+    }, function (error) {
+        // 응답 에러 직전 호출되는 콜백
+        const errorMsg = error.response.data?.error?.msg;
+        if (errorMsg === "토큰이 유효하지 않습니다." || errorMsg === "토큰이 없습니다." || errorMsg === undefined) {
+            alert("로그인이 만료 되었습니다 재 로그인 해주세요")
+            localStorage.removeItem("Authorization");
+            window.location.reload();
+        }
+        return Promise.reject(error);
+    });
+
     //라디오버튼 이벤트
     $('input[type="radio"]').click(function() {
         $('input[type="radio"]').not(this).prop('checked', false);
