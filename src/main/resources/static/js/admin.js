@@ -11,7 +11,7 @@ $(document).ready(function () {
         if (errorMsg === "토큰이 유효하지 않습니다." || errorMsg === "토큰이 없습니다." || errorMsg === undefined) {
             alert("로그인이 만료 되었습니다 재 로그인 해주세요")
             localStorage.removeItem("Authorization_admin");
-            window.location.reload();
+            window.location.href="/main";
         }
         return Promise.reject(error);
     });
