@@ -113,8 +113,7 @@ public class MgtService {
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
                 .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
                 .collect(Collectors.toList());
-        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos),
-                MsgType.SEARCH_SUCCESSFULLY);
+        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos,pageable,parkMgtInfos.getTotalElements()), MsgType.SEARCH_SUCCESSFULLY);
     }
 
 
