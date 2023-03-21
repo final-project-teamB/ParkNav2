@@ -23,6 +23,10 @@ import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,9 +115,11 @@ public class BookingService {
         return ResponseUtils.ok(MsgType.CANCEL_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<List<MyBookingResponseDto>> getMyBooking(User user) {
+    public ApiResponseDto<Page<MyBookingResponseDto>> getMyBooking(User user, int page, int size) {
 
-        List<ParkBookingInfo> bookingInfoList = parkBookingInfoRepository.findAllByUserIdOrderByStartTimeDesc(user.getId());
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ParkBookingInfo> bookingInfoList = parkBookingInfoRepository.findAllByUserIdOrderByStartTimeDesc(user.getId(),pageable);
         List<MyBookingResponseDto> responseDtoList = new ArrayList<>();
 
         LocalDateTime now = LocalDateTime.now();
@@ -144,7 +150,7 @@ public class BookingService {
             responseDtoList.add(responseDto);
         }
 
-        return ResponseUtils.ok(responseDtoList, MsgType.SEARCH_SUCCESSFULLY);
+        return ResponseUtils.ok(new PageImpl<>(responseDtoList,pageable,bookingInfoList.getTotalElements()), MsgType.SEARCH_SUCCESSFULLY);
     }
 
 

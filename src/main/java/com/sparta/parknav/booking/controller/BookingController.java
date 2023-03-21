@@ -8,6 +8,7 @@ import com.sparta.parknav.booking.dto.BookingResponseDto;
 import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav._global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,8 +40,10 @@ public class BookingController {
     }
 
     @GetMapping("/mypage")
-    public ApiResponseDto<List<MyBookingResponseDto>> getMyBooking(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return bookingService.getMyBooking(userDetails.getUser());
+    public ApiResponseDto<Page<MyBookingResponseDto>> getMyBooking(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                   @RequestParam int page,
+                                                                   @RequestParam int size) {
+        return bookingService.getMyBooking(userDetails.getUser(),page, size);
     }
 
 }
