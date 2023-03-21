@@ -315,10 +315,11 @@ function axiosMapRenderFromKakao(url) {
     //axios로 URL을 호출
     axios.get(url)
         .then(function (response) {
-            const data = response.data.data;
+            console.log(response);
+            const data = response.data.data.parkOperInfoDtos;
             //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
             if (data.length == 0) {
-                data.push({la: "37.5546788388674", lo: "126.970606917394"});
+                data.push({la: response.data.data.la, lo: response.data.data.lo});
                 alert("결과가 없습니다");
             }
 
@@ -328,7 +329,7 @@ function axiosMapRenderFromKakao(url) {
                     // 지도의 중심 좌표
                     center: new kakao.maps.LatLng(data[0].la, data[0].lo),
                     // 지도의 확대 레벨
-                    level: 3
+                    level: 1
                 };
 
             // 지도 생성 및 객체 리턴
@@ -338,9 +339,26 @@ function axiosMapRenderFromKakao(url) {
             var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(50, 50), {
                 offset: new kakao.maps.Point(25, 26)
             });
+            //중 심좌표 마커이미지 생성
+            var centerMarkerImage = new kakao.maps.MarkerImage('/img/clocation.png', new kakao.maps.Size(50, 50), {
+                offset: new kakao.maps.Point(25, 26)
+            });
             // 결과값이 한 화면에 보이게 LatLngBounds 객체 생성
             var bounds = new kakao.maps.LatLngBounds();
             // 받아온 데이터를 이용하여 마커 생성
+
+            var marker = new kakao.maps.Marker({
+                // 마커를 표시할 지도 객체
+                map: map,
+                // 마커의 위치 좌표
+                position: new kakao.maps.LatLng(response.data.data.la, response.data.data.lo),
+                // 마커에 마우스를 올렸을 때 나타날 툴팁 메시지
+                title: response.data.data.placeName,
+                // 마커 이미지 설정
+                image: centerMarkerImage
+            });
+            bounds.extend(new kakao.maps.LatLng(response.data.data.la, response.data.data.lo));
+
             data.forEach(function (item) {
                 //bound에 좌표값 추가
                 bounds.extend(new kakao.maps.LatLng(item.la, item.lo));

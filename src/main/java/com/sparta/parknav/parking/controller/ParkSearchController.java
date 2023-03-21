@@ -9,8 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
 public class ParkSearchController {
@@ -33,10 +31,9 @@ public class ParkSearchController {
     }
     @ResponseBody
     @GetMapping("/api/parks")
-    public ApiResponseDto<List<ParkSearchResponseDto>> serchPark(ParkSearchRequestDto parkSearchRequestDto){
+    public ApiResponseDto<ParkSearchResponseDto> serchPark(ParkSearchRequestDto parkSearchRequestDto){
 
         return parkSearchService.searchPark(parkSearchRequestDto);
 
     }
-
 }
