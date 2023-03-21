@@ -1,6 +1,8 @@
 package com.sparta.parknav.booking.repository;
 
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +14,7 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
 
     List<ParkBookingInfo> findAllByParkInfoId(Long parkId);
 
-    List<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id);
+    Page<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id, Pageable pageable);
 
     @Query(value = "SELECT COUNT(p) FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
             "AND ((p.startTime >= :startTime and p.startTime < :endTime) " +
