@@ -1,5 +1,7 @@
 const token = localStorage.getItem('Authorization_admin');
-
+let currentPage = 0;
+const pageSize = 10; // 한 페이지당 보여줄 항목 수
+let totalPages = 0;
 $(document).ready(function () {
     axios.interceptors.response.use(function (response) {
         // 응답 성공 직전 호출되는 콜백
@@ -22,8 +24,8 @@ $(document).ready(function () {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
         $("#logout-button").show();
-        parkingLotList(1,10)
-    }else{
+        fetchData(0);
+    } else {
         $("#loginModal").modal('show');
         $("#login-button").show();
         $("#logout-button").hide();
@@ -61,48 +63,16 @@ $(document).ready(function () {
     });
 
 });
-function parkingLotList(page,size){
-    const body={
-        page: page,
-        size: size
-    }
-    const params = new URLSearchParams(body).toString();
-    axios.get(`/api/mgt/check?${params}`)
-        .then(response => {
-            console.log(response);
-            const data = response.data.data.content;
-            console.log(data);
-            let num = 1;
-            data.map((item)=>{
-                $("#parking-list").append(`
-                    <tr>
-                        <td>${num++}</td>
-                        <td>${item.carNum}</td>
-                        <td>${item.enterTime}</td>
-                        <td>${item.exitTime==null?"-":item.exitTime}</td>
-                        <td>${item.exitTime==null?"-":item.charge+"원"}</td>
-                        <td>${item.exitTime==null?"주차":"출차"}</td>
-                    </tr>`
-                );
-            })
-            if(data.length==0){
-                $("#parking-list").append(`<tr><td colspan="6">데이터가 없습니다</td></tr>`)
-            }
-        })
-        .catch(error => {
-            console.log(error.response.data.error.msg);
-            return false;
-        });
-}
-function adminLogin(){
+
+function adminLogin() {
     const userId = $("#username").val();
     const password = $("#password").val();
-    if(userId ===""){
+    if (userId === "") {
         alert("아이디를 입력해주세요");
         $("#username").focus();
         return false;
     }
-    if(password ===""){
+    if (password === "") {
         alert("패스워드를 입력해주세요");
         $("#password").focus();
         return false;
@@ -111,12 +81,10 @@ function adminLogin(){
         userId: userId,
         password: password,
     };
-    console.log(body);
 
     axios.post("/api/admins/login", body)
         .then(response => {
-            console.log(response)
-            if(response.data.msg === '로그인이 완료되었습니다.') {
+            if (response.data.msg === '로그인이 완료되었습니다.') {
                 const token = response.headers.authorization;
                 axios.defaults.headers.common['Authorization'] = response.headers.authorization;
                 localStorage.setItem('Authorization_admin', token);
@@ -130,4 +98,89 @@ function adminLogin(){
             alert(error.response.data.error.msg)
             return false;
         });
+}
+
+function fetchData(page) {
+    const body = {
+        page: page,
+        size: pageSize
+    };
+    const params = new URLSearchParams(body).toString();
+    axios.get(`/api/mgt/check?${params}`)
+        .then(response => {
+            const data = response.data.data.content;
+            const content = data.content;
+            let num = 1;
+            $("#parking-list").empty();
+            data.map((item) => {
+                $("#parking-list").append(`
+                  <tr>
+                    <td>${(pageSize*(page))+num++}</td>
+                    <td>${item.carNum}</td>
+                    <td>${item.enterTime}</td>
+                    <td>${item.exitTime == null ? "-" : item.exitTime}</td>
+                    <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
+                    <td>${item.exitTime == null ? "주차" : "출차"}</td>
+                  </tr>
+                `);
+            });
+            currentPage = page; // 현재 페이지 번호 설정
+            totalPages = response.data.data.totalPages; // 총 페이지 수 설정
+            renderPagination(); // 페이징 버튼 생성 함수 호출
+        })
+        .catch(error => {
+            console.log(error);
+        });
+}
+
+function renderPagination() {
+    const pagination = $(".pagination");
+    pagination.empty();
+    if (totalPages > 0) {
+        // 이전 페이지 버튼 추가
+        pagination.append(`
+            <li class="page-item" id="previous-page">
+                <a class="page-link" href="#">이전</a>
+            </li>
+        `);
+
+        // 페이지 번호 버튼 추가
+        const startPage = Math.max(0, currentPage - 2);
+        const endPage = Math.min(totalPages - 1, currentPage + 2);
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = currentPage === i ? "active" : "";
+            pagination.append(`
+                <li class="page-item ${activeClass}">
+                    <a class="page-link page-num" href="#" data-page="${i}">${i + 1}</a>
+                </li>
+            `);
+        }
+
+        // 다음 페이지 버튼 추가
+        pagination.append(`
+            <li class="page-item" id="next-page">
+                <a class="page-link" href="#">다음</a>
+            </li>
+        `);
+
+        // 이전 페이지 버튼 클릭 이벤트
+        $("#previous-page").click(() => {
+            if (currentPage > 0) {
+                fetchData(currentPage - 1);
+            }
+        });
+
+        // 다음 페이지 버튼 클릭 이벤트
+        $("#next-page").click(() => {
+            if (currentPage < totalPages - 1) {
+                fetchData(currentPage + 1);
+            }
+        });
+
+        // 페이지 번호 버튼 클릭 이벤트
+        $(".page-num").click((event) => {
+            const page = $(event.target).data("page");
+            fetchData(page);
+        });
+    }
 }
