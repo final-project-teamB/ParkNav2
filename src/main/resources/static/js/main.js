@@ -250,7 +250,6 @@ async function searchData() {
     const parktime = $('#parktime').val();
     const charge = $('#charge').val();
     const type = $('#type').val();
-    const available = $('#available').prop('checked');
     const mylocation = $('#mylocation').prop('checked');
     const keyword = $('#keyword').val();
     let url = "";
@@ -268,9 +267,9 @@ async function searchData() {
             alert("현재 위치 기반 검색을 하시려면 위치정보를 켜주세요!");
             return;
         }
-        url = `/api/parks?parktime=${parktime}&charge=${charge}&type=${type}&available=${available}&la=${la}&lo=${lo}`;
+        url = `/api/parks?parktime=${parktime}&charge=${charge}&type=${type}&la=${la}&lo=${lo}`;
     } else {
-        url = `/api/parks?keyword=${keyword}&parktime=${parktime}&charge=${charge}&type=${type}&available=${available}`;
+        url = `/api/parks?keyword=${keyword}&parktime=${parktime}&charge=${charge}&type=${type}`;
     }
     axiosMapRenderFromKakao(url);
 }
@@ -317,7 +316,6 @@ function axiosMapRenderFromKakao(url) {
     axios.get(url)
         .then(function (response) {
             const data = response.data.data;
-            console.log(data);
             //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
             if (data.length == 0) {
                 data.push({la: "37.5546788388674", lo: "126.970606917394"});
