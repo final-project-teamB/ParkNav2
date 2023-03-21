@@ -1,5 +1,7 @@
 const token = localStorage.getItem('Authorization');
-
+let currentPage = 0;
+const pageSize = 10; // 한 페이지당 보여줄 항목 수
+let totalPages = 0;
 $(document).ready(function () {
     axios.interceptors.response.use(function (response) {
         // 응답 성공 직전 호출되는 콜백
@@ -19,7 +21,7 @@ $(document).ready(function () {
     $("#parking-list").empty();
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;
-        bookingList();
+        fetchData(0);
     } else {
         alert("로그인이 필요합니다");
         window.location.href = "/main";
@@ -166,7 +168,7 @@ function cancelReservation(id) {
             .then(response => {
                 const data = response.data;
                 alert(data.msg)
-                bookingList();
+                fetchData(currentPage);
             })
             .catch(error => {
                 alert(error.response.data.error.msg);
@@ -181,7 +183,6 @@ function bookingList() {
     axios.get("/api/booking/mypage")
         .then(response => {
             const data = response.data.data;
-            console.log(data);
             data.map((item) => {
                 let button;
                 if (item.status === "UNUSED") {
@@ -212,4 +213,102 @@ function bookingList() {
             alert(error.response.data.error.msg);
             return false;
         });
+}
+
+function fetchData(page) {
+    const body = {
+        page: page,
+        size: pageSize
+    };
+    const params = new URLSearchParams(body).toString();
+    axios.get(`/api/booking/mypage?${params}`)
+        .then(response => {
+            const data = response.data.data.content;
+            const content = data.content;
+            let num = 1;
+            $("#parking-list").empty();
+            data.map((item) => {
+                let button;
+                if (item.status === "UNUSED") {
+                    button = `<button type="button" class="btn btn-outline-secondary btn-sm mx-1" onclick="viewReservation(${item.parkId},'${item.startDate}','${item.endDate}')">예약 확인</button>` +
+                        `<button type="button" class="btn btn-outline-warning btn-sm mx-1" onclick="cancelReservation(${item.bookingId})">예약 취소</button>`;
+                } else if (item.status === "EXPIRED") {
+                    button = `<button type="button" class="btn btn-outline-danger btn-sm mx-1">기간만료</button>`;
+                } else {
+                    button = `<button type="button" class="btn btn-outline-success btn-sm mx-1">사용완료</button>`;
+                }
+                $("#parking-list").append(`
+                    <tr>
+                        <td>${item.parkName}</td>
+                        <td>${item.carNum}</td>
+                        <td>${item.startDate} ~<br> ${item.endDate}</td>
+                        <td>${item.charge + "원"}</td>
+                        <td>
+                            ${button}
+                        </td>
+                    </tr>`
+                );
+            });
+            // 현재 페이지 번호 설정
+            currentPage = page;
+            // 총 페이지 수 설정
+            totalPages = response.data.data.totalPages;
+            // 페이징 버튼 생성 함수 호출
+            renderPagination();
+        })
+        .catch(error => {
+            console.log(error);
+        });
+}
+
+function renderPagination() {
+    const pagination = $(".pagination");
+    pagination.empty();
+    if (totalPages > 0) {
+        // 이전 페이지 버튼 추가
+        pagination.append(`
+            <li class="page-item" id="previous-page">
+                <a class="page-link" href="#">이전</a>
+            </li>
+        `);
+
+        // 페이지 번호 버튼 추가
+        const startPage = Math.max(0, currentPage - 2);
+        const endPage = Math.min(totalPages - 1, currentPage + 2);
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = currentPage === i ? "active" : "";
+            pagination.append(`
+                <li class="page-item ${activeClass}">
+                    <a class="page-link page-num" href="#" data-page="${i}">${i + 1}</a>
+                </li>
+            `);
+        }
+
+        // 다음 페이지 버튼 추가
+        pagination.append(`
+            <li class="page-item" id="next-page">
+                <a class="page-link" href="#">다음</a>
+            </li>
+        `);
+
+        // 이전 페이지 버튼 클릭 이벤트
+        $("#previous-page").click(() => {
+            if (currentPage > 0) {
+                fetchData(currentPage - 1);
+            }
+        });
+
+        // 다음 페이지 버튼 클릭 이벤트
+        $("#next-page").click(() => {
+            if (currentPage < totalPages - 1) {
+                fetchData(currentPage + 1);
+            }
+        });
+
+        // 페이지 번호 버튼 클릭 이벤트
+        $(".page-num").click((event) => {
+            const page = $(event.target).data("page");
+            fetchData(page);
+        });
+    }
 }

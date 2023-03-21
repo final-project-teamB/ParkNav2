@@ -36,6 +36,6 @@ public class MgtController {
     public ApiResponseDto<Page<ParkMgtResponseDto>> mgtPage(@AuthenticationPrincipal AdminDetailsImpl userDetails,
                                                             @RequestParam int page,
                                                             @RequestParam int size) {
-        return mgtService.mgtPage(userDetails.getUser(), page-1, size);
+        return mgtService.mgtPage(userDetails.getUser(), page, size);
     }
 }
