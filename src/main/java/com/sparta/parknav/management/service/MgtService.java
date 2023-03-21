@@ -47,23 +47,24 @@ public class MgtService {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
         // SCENARIO ENTER 2
+        ParkInfo parkInfo = parkInfoRepository.findById(requestDto.getParkId()).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK)
+        );
+        // SCENARIO ENTER 3
         Optional<ParkMgtInfo> park = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
         if (park.isPresent() && park.get().getExitTime() == null) {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
 
         // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
-        // SCENARIO ENTER 3
+        // SCENARIO ENTER 4
         List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
         LocalDateTime now = LocalDateTime.now();
         // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
         int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now);
         // 예약된 차량 찾기
         ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
-        // SCENARIO ENTER 5
-        ParkInfo parkInfo = parkInfoRepository.findById(requestDto.getParkId()).orElseThrow(
-                () -> new CustomException(ErrorType.NOT_FOUND_PARK)
-        );
+
         // 주차 구획수
         int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
         List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
@@ -99,7 +100,7 @@ public class MgtService {
 
         Duration duration = Duration.between(parkMgtInfo.getEnterTime(), now);
         long minutes = duration.toMinutes();
-
+        // SCENARIO EXIT 4
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
         parkMgtInfo.update(charge, now);
