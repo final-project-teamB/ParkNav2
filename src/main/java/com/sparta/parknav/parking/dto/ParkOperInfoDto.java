@@ -29,7 +29,7 @@ public class ParkOperInfoDto {
 
     @Builder
     private ParkOperInfoDto(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int totCharge) {
-        this.id = parkOperInfo.getId();
+        this.id = parkOperInfo.getParkInfo().getId();
         this.chargeAditUnitChrg =  parkOperInfo.getChargeAditUnitChrg();
         this.chargeAditUnitTime = parkOperInfo.getChargeAditUnitTime();
         this.chargeBsChrg = parkOperInfo.getChargeBsChrg();
