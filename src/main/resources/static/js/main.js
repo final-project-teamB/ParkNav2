@@ -338,7 +338,7 @@ function axiosMapRenderFromKakao(url) {
             var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(50, 50), {
                 offset: new kakao.maps.Point(25, 26)
             });
-            //중 심좌표 마커이미지 생성
+            //중심 좌표 마커이미지 생성
             var centerMarkerImage = new kakao.maps.MarkerImage('/img/clocation.png', new kakao.maps.Size(50, 50), {
                 offset: new kakao.maps.Point(25, 26)
             });
