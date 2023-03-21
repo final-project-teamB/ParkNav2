@@ -69,43 +69,50 @@ $(document).ready(function () {
 
     //모달 차량번호 등록
     $('#car-number-confirm').click(function () {
-        const carnum = $("#car-number-input").val();
-        const pattern1 = /^[0-9]{2,3}[가-힣]{1}[0-9]{4}$/;
-        const pattern2 = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}$/;
-        if (pattern1.test(carnum) || pattern2.test(carnum)) {
-            axios.post(`/api/car/reg`, {carNum: carnum})
-                .then(response => {
-                    console.log(response)
-                    if (response.data.msg === "차량 등록 성공") {
-                        alert(response.data.msg);
-                        myCarList();
-                    } else {
-                        alert("등록에 실패했습니다.")
-                        return false;
-                    }
-                })
-                .catch(error => {
-                    alert(error.response.data.error.msg);
-                    return false;
-                });
-        } else {
-            alert("올바른 차량번호 형식이 아닙니다.");
-        }
+        myCarAdd();
     });
 
-    $('button.btn-danger').click(function () {
-        const carnum = $(this).parent().prev().prev().text();
-        console.log(carnum); // 다라마1234
+    //모달 차량번호박스 엔터
+    $('#car-number-input').keypress(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            myCarAdd();
+        }
     });
 
 });
 
+function myCarAdd(){
+    const carnum = $("#car-number-input").val();
+    const pattern1 = /^[0-9]{2,3}[가-힣]{1}[0-9]{4}$/;
+    const pattern2 = /^[가-힣]{2}[0-9]{2}[가-힣]{1}[0-9]{4}$/;
+    if (pattern1.test(carnum) || pattern2.test(carnum)) {
+        axios.post(`/api/car/reg`, {carNum: carnum})
+            .then(response => {
+                if (response.data.msg === "차량 등록 성공") {
+                    alert(response.data.msg);
+                    myCarList();
+                    $("#car-number-input").val("");
+                } else {
+                    alert("등록에 실패했습니다.")
+                    return false;
+                }
+            })
+            .catch(error => {
+                alert(error.response.data.error.msg);
+                return false;
+            });
+    } else {
+        alert("올바른 차량번호 형식이 아닙니다.");
+    }
+}
+
+//나의 차량 목록
 function myCarList() {
     $("#existing-car-numbers").empty();
     axios.get("/api/car/check")
         .then(response => {
             const data = response.data.data;
-            console.log(data);
             let num = 1;
             data.map((item) => {
                 $("#existing-car-numbers").append(`
@@ -152,20 +159,23 @@ function viewReservation(id, startDate, endDate) {
         });
 }
 
-// 주차 취소 버튼 클릭시 이벤트
+// 예약 취소 버튼 클릭시 이벤트
 function cancelReservation(id) {
-    axios.delete(`/api/booking/${id}`)
-        .then(response => {
-            const data = response.data;
-            alert(data.msg)
-            bookingList();
-        })
-        .catch(error => {
-            alert(error.response.data.error.msg);
-            return false;
-        });
+    if (confirm("예약을 취소 하시겠습니까?")) {
+        axios.delete(`/api/booking/${id}`)
+            .then(response => {
+                const data = response.data;
+                alert(data.msg)
+                bookingList();
+            })
+            .catch(error => {
+                alert(error.response.data.error.msg);
+                return false;
+            });
+    }
 }
 
+//예약 목록 불러오기
 function bookingList() {
     $("#parking-list").empty();
     axios.get("/api/booking/mypage")

@@ -186,31 +186,25 @@ $(document).ready(function () {
             });
     });
 
-    //로그인 버튼 클릭시
+    //모달 로그인 버튼 클릭시
     $('#login-btn').click(function () {
-        const userId = $("#username").val();
-        const password = $("#password").val();
-        const body = {
-            userId: userId,
-            password: password,
-        };
+        userLogin();
+    });
 
-        axios.post("/api/users/login", body)
-            .then(response => {
-                if(response.data.msg === '로그인이 완료되었습니다.') {
-                    const token = response.headers.authorization;
-                    axios.defaults.headers.common['Authorization'] = response.headers.authorization;
-                    localStorage.setItem('Authorization', token);
-                    window.location.reload();
-                } else {
-                    alert('로그인에 실패하셨습니다. 다시 로그인해 주세요.')
-                    return false;
-                }
-            })
-            .catch(error => {
-                alert(error.response.data.error.msg);
-                return false;
-            });
+    //모달 비밀번호에서 Enter 키 입력 시 이벤트
+    $('#password').keypress(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            userLogin();
+        }
+    });
+
+    //모달 아이디에서 Enter 키 입력 시 이벤트
+    $('#username').keypress(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            $('#password').focus();
+        }
     });
 
     $('#logout-button').click(function () {
@@ -281,6 +275,43 @@ async function searchData() {
     axiosMapRenderFromKakao(url);
 }
 
+function userLogin(){
+    const userId = $("#username").val();
+    const password = $("#password").val();
+    if(userId ===""){
+        alert("아이디를 입력해주세요");
+        $("#username").focus();
+        return false;
+    }
+    if(password ===""){
+        alert("패스워드를 입력해주세요");
+        $("#password").focus();
+        return false;
+    }
+    const body = {
+        userId: userId,
+        password: password,
+    };
+
+    axios.post("/api/users/login", body)
+        .then(response => {
+            if(response.data.msg === '로그인이 완료되었습니다.') {
+                const token = response.headers.authorization;
+                axios.defaults.headers.common['Authorization'] = response.headers.authorization;
+                localStorage.setItem('Authorization', token);
+                window.location.reload();
+            } else {
+                alert('로그인에 실패하셨습니다. 다시 로그인해 주세요.')
+                return false;
+            }
+        })
+        .catch(error => {
+            alert(error.response.data.error.msg);
+            return false;
+        });
+}
+
+//카카오 맵 지도 호출
 function axiosMapRenderFromKakao(url) {
     //axios로 URL을 호출
     axios.get(url)
@@ -341,6 +372,9 @@ function axiosMapRenderFromKakao(url) {
                     $("#parking-lot-operation-hours").attr("value",item.weekdayOpen+" ~ "+item.weekdayClose);
                     $("#parking-lot-basic-price").attr("value",item.chargeBsTime+"분 "+item.chargeBsChrg+"원");
                     $("#parking-lot-additional-price").attr("value",item.chargeAditUnitTime+"분당 "+item.chargeAditUnitChrg+"원");
+                    $("#weekOpen").text("평일: "+item.weekdayOpen+" ~ "+item.weekdayClose);
+                    $("#satOpen").text("토요일: "+item.satOpen+" ~ "+item.satClose);
+                    $("#sunOpen").text("휴일: "+item.sunOpen+" ~ "+item.sunClose);
                 };
                 // 마커에 클릭 이벤트 리스너 추가
                 kakao.maps.event.addListener(marker, 'click', handleClickMarker);
@@ -348,5 +382,4 @@ function axiosMapRenderFromKakao(url) {
             //bound를 셋팅하여 결과가 한 화면에 보이게 설정
             map.setBounds(bounds);
         });
-
 }
