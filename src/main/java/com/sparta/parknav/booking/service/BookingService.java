@@ -84,15 +84,28 @@ public class BookingService {
         return ResponseUtils.ok(responseDto, MsgType.SEARCH_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<BookingResponseDto> bookingPark(Long id, BookingInfoRequestDto requestDto, User user) {
-
-        ParkInfo parkInfo = parkInfoRepository.findById(id).orElseThrow(
+    public ApiResponseDto<BookingResponseDto> bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
+        // SCENARIO BOOKING 1
+        if (requestDto.getStartDate().equals(requestDto.getEndDate())||requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
+            throw new CustomException(ErrorType.NOT_END_TO_START);
+        }
+        // SCENARIO BOOKING 2
+        ParkInfo parkInfo = parkInfoRepository.findById(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
-
+        // SCENARIO BOOKING 3
         Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
-        );
+        ); // 2~5 , 1~3
+        // SCENARIO BOOKING 4
+        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoAndUser(parkInfo, user);
+        for (ParkBookingInfo p : parkBookingInfo) {
+            if (p != null) {
+                if (requestDto.getStartDate().isBefore(p.getEndTime())&&requestDto.getEndDate().isAfter(p.getStartTime())) {
+                    throw new CustomException(ErrorType.ALREADY_RESERVED);
+                }
+            }
+        }
 
         ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
 

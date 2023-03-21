@@ -27,10 +27,10 @@ public class BookingController {
     }
 
     @PostMapping("/{park-id}")
-    public ApiResponseDto<BookingResponseDto> bookingPark(@PathVariable(name = "park-id") Long id,
+    public ApiResponseDto<BookingResponseDto> bookingPark(@PathVariable(name = "park-id") Long parkId,
                                                           @RequestBody BookingInfoRequestDto requestDto,
                                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return bookingService.bookingPark(id, requestDto, userDetails.getUser());
+        return bookingService.bookingPark(parkId, requestDto, userDetails.getUser());
     }
 
     @DeleteMapping("/{booking-id}")
