@@ -315,12 +315,29 @@ function axiosMapRenderFromKakao(url) {
     //axios로 URL을 호출
     axios.get(url)
         .then(function (response) {
-            const data = response.data.data.parkOperInfoDtos;
-            //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
-            if (data.length == 0) {
-                data.push({la: response.data.data.la, lo: response.data.data.lo});
+            let data = [];
+            let centerLa, centerLo, placeName;
+            let result = false;
+            if (response.data && response.data.data && response.data.data.parkOperInfoDtos) {
+                data = response.data.data.parkOperInfoDtos;
+                centerLa = response.data.data.la;
+                centerLo = response.data.data.lo;
+                placeName = response.data.data.placeName;
+                result = true;
+                //받은 데이터가 0개 일때 초기위치를 data배열에 넣어준다
+                if (data.length == 0) {
+                    data.push({la: centerLa, lo: centerLo});
+                    alert("결과가 없습니다");
+                    result = false;
+                }
+            } else {
+                centerLa = "37.5546788388674";
+                centerLo = "126.970606917394";
+                placeName = "서울역";
+                data.push({la: centerLa, lo: centerLo});
                 alert("결과가 없습니다");
             }
+
 
             // 지도를 표시할 div
             var mapContainer = document.getElementById('map'),
@@ -350,50 +367,51 @@ function axiosMapRenderFromKakao(url) {
                 // 마커를 표시할 지도 객체
                 map: map,
                 // 마커의 위치 좌표
-                position: new kakao.maps.LatLng(response.data.data.la, response.data.data.lo),
+                position: new kakao.maps.LatLng(centerLa, centerLo),
                 // 마커에 마우스를 올렸을 때 나타날 툴팁 메시지
-                title: response.data.data.placeName,
+                title: placeName,
                 // 마커 이미지 설정
                 image: centerMarkerImage
             });
-            bounds.extend(new kakao.maps.LatLng(response.data.data.la, response.data.data.lo));
+            bounds.extend(new kakao.maps.LatLng(centerLa, centerLo));
+            if (result) {
+                data.forEach(function (item) {
+                    //bound에 좌표값 추가
+                    bounds.extend(new kakao.maps.LatLng(item.la, item.lo));
+                    var marker = new kakao.maps.Marker({
+                        // 마커를 표시할 지도 객체
+                        map: map,
+                        // 마커의 위치 좌표
+                        position: new kakao.maps.LatLng(item.la, item.lo),
+                        // 마커에 마우스를 올렸을 때 나타날 툴팁 메시지
+                        title: item.name,
+                        // 마커 이미지 설정
+                        image: markerImage
+                    });
 
-            data.forEach(function (item) {
-                //bound에 좌표값 추가
-                bounds.extend(new kakao.maps.LatLng(item.la, item.lo));
-                var marker = new kakao.maps.Marker({
-                    // 마커를 표시할 지도 객체
-                    map: map,
-                    // 마커의 위치 좌표
-                    position: new kakao.maps.LatLng(item.la, item.lo),
-                    // 마커에 마우스를 올렸을 때 나타날 툴팁 메시지
-                    title: item.name,
-                    // 마커 이미지 설정
-                    image: markerImage
+                    //클릭 이벤트 리스너가 작동되면 해당 주차장의 이름을 input 요소에 표시
+                    var handleClickMarker = function () {
+                        $("#parking-lot-name").attr("value", item.name);
+                        //도로명주소가 없을경우 지번주소로 입력
+                        let address = item.address1;
+                        if (address == "") {
+                            address = item.address2;
+                        }
+                        $("#parking-lot-id").attr("value", item.id);
+                        $("#parking-lot-address").attr("value", address);
+                        $("#parking-lot-price").attr("value", item.totCharge + "원");
+                        $("#parking-lot-total-spots").attr("value", item.cmprtCo + "대");
+                        $("#parking-lot-operation-hours").attr("value", item.weekdayOpen + " ~ " + item.weekdayClose);
+                        $("#parking-lot-basic-price").attr("value", item.chargeBsTime + "분 " + item.chargeBsChrg + "원");
+                        $("#parking-lot-additional-price").attr("value", item.chargeAditUnitTime + "분당 " + item.chargeAditUnitChrg + "원");
+                        $("#weekOpen").text("평일: " + item.weekdayOpen + " ~ " + item.weekdayClose);
+                        $("#satOpen").text("토요일: " + item.satOpen + " ~ " + item.satClose);
+                        $("#sunOpen").text("휴일: " + item.sunOpen + " ~ " + item.sunClose);
+                    };
+                    // 마커에 클릭 이벤트 리스너 추가
+                    kakao.maps.event.addListener(marker, 'click', handleClickMarker);
                 });
-
-                //클릭 이벤트 리스너가 작동되면 해당 주차장의 이름을 input 요소에 표시
-                var handleClickMarker = function () {
-                    $("#parking-lot-name").attr("value", item.name);
-                    //도로명주소가 없을경우 지번주소로 입력
-                    let address = item.address1;
-                    if (address == "") {
-                        address = item.address2;
-                    }
-                    $("#parking-lot-id").attr("value", item.id);
-                    $("#parking-lot-address").attr("value", address);
-                    $("#parking-lot-price").attr("value", item.totCharge + "원");
-                    $("#parking-lot-total-spots").attr("value", item.cmprtCo + "대");
-                    $("#parking-lot-operation-hours").attr("value", item.weekdayOpen + " ~ " + item.weekdayClose);
-                    $("#parking-lot-basic-price").attr("value", item.chargeBsTime + "분 " + item.chargeBsChrg + "원");
-                    $("#parking-lot-additional-price").attr("value", item.chargeAditUnitTime + "분당 " + item.chargeAditUnitChrg + "원");
-                    $("#weekOpen").text("평일: " + item.weekdayOpen + " ~ " + item.weekdayClose);
-                    $("#satOpen").text("토요일: " + item.satOpen + " ~ " + item.satClose);
-                    $("#sunOpen").text("휴일: " + item.sunOpen + " ~ " + item.sunClose);
-                };
-                // 마커에 클릭 이벤트 리스너 추가
-                kakao.maps.event.addListener(marker, 'click', handleClickMarker);
-            });
+            }
             //bound를 셋팅하여 결과가 한 화면에 보이게 설정
             map.setBounds(bounds);
         });
