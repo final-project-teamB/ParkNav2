@@ -49,7 +49,7 @@ public class BookingService {
 
     public ApiResponseDto<BookingInfoResponseDto> getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
-        ParkOperInfo parkOperInfo = parkOperInfoRepository.findById(id).orElseThrow(
+        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(id).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
 
