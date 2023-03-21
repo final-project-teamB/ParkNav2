@@ -43,7 +43,7 @@ public class BookingController {
     public ApiResponseDto<Page<MyBookingResponseDto>> getMyBooking(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                    @RequestParam int page,
                                                                    @RequestParam int size) {
-        return bookingService.getMyBooking(userDetails.getUser(),page, size);
+        return bookingService.getMyBooking(userDetails.getUser(),page-1, size);
     }
 
 }
