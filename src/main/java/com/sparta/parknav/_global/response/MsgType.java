@@ -16,7 +16,8 @@ public enum MsgType {
     CANCEL_SUCCESSFULLY("예약이 취소되었습니다."),
     REGISTRATION_SUCCESSFULLY("차량 등록 성공"),
     REP_REG_SUCCESSFULLY("대표 차량 등록 성공"),
-    REP_DEL_SUCCESSFULLY("차량 삭제 성공")
+    REP_DEL_SUCCESSFULLY("차량 삭제 성공"),
+    DATA_SUCCESSFULLY("데이터 생성 성공")
     ;
 
     private final String msg;
