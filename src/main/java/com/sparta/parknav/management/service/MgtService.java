@@ -110,11 +110,13 @@ public class MgtService {
     @Transactional
     public ApiResponseDto<Page<ParkMgtResponseDto>> mgtPage(Admin admin, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        Optional<ParkInfo> parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId());
+        String parkName = parkInfo.get().getName();
         Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoIdOrderByEnterTimeDesc(admin.getParkInfo().getId(), pageable);
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
-                .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge(),p.getParkInfo().getName()))
+                .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
                 .collect(Collectors.toList());
-        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements()), MsgType.SEARCH_SUCCESSFULLY);
+        return ResponseUtils.ok(parkName,new PageImpl<>(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements()), MsgType.SEARCH_SUCCESSFULLY);
     }
 
     private static ParkBookingInfo getParkBookingInfo(CarNumRequestDto requestDto, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {
