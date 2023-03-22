@@ -15,4 +15,10 @@ public class MakeDataController {
     public ApiResponseDto<Void> getInfoBeforeBooking(@PathVariable Long firstParkInfoId,@PathVariable Long lastParkInfoId) {
         return makeData.makeBookingInfoData(firstParkInfoId, lastParkInfoId);
     }
+
+    @PostMapping("/mgtinfo/{firstParkInfoId}/{lastParkInfoId}")
+    public ApiResponseDto<Void> makeMgtInfoData(@PathVariable Long firstParkInfoId,@PathVariable Long lastParkInfoId) {
+        return makeData.makeMgtInfoData(firstParkInfoId, lastParkInfoId);
+    }
+
 }
