@@ -40,10 +40,12 @@ $(document).ready(function () {
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
+        $("#signup-button").hide();
         $("#logout-button").show();
         $("#mypage-button").show();
     } else {
         $("#login-button").show();
+        $("#signup-button").show();
         $("#logout-button").hide();
         $("#mypage-button").hide();
     }
@@ -171,7 +173,6 @@ $(document).ready(function () {
 
         axios.post(`/api/booking/${id}`, body)
             .then(response => {
-                console.log(response)
                 if (response.data.msg === "예약이 완료되었습니다.") {
                     alert(response.data.msg);
                     $('#reservation-modal').modal('hide');
@@ -207,6 +208,7 @@ $(document).ready(function () {
         }
     });
 
+    //로그아웃 버튼 클릭 이벤트
     $('#logout-button').click(function () {
         if (confirm("로그아웃 하시겠습니까?")) {
             localStorage.setItem('Authorization', '');
@@ -216,8 +218,59 @@ $(document).ready(function () {
         }
     });
 
+    //마이페이지 버튼 클릭 이벤트
     $('#mypage-button').click(function () {
         window.location.href = "/mypage";
+    });
+
+    //모달 회원가입 버튼 클릭 이벤트
+    $('#signup-btn').click(function () {
+        const id = $('#signup_username');
+        const password = $('#signup_password');
+        const passwordCheck = $('#signup_password_check');
+
+        if (id.val() === "") {
+            alert("아이디를 입력해 주세요.");
+            id.focus();
+            return false;
+        }
+        if (password.val() === "") {
+            alert("비밀번호를 입력해 주세요.");
+            password.focus();
+            return false;
+        }
+        if (passwordCheck.val() === "") {
+            alert("비밀번호 확인을 입력해 주세요.");
+            passwordCheck.focus();
+            return false;
+        }
+        if (password.val() !== passwordCheck.val()) {
+            alert("비밀번호 확인이 다릅니다.");
+            passwordCheck.focus();
+            return false;
+        }
+
+        const body = {
+            userId: id.val(),
+            password: password.val()
+        };
+        axios.post(`/api/users/signup`, body)
+            .then(response => {
+                if (response.data.msg === "회원가입이 완료되었습니다.") {
+                    alert(response.data.msg);
+                    $('#signupModal').modal('hide');
+                    id.val("");
+                    password.val("");
+                    passwordCheck.val("");
+                } else {
+                    alert("회원가입에 실패했습니다.")
+                    return false;
+                }
+            })
+            .catch(error => {
+                alert(error.response.data.error.msg);
+                return false;
+            });
     });
 
     //처음 접속 시 지도 기본값 출력
