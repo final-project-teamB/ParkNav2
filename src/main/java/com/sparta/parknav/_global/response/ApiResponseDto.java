@@ -12,13 +12,11 @@ public class ApiResponseDto<T> {
     private T data;
     private String msg;
     private ErrorResponse error;
-    private String parkName;
 
     @Builder
-    public ApiResponseDto(T data, String msg, ErrorResponse error, String parkName) {
+    public ApiResponseDto(T data, String msg, ErrorResponse error) {
         this.data = data;
         this.msg = msg;
-        this.parkName = parkName;
         this.error = error;
     }
 }

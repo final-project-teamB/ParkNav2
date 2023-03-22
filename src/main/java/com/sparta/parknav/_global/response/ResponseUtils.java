@@ -11,14 +11,6 @@ public class ResponseUtils {
                 .build();
     }
 
-    public static <T> ApiResponseDto<T> ok(String parkName, T data, MsgType msg) {
-        return ApiResponseDto.<T>builder()
-                .parkName(parkName)
-                .data(data)
-                .msg(msg.getMsg())
-                .build();
-    }
-
     public static ApiResponseDto<Void> ok(MsgType msg) {
         return ApiResponseDto.<Void>builder()
                 .msg(msg.getMsg())
