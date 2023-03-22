@@ -2,11 +2,13 @@ package com.sparta.parknav._global.data;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.MsgType;
+import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.booking.entity.Car;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
-import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
@@ -19,14 +21,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -108,31 +108,35 @@ public class MakeData {
     }
 
     @Transactional
-    public void makeBookingInfoData(Long parkInfoId) {
-        // 주차장별 50개 랜덤 데이터 만들기
-        for (int i = 1; i <= 50; i++) {
-            // 예약 시작시간 랜덤 설정
-            LocalDateTime start = LocalDateTime.of(2023, 3, 21, 9, 0, 0);
-            LocalDateTime end = LocalDateTime.of(2023, 3, 22, 12, 0, 0);
-            Duration duration = Duration.between(start, end);
-            long hours = duration.toHours();
-            // 예약 시작 시간
-            LocalDateTime startTime = start.plusHours(ThreadLocalRandom.current()
-                            .nextLong(hours + 1))
-                    .truncatedTo(ChronoUnit.HOURS);
-            // 예약 종료 시간
-            LocalDateTime endTime = startTime.plusDays(2);
+    public ApiResponseDto<Void> makeBookingInfoData(Long firstParkInfoId, Long lastParkInfoId) {
+        for (Long j = firstParkInfoId; j <lastParkInfoId ; j++) {
+            // 주차장별 50개 랜덤 데이터 만들기
+            for (int i = 1; i <= 50; i++) {
+                // 예약 시작시간 랜덤 설정
+                LocalDateTime start = LocalDateTime.of(2023, 3, 21, 9, 0, 0);
+                LocalDateTime end = LocalDateTime.of(2023, 3, 22, 12, 0, 0);
+                Duration duration = Duration.between(start, end);
+                long hours = duration.toHours();
+                // 예약 시작 시간
+                LocalDateTime startTime = start.plusHours(ThreadLocalRandom.current()
+                                .nextLong(hours + 1))
+                        .truncatedTo(ChronoUnit.HOURS);
+                // 예약 종료 시간
+                LocalDateTime endTime = startTime.plusDays(2);
 
-            User user = userRepository.getReferenceById((long)i);
+                User user = userRepository.getReferenceById((long)i);
 
-            ParkInfo parkInfo = parkInfoRepository.getReferenceById(parkInfoId);
+                ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
 
-            Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).get();
+                Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).get();
 
-            // ParkBookingInfo 만들어서 저장
-            ParkBookingInfo parkBookingInfo = ParkBookingInfo.of(startTime, endTime, user, parkInfo, car.getCarNum());
-            parkBookingInfoRepository.save(parkBookingInfo);
+                // ParkBookingInfo 만들어서 저장
+                ParkBookingInfo parkBookingInfo = ParkBookingInfo.of(startTime, endTime, user, parkInfo, car.getCarNum());
+                parkBookingInfoRepository.save(parkBookingInfo);
+            }
         }
+        return ResponseUtils.ok(MsgType.BOOKING_SUCCESSFULLY);
+
     }
 
 
@@ -161,10 +165,10 @@ public class MakeData {
 
     // parkInfoId에 해당하는 주차장의 예약정보를 만든다.
 //    @PostConstruct
-    public void initBooking() {
-        for (int parkInfoId = 6; parkInfoId <= 500; parkInfoId++) {
-            makeBookingInfoData((long) parkInfoId);
-        }
-    }
+//    public void initBooking() {
+//        for (int parkInfoId = 6; parkInfoId <= 500; parkInfoId++) {
+//            makeBookingInfoData((long) parkInfoId);
+//        }
+//    }
 
 }
