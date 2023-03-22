@@ -57,4 +57,14 @@ public class ParkBookingInfo {
                 .build();
     }
 
+    public static ParkBookingInfo of(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum) {
+        return ParkBookingInfo.builder()
+                .startTime(startTime)
+                .endTime(endTime)
+                .user(user)
+                .parkInfo(parkInfo)
+                .carNum(carNum)
+                .build();
+    }
+
 }
