@@ -21,4 +21,9 @@ public class MakeDataController {
         return makeData.makeMgtInfoData(firstParkInfoId, lastParkInfoId);
     }
 
+    @PostMapping("/mgtbooking/{firstParkInfoId}/{lastParkInfoId}")
+    public ApiResponseDto<Void> makeMgtBookingInfoData(@PathVariable Long firstParkInfoId, @PathVariable Long lastParkInfoId) {
+        return makeData.makeMgtBookingInfoData(firstParkInfoId, lastParkInfoId);
+    }
+
 }

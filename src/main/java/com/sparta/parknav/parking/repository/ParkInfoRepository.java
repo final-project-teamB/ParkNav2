@@ -18,5 +18,7 @@ public interface ParkInfoRepository extends JpaRepository<ParkInfo,Long> {
     @Query(value = "SELECT p, p.parkInfo FROM ParkOperInfo p JOIN p.parkInfo WHERE ST_Distance_Sphere(Point(:x, :y), Point(p.parkInfo.lo, p.parkInfo.la)) < :distance and p.parkCtgy=:type ORDER BY ST_Distance_Sphere(Point(:x, :y), Point(p.parkInfo.lo, p.parkInfo.la)) ASC")
     List<Object[]> findParkInfoWithOperInfoAndType(@Param("x") String x, @Param("y") String y, @Param("distance") double distance,  @Param("type") String type);
 
+    List<ParkInfo> findAllByIdBetween(Long firstParkInfoId, Long lastParkInfoId);
+
 }
 
