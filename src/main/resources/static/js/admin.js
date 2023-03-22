@@ -18,7 +18,6 @@ $(document).ready(function () {
         return Promise.reject(error);
     });
 
-    localStorage.removeItem("Authorization");
     $("#parking-list").empty();
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;

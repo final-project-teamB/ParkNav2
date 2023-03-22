@@ -44,6 +44,7 @@ $(document).ready(function () {
         $("#logout-button").show();
         $("#mypage-button").show();
     } else {
+        $("#loginModal").modal('show');
         $("#login-button").show();
         $("#signup-button").show();
         $("#logout-button").hide();
