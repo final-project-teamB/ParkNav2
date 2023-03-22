@@ -56,6 +56,7 @@ public class WebSecurityConfig {
                 .antMatchers("/img/**").permitAll()
                 .antMatchers("/admin").permitAll()
                 .antMatchers("/mypage").permitAll()
+                .antMatchers("/data/**").permitAll()
                 .anyRequest().authenticated()
                 .and().exceptionHandling().authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);

@@ -61,7 +61,7 @@ public class MakeData {
         });
 
         int idx = 0;
-        for(ParkInfoJsonDto parkInfoJson : parkInfos) {
+        for (ParkInfoJsonDto parkInfoJson : parkInfos) {
             String name = parkInfoJson.getName();
             String address1 = parkInfoJson.getAddress1();
             String address2 = parkInfoJson.getAddress2();
@@ -109,7 +109,7 @@ public class MakeData {
 
     @Transactional
     public ApiResponseDto<Void> makeBookingInfoData(Long firstParkInfoId, Long lastParkInfoId) {
-        for (Long j = firstParkInfoId; j <lastParkInfoId ; j++) {
+        for (Long j = firstParkInfoId; j <= lastParkInfoId; j++) {
             // 주차장별 50개 랜덤 데이터 만들기
             for (int i = 1; i <= 50; i++) {
                 // 예약 시작시간 랜덤 설정
@@ -124,7 +124,7 @@ public class MakeData {
                 // 예약 종료 시간
                 LocalDateTime endTime = startTime.plusDays(2);
 
-                User user = userRepository.getReferenceById((long)i);
+                User user = userRepository.getReferenceById((long) i);
 
                 ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
 
