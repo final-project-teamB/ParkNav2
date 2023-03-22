@@ -8,4 +8,6 @@ public class ParkInfoJsonDto {
     private String parking_type;
     private String address1;
     private String address2;
+    private String lo;
+    private String la;
 }
