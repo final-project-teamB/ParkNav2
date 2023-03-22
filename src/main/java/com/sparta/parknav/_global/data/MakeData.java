@@ -9,7 +9,9 @@ import com.sparta.parknav.booking.entity.Car;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
+import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
+import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
@@ -110,6 +112,7 @@ public class MakeData {
     @Transactional
     public ApiResponseDto<Void> makeBookingInfoData(Long firstParkInfoId, Long lastParkInfoId) {
         for (Long j = firstParkInfoId; j <= lastParkInfoId; j++) {
+            ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
             // 주차장별 50개 랜덤 데이터 만들기
             for (int i = 1; i <= 50; i++) {
                 // 예약 시작시간 랜덤 설정
@@ -126,8 +129,6 @@ public class MakeData {
 
                 User user = userRepository.getReferenceById((long) i);
 
-                ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
-
                 Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).get();
 
                 // ParkBookingInfo 만들어서 저장
@@ -140,15 +141,36 @@ public class MakeData {
     }
 
 
-    // 현황관리 정보를 만든다.
-    public void makeMgtInfoData(Long parkInfoId) {
+    // 현황관리 정보를 만든다. bookingInfo = null인 경우
+    public ApiResponseDto<Void> makeMgtInfoData(Long firstParkInfoId, Long lastParkInfoId) {
+        for (Long j = firstParkInfoId; j <= lastParkInfoId; j++) {
+            ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
+            ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(j).get();
 
-        // ParkInfo parkInfo, String carNum, LocalDateTime enterTime
-        //            , LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo
+            for (int i = 51; i <= 100; i++) {
 
-        ParkInfo parkInfo = parkInfoRepository.getReferenceById(parkInfoId);
+                User user = userRepository.getReferenceById((long) i);
 
-//        ParkMgtInfo mgtInfo = ParkMgtInfo.of()
+                Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).get();
+
+                // 입차 시간 랜덤 설정
+                LocalDateTime start = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
+                LocalDateTime end = LocalDateTime.of(2023, 3, 15, 23, 59, 59);
+                Duration duration = Duration.between(start, end);
+                long hours = duration.toHours();
+                LocalDateTime startTime = start.plusHours(ThreadLocalRandom.current()
+                                .nextLong(hours + 1))
+                        .truncatedTo(ChronoUnit.HOURS);
+                // 출차 시간
+                LocalDateTime endTime = startTime.plusHours(3);
+
+                int charge = ParkingFeeCalculator.calculateParkingFee(Duration.between(startTime, endTime).toMinutes(), parkOperInfo);
+
+                ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), startTime, endTime, charge, null);
+                parkMgtInfoRepository.save(mgtInfo);
+            }
+        }
+        return ResponseUtils.ok(MsgType.BOOKING_SUCCESSFULLY);
     }
 
     // MakeData Bean 이 생성될 떄, init() 함수가 실행된다.
