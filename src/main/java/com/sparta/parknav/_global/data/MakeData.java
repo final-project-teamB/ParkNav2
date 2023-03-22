@@ -112,6 +112,7 @@ public class MakeData {
     @Transactional
     public ApiResponseDto<Void> makeBookingInfoData(Long firstParkInfoId, Long lastParkInfoId) {
         for (Long j = firstParkInfoId; j <= lastParkInfoId; j++) {
+            ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
             // 주차장별 50개 랜덤 데이터 만들기
             for (int i = 1; i <= 50; i++) {
                 // 예약 시작시간 랜덤 설정
@@ -127,8 +128,6 @@ public class MakeData {
                 LocalDateTime endTime = startTime.plusDays(2);
 
                 User user = userRepository.getReferenceById((long) i);
-
-                ParkInfo parkInfo = parkInfoRepository.getReferenceById(j);
 
                 Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).get();
 
