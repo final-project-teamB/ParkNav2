@@ -40,10 +40,12 @@ $(document).ready(function () {
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
+        $("#signup-button").hide();
         $("#logout-button").show();
         $("#mypage-button").show();
     } else {
         $("#login-button").show();
+        $("#signup-button").show();
         $("#logout-button").hide();
         $("#mypage-button").hide();
     }
