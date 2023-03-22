@@ -28,7 +28,7 @@ public class JwtUtil {
     private final AdminDetailsServiceImpl adminDetailsService;
     public static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 1000L;
+    private static final long TOKEN_TIME = 60 * 60 * 1000L * 24 * 30;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
