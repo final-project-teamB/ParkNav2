@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -157,9 +158,10 @@ public class MakeData {
         List<ParkOperInfo> parkOperInfoList = parkOperInfoRepository.findAllByParkInfoIdBetween(firstParkInfoId, lastParkInfoId);
         // 유저 정보 미리 로딩
         List<User> userList = userRepository.findAllByIdBetween(51L, 100L);
+        // 쿼리문 줄이기 위한 List 생성
+        List<ParkMgtInfo> mgtInfoList = new ArrayList<>();
 
         int idx = 0;
-        int cnt = 0;
         for (ParkInfo parkInfo : parkInfoList) {
 
             ParkOperInfo parkOperInfo = parkOperInfoList.get(idx++);
@@ -182,13 +184,11 @@ public class MakeData {
                 int charge = ParkingFeeCalculator.calculateParkingFee(Duration.between(startTime, endTime).toMinutes(), parkOperInfo);
 
                 ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), startTime, endTime, charge, null);
-                parkMgtInfoRepository.save(mgtInfo);
-
-                if (cnt++ % 100 == 0) {
-                    parkMgtInfoRepository.flush();
-                }
+                mgtInfoList.add(mgtInfo);
             }
         }
+        parkMgtInfoRepository.saveAll(mgtInfoList);
+
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
     }
 
@@ -201,9 +201,10 @@ public class MakeData {
         List<ParkOperInfo> parkOperInfoList = parkOperInfoRepository.findAllByParkInfoIdBetween(firstParkInfoId, lastParkInfoId);
         // 유저 정보 미리 로딩
         List<User> userList = userRepository.findAllByIdBetween(1L, 40L);
+        // 쿼리문 줄이기 위한 List 생성
+        List<ParkMgtInfo> mgtInfoList = new ArrayList<>();
 
         int idx = 0;
-        int cnt = 0;
         for (ParkInfo parkInfo : parkInfoList) {
 
             ParkOperInfo parkOperInfo = parkOperInfoList.get(idx++);
@@ -228,14 +229,11 @@ public class MakeData {
 
                 // 예약정보 포함하여 저장
                 ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), enterTime, exitTime, charge, bookingInfo);
-                parkMgtInfoRepository.save(mgtInfo);
-
-                if (cnt++ % 100 == 0) {
-                    parkMgtInfoRepository.flush();
-                }
+                mgtInfoList.add(mgtInfo);
             }
-
         }
+        parkMgtInfoRepository.saveAll(mgtInfoList);
+
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
     }
 
