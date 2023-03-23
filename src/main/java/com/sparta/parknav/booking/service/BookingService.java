@@ -98,7 +98,7 @@ public class BookingService {
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
         ); // 2~5 , 1~3
         // SCENARIO BOOKING 4
-        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoAndUser(parkInfo, user);
+        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndUserId(parkInfo.getId(), user.getId());
         for (ParkBookingInfo p : parkBookingInfo) {
             if (p != null) {
                 if (requestDto.getStartDate().isBefore(p.getEndTime())&&requestDto.getEndDate().isAfter(p.getStartTime())) {
