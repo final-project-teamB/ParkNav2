@@ -60,15 +60,15 @@ public class MgtService {
         // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
         // SCENARIO ENTER 4
         List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
+        List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
         LocalDateTime now = LocalDateTime.now();
+
         // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
-        int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now);
+        int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
         // 예약된 차량 찾기
         ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
-
         // 주차 구획수
         int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
-        List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
         // 이 주차장에 현재 입차되어있는 차량 수
         int mgtNum = getMgtNum(parkMgtInfo);
         if (bookingNowCnt + mgtNum >= cmprtCoNum) {
@@ -135,7 +135,7 @@ public class MgtService {
         return parkBookingNow;
     }
 
-    private static int getBookingNowCnt(String carNum, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {
+    private static int getBookingNowCnt(String carNum, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now, List<ParkMgtInfo> parkMgtInfo) {
         // 3시 입차
         // 2~5시 예약
         int bookingNowCnt = 0;
@@ -145,6 +145,16 @@ public class MgtService {
                     continue;
                 }
                 bookingNowCnt++;
+            }
+        }
+        // 예약된 차량이 주차장에 이미 입차되어 있는지 확인
+        for (ParkBookingInfo p : parkBookingInfo) {
+            for (ParkMgtInfo m : parkMgtInfo) {
+                // 현재 시간이 예약 시작 시간-1보다 크고, 예약 종료 시간보다 작을때, 예약차가 입차해있지만, 출차를 안했다면
+                if (((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) &&
+                        Objects.equals(m.getCarNum(), p.getCarNum()) && m.getExitTime() == null) {
+                    bookingNowCnt--;
+                }
             }
         }
         return bookingNowCnt;
