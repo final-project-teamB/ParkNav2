@@ -107,9 +107,10 @@ function fetchData(page) {
     const params = new URLSearchParams(body).toString();
     axios.get(`/api/mgt/check?${params}`)
         .then(response => {
-            const data = response.data.data.content;
-            const content = data.content;
+            console.log(response);
+            const data = response.data.data.page.content;
             let num = 1;
+            $("#parking-lot-name").text(response.data.data.parkName);
             $("#parking-list").empty();
             data.map((item) => {
                 $("#parking-list").append(`
@@ -124,7 +125,7 @@ function fetchData(page) {
                 `);
             });
             currentPage = page; // 현재 페이지 번호 설정
-            totalPages = response.data.data.totalPages; // 총 페이지 수 설정
+            totalPages = response.data.data.page.totalPages; // 총 페이지 수 설정
             renderPagination(); // 페이징 버튼 생성 함수 호출
         })
         .catch(error => {
@@ -135,6 +136,7 @@ function fetchData(page) {
 function renderPagination() {
     const pagination = $(".pagination");
     pagination.empty();
+
     if (totalPages > 0) {
         // 이전 페이지 버튼 추가
         pagination.append(`
