@@ -7,6 +7,7 @@ import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.response.ResponseUtils;
+import com.sparta.parknav.management.dto.response.ParkMgtListResponseDto;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
@@ -108,13 +109,17 @@ public class MgtService {
     }
 
     @Transactional
-    public ApiResponseDto<Page<ParkMgtResponseDto>> mgtPage(Admin admin, int page, int size) {
+    public ApiResponseDto<ParkMgtListResponseDto> mgtPage(Admin admin, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoId(admin.getParkInfo().getId(), pageable);
+        Optional<ParkInfo> parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId());
+        String parkName = parkInfo.get().getName();
+        Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoIdOrderByEnterTimeDesc(admin.getParkInfo().getId(), pageable);
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
                 .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
                 .collect(Collectors.toList());
-        return ResponseUtils.ok(new PageImpl<>(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements()), MsgType.SEARCH_SUCCESSFULLY);
+        Page page1 = new PageImpl(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements());
+        ParkMgtListResponseDto parkMgtListResponseDto = ParkMgtListResponseDto.of(page1, parkName);
+        return ResponseUtils.ok(parkMgtListResponseDto, MsgType.SEARCH_SUCCESSFULLY);
     }
 
     private static ParkBookingInfo getParkBookingInfo(CarNumRequestDto requestDto, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {

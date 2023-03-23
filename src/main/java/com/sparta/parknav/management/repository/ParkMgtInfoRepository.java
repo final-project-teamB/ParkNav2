@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
 
     List<ParkMgtInfo> findAllByParkInfoId(Long parkId);
-    Page<ParkMgtInfo> findAllByParkInfoId(Long parkId, Pageable pageable);
+    Page<ParkMgtInfo> findAllByParkInfoIdOrderByEnterTimeDesc(Long parkId, Pageable pageable);
     int countByParkInfoIdAndExitTimeIsNull(Long id);
 
     Optional<ParkMgtInfo> findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(Long parkId, String carNum);
