@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -117,8 +118,8 @@ public class MakeData {
         // 유저 정보 미리 로딩
         List<User> userList = userRepository.findAllByIdBetween(1L, 50L);
 
+        int cnt = 0;
         for (ParkInfo parkInfo : parkInfoList) {
-
             // 주차장별 50개 랜덤 데이터 만들기
             for (User user : userList) {
                 // 예약 시작시간 랜덤 설정
@@ -138,6 +139,10 @@ public class MakeData {
                 // ParkBookingInfo 만들어서 저장
                 ParkBookingInfo parkBookingInfo = ParkBookingInfo.of(startTime, endTime, user, parkInfo, car.getCarNum());
                 parkBookingInfoRepository.save(parkBookingInfo);
+
+                if (cnt++ % 100 == 0) {
+                    parkBookingInfoRepository.flush();
+                }
             }
         }
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
@@ -153,6 +158,8 @@ public class MakeData {
         List<ParkOperInfo> parkOperInfoList = parkOperInfoRepository.findAllByParkInfoIdBetween(firstParkInfoId, lastParkInfoId);
         // 유저 정보 미리 로딩
         List<User> userList = userRepository.findAllByIdBetween(51L, 100L);
+        // 쿼리문 줄이기 위한 List 생성
+        List<ParkMgtInfo> mgtInfoList = new ArrayList<>();
 
         int idx = 0;
         for (ParkInfo parkInfo : parkInfoList) {
@@ -177,9 +184,11 @@ public class MakeData {
                 int charge = ParkingFeeCalculator.calculateParkingFee(Duration.between(startTime, endTime).toMinutes(), parkOperInfo);
 
                 ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), startTime, endTime, charge, null);
-                parkMgtInfoRepository.save(mgtInfo);
+                mgtInfoList.add(mgtInfo);
             }
         }
+        parkMgtInfoRepository.saveAll(mgtInfoList);
+
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
     }
 
@@ -192,6 +201,8 @@ public class MakeData {
         List<ParkOperInfo> parkOperInfoList = parkOperInfoRepository.findAllByParkInfoIdBetween(firstParkInfoId, lastParkInfoId);
         // 유저 정보 미리 로딩
         List<User> userList = userRepository.findAllByIdBetween(1L, 40L);
+        // 쿼리문 줄이기 위한 List 생성
+        List<ParkMgtInfo> mgtInfoList = new ArrayList<>();
 
         int idx = 0;
         for (ParkInfo parkInfo : parkInfoList) {
@@ -218,10 +229,11 @@ public class MakeData {
 
                 // 예약정보 포함하여 저장
                 ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), enterTime, exitTime, charge, bookingInfo);
-                parkMgtInfoRepository.save(mgtInfo);
+                mgtInfoList.add(mgtInfo);
             }
-
         }
+        parkMgtInfoRepository.saveAll(mgtInfoList);
+
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
     }
 
