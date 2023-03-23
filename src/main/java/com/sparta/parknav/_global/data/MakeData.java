@@ -210,7 +210,12 @@ public class MakeData {
             ParkOperInfo parkOperInfo = parkOperInfoList.get(idx++);
 
             for (User user : userList) {
-                ParkBookingInfo bookingInfo = parkBookingInfoRepository.findAllByParkInfoAndUser(parkInfo, user).get(0);
+                ParkBookingInfo bookingInfo;
+                try {
+                    bookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndUserId(parkInfo.getId(), user.getId()).get(0);
+                } catch (Exception e) {
+                    continue;
+                }
                 Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).get();
 
                 // 예약시간 전후 30분 구하기
