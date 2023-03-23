@@ -71,9 +71,7 @@ public class MgtService {
         int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
         // 이 주차장에 현재 입차되어있는 차량 수
         int mgtNum = getMgtNum(parkMgtInfo);
-        System.out.println("주차 구획수 = " + cmprtCoNum);
-        System.out.println("예약된 차량수 = " + bookingNowCnt);
-        System.out.println("입차된 차량수 = " + mgtNum);
+
         if (bookingNowCnt + mgtNum >= cmprtCoNum) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
