@@ -9,9 +9,9 @@ name: Spring Boot & Gradle CI/CD
 # branch 단위 외에도, tag나 cron 식 등을 사용할 수 있음 
 on:
   push:
-    branches: [ develop ]
+    branches: [ CI-CD-Test ]
   pull_request:
-    branches: [ develop ] 
+    branches: [ CI-CD-Test ] 
 
 jobs:
   build:
@@ -74,7 +74,16 @@ jobs:
         chmod +x ./gradlew
         
         ./gradlew build
-
+      
+      # 필요 없는 도커 파일 삭제
+    - name: Remove unused Docker images and containers
+      run: |
+          docker container prune -f
+          docker image prune -f
+          docker system prune --force
+          docker volume prune --force
+          docker network prune --force
+          
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작 
     - name: Docker build
