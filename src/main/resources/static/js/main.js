@@ -167,7 +167,7 @@ $(document).ready(function () {
             alert("운영시간이 아닙니다");
             return false;
         }
-        if (available + booking > total) {
+        if (available <= booking ) {
             alert("예약 할 수 없습니다");
             return false;
         }
