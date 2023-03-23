@@ -117,8 +117,8 @@ public class MakeData {
         // 유저 정보 미리 로딩
         List<User> userList = userRepository.findAllByIdBetween(1L, 50L);
 
+        int cnt = 0;
         for (ParkInfo parkInfo : parkInfoList) {
-
             // 주차장별 50개 랜덤 데이터 만들기
             for (User user : userList) {
                 // 예약 시작시간 랜덤 설정
@@ -138,6 +138,10 @@ public class MakeData {
                 // ParkBookingInfo 만들어서 저장
                 ParkBookingInfo parkBookingInfo = ParkBookingInfo.of(startTime, endTime, user, parkInfo, car.getCarNum());
                 parkBookingInfoRepository.save(parkBookingInfo);
+
+                if (cnt++ % 100 == 0) {
+                    parkBookingInfoRepository.flush();
+                }
             }
         }
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
@@ -155,6 +159,7 @@ public class MakeData {
         List<User> userList = userRepository.findAllByIdBetween(51L, 100L);
 
         int idx = 0;
+        int cnt = 0;
         for (ParkInfo parkInfo : parkInfoList) {
 
             ParkOperInfo parkOperInfo = parkOperInfoList.get(idx++);
@@ -178,6 +183,10 @@ public class MakeData {
 
                 ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), startTime, endTime, charge, null);
                 parkMgtInfoRepository.save(mgtInfo);
+
+                if (cnt++ % 100 == 0) {
+                    parkMgtInfoRepository.flush();
+                }
             }
         }
         return ResponseUtils.ok(MsgType.DATA_SUCCESSFULLY);
@@ -194,6 +203,7 @@ public class MakeData {
         List<User> userList = userRepository.findAllByIdBetween(1L, 40L);
 
         int idx = 0;
+        int cnt = 0;
         for (ParkInfo parkInfo : parkInfoList) {
 
             ParkOperInfo parkOperInfo = parkOperInfoList.get(idx++);
@@ -219,6 +229,10 @@ public class MakeData {
                 // 예약정보 포함하여 저장
                 ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), enterTime, exitTime, charge, bookingInfo);
                 parkMgtInfoRepository.save(mgtInfo);
+
+                if (cnt++ % 100 == 0) {
+                    parkMgtInfoRepository.flush();
+                }
             }
 
         }
