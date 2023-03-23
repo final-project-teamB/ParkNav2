@@ -71,6 +71,9 @@ public class MgtService {
         int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
         // 이 주차장에 현재 입차되어있는 차량 수
         int mgtNum = getMgtNum(parkMgtInfo);
+        System.out.println("주차 구획수 = " + cmprtCoNum);
+        System.out.println("예약된 차량수 = " + bookingNowCnt);
+        System.out.println("입차된 차량수 = " + mgtNum);
         if (bookingNowCnt + mgtNum >= cmprtCoNum) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
@@ -152,16 +155,9 @@ public class MgtService {
             // 현재 시간이 예약 시작 시간-1보다 크고, 예약 종료 시간보다 작을때
             if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
                 for (ParkMgtInfo m : parkMgtInfo) {
-                    // 예약차가 입차해있지만, 출차를 안했다면
-                    if (m.getExitTime() == null) {
-                        if (Objects.equals(m.getCarNum(), p.getCarNum())) {
-                            bookingNowCnt--;
-                        }
-                    } else { // A차가 2~5시 예약을 하고 3~4시 입차를 했을 경우 현재 3시 30분이면, A차는 예약차에서 제외
-                        if (Objects.equals(m.getCarNum(), p.getCarNum()) &&
-                                ((m.getEnterTime().minusHours(1).isEqual(now) || m.getEnterTime().minusHours(1).isBefore(now)) && m.getExitTime().isAfter(now))) {
-                            bookingNowCnt--;
-                        }
+                    // 예약차가 입차해있고, 입차된 차량의 예약번호와 같을 때
+                    if(Objects.equals(m.getCarNum(), p.getCarNum()) && Objects.equals(m.getParkBookingInfo().getId(), p.getId())) {
+                        bookingNowCnt--;
                     }
                 }
             }
