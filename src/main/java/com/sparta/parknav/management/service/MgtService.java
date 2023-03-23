@@ -150,11 +150,18 @@ public class MgtService {
         // 예약된 차량이 주차장에 이미 입차되어 있는지 확인
         for (ParkBookingInfo p : parkBookingInfo) {
             // 현재 시간이 예약 시작 시간-1보다 크고, 예약 종료 시간보다 작을때
-            if (((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now))) {
+            if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
                 for (ParkMgtInfo m : parkMgtInfo) {
                     // 예약차가 입차해있지만, 출차를 안했다면
-                    if(Objects.equals(m.getCarNum(), p.getCarNum())) {
-                        bookingNowCnt--;
+                    if (m.getExitTime() == null) {
+                        if (Objects.equals(m.getCarNum(), p.getCarNum())) {
+                            bookingNowCnt--;
+                        }
+                    } else { // A차가 2~5시 예약을 하고 3~4시 입차를 했을 경우 현재 3시 30분이면, A차는 예약차에서 제외
+                        if (Objects.equals(m.getCarNum(), p.getCarNum()) &&
+                                ((m.getEnterTime().minusHours(1).isEqual(now) || m.getEnterTime().minusHours(1).isBefore(now)) && m.getExitTime().isAfter(now))) {
+                            bookingNowCnt--;
+                        }
                     }
                 }
             }
