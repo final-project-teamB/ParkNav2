@@ -74,15 +74,7 @@ jobs:
         chmod +x ./gradlew
         
         ./gradlew build
-      
-      # 필요 없는 도커 파일 삭제
-    - name: Remove unused Docker images and containers
-      run: |
-          sudo docker container prune -f
-          sudo docker image prune -af
-          sudo docker system prune -f
-          sudo docker volume prune -f
-          sudo docker network prune -f
+        
           
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작 
@@ -91,7 +83,7 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build --build-arg DEPENDENCY=build/dependency -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
-     
+          
       
       # 서버에서 Docker 이미지 실행
       # HOST_DEV = 퍼블릭 IPv4 DNS , USERNAME = ubuntu, KEY = pem 키 전체
