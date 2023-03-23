@@ -78,11 +78,11 @@ jobs:
       # 필요 없는 도커 파일 삭제
     - name: Remove unused Docker images and containers
       run: |
-          docker container prune -f
-          docker image prune -f
-          docker system prune --force
-          docker volume prune --force
-          docker network prune --force
+          sudo docker container prune -f
+          sudo docker image prune -af
+          sudo docker system prune -f
+          sudo docker volume prune -f
+          sudo docker network prune -f
           
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작 
