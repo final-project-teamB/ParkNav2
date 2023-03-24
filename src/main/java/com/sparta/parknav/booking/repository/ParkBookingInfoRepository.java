@@ -16,11 +16,11 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
 
     Page<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id, Pageable pageable);
 
-    @Query(value = "SELECT COUNT(p) FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
+    @Query(value = "SELECT p FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
             "AND ((p.startTime >= :startTime and p.startTime < :endTime) " +
             "OR (p.endTime > :startTime and p.endTime <= :endTime)" +
             "OR (p.startTime <= :startTime and p.endTime >= :endTime))")
-    int getBookingCnt(@Param("parkId") Long parkId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    List<ParkBookingInfo> getSelectedTimeBookingList(@Param("parkId") Long parkId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     List<ParkBookingInfo> findAllByParkInfoIdAndUserId(Long parkInfoId, Long userId);
 }

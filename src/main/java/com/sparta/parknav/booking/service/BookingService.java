@@ -14,10 +14,10 @@ import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.entity.StatusType;
 import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
+import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.entity.ParkInfo;
-import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
@@ -30,9 +30,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class BookingService {
 
         String available;
         // 현재 운영여부 확인
-        if (checkOperation(LocalDateTime.now().getDayOfWeek(), parkOperInfo)) {
+        if (checkOperation(LocalDateTime.now(), parkOperInfo)) {
             // 현재 주차 가능 대수 = 주차 가능 대수 - 출차시간이 없는 현황 수(주차중인 경우)
             available = (parkOperInfo.getCmprtCo() - parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(id)) + "대";
         } else {
@@ -65,17 +65,21 @@ public class BookingService {
 
         String booking;
         // 선택한 날짜 운영여부 확인
-        if (checkOperation(requestDto.getStartDate().getDayOfWeek(), parkOperInfo)
-                && checkOperation(requestDto.getEndDate().getDayOfWeek(), parkOperInfo)) {
-            // 선택시간 예약건수 = 기존 예약 중에서 사용자가 선택한 시간 사이에 예약 시작 시간이 있거나 예약 끝나는 시간이 있는 경우
-            booking = parkBookingInfoRepository.getBookingCnt(id, requestDto.getStartDate(), requestDto.getEndDate()) + "대";
+        if (checkOperation(requestDto.getStartDate(), parkOperInfo) && checkOperation(requestDto.getEndDate(), parkOperInfo)) {
+            // 선택시간 예약 차량 = 기존 예약 중에서 사용자가 선택한 시간 사이에 예약 시작 시간이 있거나 예약 끝나는 시간이 있는 경우
+            List<ParkBookingInfo> selectedTimeBooking = parkBookingInfoRepository.getSelectedTimeBookingList(id, requestDto.getStartDate(), requestDto.getEndDate());
+            // 예약차량 중 현재 입차한 차량 수
+            int enterCnt = parkMgtInfoRepository.countByParkBookingInfoIn(selectedTimeBooking);
+            // 선택시간 예약 차량 수에서 현재 입차한 차량 수는 제외한다.
+            booking = (selectedTimeBooking.size() - enterCnt) + "대";
         } else {
             // 선택시간이 운영중이 아니라면 메시지 출력
             booking = MsgType.NOT_OPEN_SELECT_DATE.getMsg();
         }
 
         // 주차 시간 구하기
-        int bookingTime = getBookingTime(requestDto);
+        long bookingTime = Duration.between(requestDto.getStartDate(), requestDto.getEndDate()).toMinutes();
+
         // 주차 요금 구하기
         int charge = ParkingFeeCalculator.calculateParkingFee(bookingTime, parkOperInfo);
 
@@ -167,35 +171,38 @@ public class BookingService {
     }
 
 
-    private boolean checkOperation(DayOfWeek dayOfWeek, ParkOperInfo parkOperInfo) {
+    private boolean checkOperation(LocalDateTime selectedTime, ParkOperInfo parkOperInfo) {
 
-        if (dayOfWeek == DayOfWeek.SATURDAY
-                && parkOperInfo.getSatOpen().equals("00:00") && parkOperInfo.getSatClose().equals("00:00")) {
-            return false;
-        } else if (dayOfWeek == DayOfWeek.SUNDAY
-                && parkOperInfo.getSunOpen().equals("00:00") && parkOperInfo.getSunClose().equals("00:00")) {
-            return false;
-        } else if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY
-                && parkOperInfo.getWeekdayOpen().equals("00:00") && parkOperInfo.getWeekdayClose().equals("00:00")) {
-            return false;
-        } else {
-            return true;
+        LocalTime openTime;
+        LocalTime closeTime;
+
+        // selectedTime 의 요일에 따른 운영시간 체크
+        switch(selectedTime.getDayOfWeek()) {
+            case SATURDAY -> {
+                openTime = LocalTime.parse(parkOperInfo.getSatOpen());
+                closeTime = LocalTime.parse(parkOperInfo.getSatClose());
+            }
+            case SUNDAY -> {
+                openTime = LocalTime.parse(parkOperInfo.getSunOpen());
+                closeTime = LocalTime.parse(parkOperInfo.getSunClose());
+            }
+            default -> {
+                openTime = LocalTime.parse(parkOperInfo.getWeekdayOpen());
+                closeTime = LocalTime.parse(parkOperInfo.getWeekdayClose());
+            }
         }
 
-    }
-
-    private static int getBookingTime(BookingInfoRequestDto requestDto) {
-
-        int parkingDay = requestDto.getEndDate().getDayOfYear() - requestDto.getStartDate().getDayOfYear();
-        int parkingTime = (requestDto.getEndDate().getHour() * 60 + requestDto.getEndDate().getMinute())
-                - (requestDto.getStartDate().getHour() * 60 + requestDto.getStartDate().getMinute());
-
-        if (parkingTime < 0) {
-            parkingDay -= 1;
-            parkingTime += 1440;
+        // 시작시간, 종료시간이 00:00시라면 해당일엔 운영하지 않음
+        if (openTime.equals(LocalTime.of(0, 0)) && closeTime.equals(LocalTime.of(0, 0))) {
+            return false;
         }
 
-        return parkingDay * 1440 + parkingTime;
+        // selectedTime 이 운영시작시간 전이거나 운영종료시간 후인 경우 -> 선택한 시간은 운영 안함
+        if (selectedTime.toLocalTime().isBefore(openTime) || (!closeTime.equals(LocalTime.of(0, 0)) && selectedTime.toLocalTime().isAfter(closeTime))) {
+            return false;
+        }
+
+        return true;
     }
 
 }
