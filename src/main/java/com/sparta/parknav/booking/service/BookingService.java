@@ -81,9 +81,7 @@ public class BookingService {
         // 주차 요금 구하기
         int charge = ParkingFeeCalculator.calculateParkingFee(bookingTime, parkOperInfo);
 
-        BookingInfoResponseDto responseDto = BookingInfoResponseDto.of(available, booking, charge);
-
-        return responseDto;
+        return BookingInfoResponseDto.of(available, booking, charge);
     }
 
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
