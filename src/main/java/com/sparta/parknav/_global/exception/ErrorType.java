@@ -25,6 +25,7 @@ public enum ErrorType {
     ALREADY_ENTER_CAR(400, "이미 입차된 차량입니다."),
     ALREADY_REG_REP_CAR(400, "이미 대표로 등록된 차량입니다."),
     ALREADY_RESERVED(400, "이미 예약된 시간입니다."),
+    FAILED_TO_ACQUIRE_LOCK(100, "락 권한을 얻는데 실패했습니다."),
     ;
 
     private int code;

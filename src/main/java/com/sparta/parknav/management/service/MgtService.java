@@ -1,24 +1,23 @@
 package com.sparta.parknav.management.service;
 
-import com.sparta.parknav.booking.entity.ParkBookingInfo;
-import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
-import com.sparta.parknav._global.response.ApiResponseDto;
-import com.sparta.parknav._global.response.MsgType;
-import com.sparta.parknav._global.response.ResponseUtils;
-import com.sparta.parknav.management.dto.response.ParkMgtListResponseDto;
-import com.sparta.parknav.parking.entity.ParkInfo;
-import com.sparta.parknav.management.entity.ParkMgtInfo;
-import com.sparta.parknav.parking.entity.ParkOperInfo;
-import com.sparta.parknav.parking.repository.ParkInfoRepository;
-import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
+import com.sparta.parknav.booking.entity.ParkBookingInfo;
+import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
+import com.sparta.parknav.management.dto.response.ParkMgtListResponseDto;
 import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
+import com.sparta.parknav.management.entity.ParkMgtInfo;
+import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
+import com.sparta.parknav.parking.entity.ParkInfo;
+import com.sparta.parknav.parking.entity.ParkOperInfo;
+import com.sparta.parknav.parking.repository.ParkInfoRepository;
+import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,14 +34,16 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MgtService {
 
+    private final RedisLockRepository redisLockRepository;
     private final ParkBookingInfoRepository parkBookingInfoRepository;
     private final ParkInfoRepository parkInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
 
     @Transactional
-    public ApiResponseDto<CarInResponseDto> enter(CarNumRequestDto requestDto, Admin user) {
+    public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
         // SCENARIO ENTER 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
@@ -57,33 +58,47 @@ public class MgtService {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
 
-        // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
-        // SCENARIO ENTER 4
-        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
-        List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
-        LocalDateTime now = LocalDateTime.now();
-
-        // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
-        int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
-        // 예약된 차량 찾기
-        ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
-        // 주차 구획수
-        int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
-        // 이 주차장에 현재 입차되어있는 차량 수
-        int mgtNum = getMgtNum(parkMgtInfo);
-
-        if (bookingNowCnt + mgtNum >= cmprtCoNum) {
-            throw new CustomException(ErrorType.NOT_PARKING_SPACE);
+        while (!redisLockRepository.lock(requestDto.getParkId())) {
+            // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
+            }
         }
+        try {
+            // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
+            // SCENARIO ENTER 4
+            List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
+            List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
+            LocalDateTime now = LocalDateTime.now();
 
-        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
-        parkMgtInfoRepository.save(mgtSave);
+            // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
+            int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
+            // 예약된 차량 찾기
+            ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
+            // 주차 구획수
+            int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
+            // 이 주차장에 현재 입차되어있는 차량 수
+            int mgtNum = getMgtNum(parkMgtInfo);
+            if (bookingNowCnt + mgtNum >= cmprtCoNum) {
+                throw new CustomException(ErrorType.NOT_PARKING_SPACE);
+            }
 
-        return ResponseUtils.ok(CarInResponseDto.of(requestDto.getCarNum(), now), MsgType.ENTER_SUCCESSFULLY);
+            ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
+            parkMgtInfoRepository.save(mgtSave);
+
+            return CarInResponseDto.of(requestDto.getCarNum(), now);
+
+        } finally {
+            // Lock 해제
+            redisLockRepository.unlock(requestDto.getParkId());
+        }
     }
 
     @Transactional
-    public ApiResponseDto<CarOutResponseDto> exit(CarNumRequestDto requestDto, Admin user) {
+    public CarOutResponseDto exit(CarNumRequestDto requestDto, Admin user) {
         // SCENARIO EXIT 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
@@ -106,11 +121,12 @@ public class MgtService {
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
         parkMgtInfo.update(charge, now);
-        return ResponseUtils.ok(CarOutResponseDto.of(charge, now), MsgType.EXIT_SUCCESSFULLY);
+        return CarOutResponseDto.of(charge, now);
     }
 
     @Transactional
-    public ApiResponseDto<ParkMgtListResponseDto> mgtPage(Admin admin, int page, int size) {
+    public ParkMgtListResponseDto mgtPage(Admin admin, int page, int size) {
+
         Pageable pageable = PageRequest.of(page, size);
         Optional<ParkInfo> parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId());
         String parkName = parkInfo.get().getName();
@@ -118,12 +134,13 @@ public class MgtService {
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
                 .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
                 .collect(Collectors.toList());
+
         Page page1 = new PageImpl(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements());
-        ParkMgtListResponseDto parkMgtListResponseDto = ParkMgtListResponseDto.of(page1, parkName);
-        return ResponseUtils.ok(parkMgtListResponseDto, MsgType.SEARCH_SUCCESSFULLY);
+        return ParkMgtListResponseDto.of(page1, parkName);
     }
 
     private static ParkBookingInfo getParkBookingInfo(CarNumRequestDto requestDto, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {
+
         ParkBookingInfo parkBookingNow = null;
         for (ParkBookingInfo p : parkBookingInfo) {
             if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
@@ -154,7 +171,7 @@ public class MgtService {
             if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
                 for (ParkMgtInfo m : parkMgtInfo) {
                     // 예약차가 입차해있고, 입차된 차량의 예약번호와 같을 때
-                    if(Objects.equals(m.getCarNum(), p.getCarNum()) && Objects.equals(m.getParkBookingInfo().getId(), p.getId())) {
+                    if (Objects.equals(m.getCarNum(), p.getCarNum()) && Objects.equals(m.getParkBookingInfo().getId(), p.getId())) {
                         bookingNowCnt--;
                     }
                 }
