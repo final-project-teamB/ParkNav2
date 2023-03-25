@@ -1,6 +1,5 @@
 package com.sparta.parknav.parking.dto;
 
-import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import lombok.Builder;
 import lombok.Getter;

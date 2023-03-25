@@ -6,7 +6,6 @@ import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.dto.*;
-import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.entity.ParkType;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
