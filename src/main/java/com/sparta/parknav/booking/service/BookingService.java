@@ -2,9 +2,7 @@ package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
-import com.sparta.parknav._global.response.ApiResponseDto;
 import com.sparta.parknav._global.response.MsgType;
-import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
 import com.sparta.parknav.booking.dto.BookingResponseDto;
@@ -47,7 +45,7 @@ public class BookingService {
     private final ParkInfoRepository parkInfoRepository;
     private final CarRepository carRepository;
 
-    public ApiResponseDto<BookingInfoResponseDto> getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
+    public BookingInfoResponseDto getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(id).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
@@ -85,10 +83,10 @@ public class BookingService {
 
         BookingInfoResponseDto responseDto = BookingInfoResponseDto.of(available, booking, charge);
 
-        return ResponseUtils.ok(responseDto, MsgType.SEARCH_SUCCESSFULLY);
+        return responseDto;
     }
 
-    public ApiResponseDto<BookingResponseDto> bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
+    public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
         // SCENARIO BOOKING 1
         if (requestDto.getStartDate().equals(requestDto.getEndDate())||requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
@@ -113,11 +111,11 @@ public class BookingService {
 
         ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
 
-        return ResponseUtils.ok(BookingResponseDto.of(parkBookingInfoRepository.save(bookingInfo).getId()), MsgType.BOOKING_SUCCESSFULLY);
+        return BookingResponseDto.of(parkBookingInfoRepository.save(bookingInfo).getId());
     }
 
     @Transactional
-    public ApiResponseDto<Void> cancelBooking(Long id, User user) {
+    public void cancelBooking(Long id, User user) {
 
         ParkBookingInfo bookingInfo = parkBookingInfoRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_BOOKING)
@@ -128,11 +126,9 @@ public class BookingService {
         }
 
         parkBookingInfoRepository.deleteById(id);
-
-        return ResponseUtils.ok(MsgType.CANCEL_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<Page<MyBookingResponseDto>> getMyBooking(User user, int page, int size) {
+    public Page<MyBookingResponseDto> getMyBooking(User user, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -167,7 +163,7 @@ public class BookingService {
             responseDtoList.add(responseDto);
         }
 
-        return ResponseUtils.ok(new PageImpl<>(responseDtoList,pageable,bookingInfoList.getTotalElements()), MsgType.SEARCH_SUCCESSFULLY);
+        return new PageImpl<>(responseDtoList,pageable,bookingInfoList.getTotalElements());
     }
 
 
