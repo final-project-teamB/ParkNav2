@@ -29,7 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public ApiResponseDto<Void> signup(SignupRequestDto requestDto) {
+    public void signup(SignupRequestDto requestDto) {
 
         String encodePw = passwordEncoder.encode(requestDto.getPassword());
 
@@ -40,11 +40,9 @@ public class UserService {
 
         User user = User.of(requestDto.getUserId(), encodePw);
         userRepository.save(user);
-
-        return ResponseUtils.ok(MsgType.SIGNUP_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<Void> login(LoginRequestDto requestDto, HttpServletResponse response) {
+    public void login(LoginRequestDto requestDto, HttpServletResponse response) {
 
         String userId = requestDto.getUserId();
         String password = requestDto.getPassword();
@@ -59,11 +57,9 @@ public class UserService {
 
         String token = jwtUtil.createToken(user.getUserId());
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-
-        return ResponseUtils.ok(MsgType.LOGIN_SUCCESSFULLY);
     }
 
-    public ApiResponseDto<Void> loginAdmin(LoginRequestDto requestDto, HttpServletResponse response) {
+    public void loginAdmin(LoginRequestDto requestDto, HttpServletResponse response) {
 
         String adminId = requestDto.getUserId();
         String password = requestDto.getPassword();
@@ -78,7 +74,5 @@ public class UserService {
 
         String token = jwtUtil.createToken(admin.getAdminId());
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-
-        return ResponseUtils.ok(MsgType.LOGIN_SUCCESSFULLY);
     }
 }
