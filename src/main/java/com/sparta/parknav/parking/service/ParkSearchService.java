@@ -22,7 +22,7 @@ public class ParkSearchService {
     private final KakaoMapService kakaoMapService;
     private final ParkInfoRepository parkInfoRepository;
 
-    public ApiResponseDto<ParkSearchResponseDto> searchPark(ParkSearchRequestDto parkSearchRequestDto) {
+    public ParkSearchResponseDto searchPark(ParkSearchRequestDto parkSearchRequestDto) {
         String lo, la, placeName;
         List<ParkOperInfoDto> parkOperInfoDtos = new ArrayList<>();
         ParkSearchResponseDto parkSearchResponseDto = null;
@@ -33,7 +33,7 @@ public class ParkSearchService {
             KakaoSearchDto kakaoSearchDto = kakaoMapService.getKakaoSearch(parkSearchRequestDto.getKeyword());
             //결과가 없을경우 리턴
             if (kakaoSearchDto.getMeta().getTotal_count() == 0) {
-                return ResponseUtils.ok(parkSearchResponseDto, MsgType.SEARCH_SUCCESSFULLY);
+                return parkSearchResponseDto;
             }
             List<KakaoSearchDocumentsDto> kakaoSearchDocumentsDto = kakaoSearchDto.getDocuments();
             lo = kakaoSearchDocumentsDto.get(0).getX();
@@ -69,6 +69,6 @@ public class ParkSearchService {
                 parkOperInfoDtos.add(parkOperInfoDto);
             }
         }
-        return ResponseUtils.ok(ParkSearchResponseDto.of(la, lo, placeName, parkOperInfoDtos), MsgType.SEARCH_SUCCESSFULLY);
+        return ParkSearchResponseDto.of(la, lo, placeName, parkOperInfoDtos);
     }
 }

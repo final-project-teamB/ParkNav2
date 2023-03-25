@@ -1,6 +1,8 @@
 package com.sparta.parknav.user.controller;
 
 import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.MsgType;
+import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.user.dto.LoginRequestDto;
 import com.sparta.parknav.user.dto.SignupRequestDto;
 import com.sparta.parknav.user.service.UserService;
@@ -22,17 +24,21 @@ public class UserController {
 
     @PostMapping("/users/signup")
     public ApiResponseDto<Void> signup(@Valid @RequestBody SignupRequestDto requestDto) {
-        return userService.signup(requestDto);
+        userService.signup(requestDto);
+        return ResponseUtils.ok(MsgType.SIGNUP_SUCCESSFULLY);
     }
 
     @PostMapping("/users/login")
     public ApiResponseDto<Void> login(@RequestBody LoginRequestDto requestDto, HttpServletResponse response) {
-        return userService.login(requestDto, response);
+        userService.login(requestDto, response);
+        return ResponseUtils.ok(MsgType.LOGIN_SUCCESSFULLY);
     }
 
     @PostMapping("/admins/login")
     public ApiResponseDto<Void> loginAdmin(@RequestBody LoginRequestDto requestDto, HttpServletResponse response) {
-        return userService.loginAdmin(requestDto, response);
+        userService.loginAdmin(requestDto, response);
+        return ResponseUtils.ok(MsgType.LOGIN_SUCCESSFULLY);
+
     }
 
 }
