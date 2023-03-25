@@ -36,6 +36,7 @@ public class BookingController {
     @DeleteMapping("/{booking-id}")
     public ApiResponseDto<Void> cancelBooking(@PathVariable(name = "booking-id") Long id,
                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        bookingService.cancelBooking(id, userDetails.getUser());
         return ResponseUtils.ok(MsgType.CANCEL_SUCCESSFULLY);
     }
 
