@@ -1,6 +1,8 @@
 package com.sparta.parknav.parking.controller;
 
 import com.sparta.parknav._global.response.ApiResponseDto;
+import com.sparta.parknav._global.response.MsgType;
+import com.sparta.parknav._global.response.ResponseUtils;
 import com.sparta.parknav.parking.dto.ParkSearchResponseDto;
 import com.sparta.parknav.parking.dto.ParkSearchRequestDto;
 import com.sparta.parknav.parking.service.ParkSearchService;
@@ -33,7 +35,7 @@ public class ParkSearchController {
     @GetMapping("/api/parks")
     public ApiResponseDto<ParkSearchResponseDto> serchPark(ParkSearchRequestDto parkSearchRequestDto){
 
-        return parkSearchService.searchPark(parkSearchRequestDto);
+        return ResponseUtils.ok(parkSearchService.searchPark(parkSearchRequestDto), MsgType.SEARCH_SUCCESSFULLY);
 
     }
 }
