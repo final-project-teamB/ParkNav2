@@ -1,6 +1,5 @@
 package com.sparta.parknav.parking.dto;
 
-import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +27,7 @@ public class ParkOperInfoDto {
     private int totCharge;
 
     @Builder
-    private ParkOperInfoDto(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int totCharge) {
+    private ParkOperInfoDto(ParkOperInfo parkOperInfo, int totCharge) {
         this.id = parkOperInfo.getParkInfo().getId();
         this.chargeAditUnitChrg =  parkOperInfo.getChargeAditUnitChrg();
         this.chargeAditUnitTime = parkOperInfo.getChargeAditUnitTime();
@@ -42,18 +41,17 @@ public class ParkOperInfoDto {
         this.sunOpen = parkOperInfo.getSunOpen();
         this.weekdayClose = parkOperInfo.getWeekdayClose();
         this.weekdayOpen = parkOperInfo.getWeekdayOpen();
-        this.address1 = parkInfo.getAddress1();
-        this.address2 = parkInfo.getAddress2();
-        this.la = parkInfo.getLa();
-        this.lo = parkInfo.getLo();
-        this.name = parkInfo.getName();
+        this.address1 = parkOperInfo.getParkInfo().getAddress1();
+        this.address2 = parkOperInfo.getParkInfo().getAddress2();
+        this.la = parkOperInfo.getParkInfo().getLa();
+        this.lo = parkOperInfo.getParkInfo().getLo();
+        this.name = parkOperInfo.getParkInfo().getName();
         this.totCharge = totCharge;
     }
 
-    public static ParkOperInfoDto of(ParkOperInfo parkOperInfo, ParkInfo parkInfo, int totCharge){
+    public static ParkOperInfoDto of(ParkOperInfo parkOperInfo, int totCharge){
         return ParkOperInfoDto.builder()
                 .parkOperInfo(parkOperInfo)
-                .parkInfo(parkInfo)
                 .totCharge(totCharge)
                 .build();
     }
