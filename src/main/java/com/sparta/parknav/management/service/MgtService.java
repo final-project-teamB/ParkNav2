@@ -88,14 +88,14 @@ public class MgtService {
             NomalBookingCarSpaceInfo useNomalBookingCarSpaceInfo = useNomalBookingCarSpaceInfo(parkMgtInfo);
             // 들어온 차량정보가 예약한 차량인지 여부를 판단
             Optional<ParkBookingInfo> enterCarBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(requestDto.getParkId(), requestDto.getCarNum(), now, now);
-            if (enterCarBookingInfo.isPresent()){
+            if (enterCarBookingInfo.isPresent()) {
                 // 예약이 꽉 찼을경우
-                if (nomalBookingCarSpaceInfo.getBookingCarSpace() < useNomalBookingCarSpaceInfo.getBookingCarSpace()+1){
+                if (nomalBookingCarSpaceInfo.getBookingCarSpace() < useNomalBookingCarSpaceInfo.getBookingCarSpace() + 1) {
                     throw new CustomException(ErrorType.NOT_PARKING_SPACE);
                 }
-            }else{
+            } else {
                 // 예약이 꽉 찼을경우
-                if (nomalBookingCarSpaceInfo.getNomalCarSpace() < useNomalBookingCarSpaceInfo.getNomalCarSpace()+1){
+                if (nomalBookingCarSpaceInfo.getNomalCarSpace() < useNomalBookingCarSpaceInfo.getNomalCarSpace() + 1) {
                     throw new CustomException(ErrorType.NOT_PARKING_SPACE);
                 }
             }
@@ -210,22 +210,22 @@ public class MgtService {
         return mgtNum;
     }
 
-    private static NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo(int cmprtCoNum){
-        int nomalCarSpace = cmprtCoNum%2==1?(cmprtCoNum/2)+1:cmprtCoNum/2;
-        int bookingCarSpace = cmprtCoNum/2;
+    private static NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo(int cmprtCoNum) {
+        int nomalCarSpace = cmprtCoNum % 2 == 1 ? (cmprtCoNum / 2) + 1 : cmprtCoNum / 2;
+        int bookingCarSpace = cmprtCoNum / 2;
         return NomalBookingCarSpaceInfo.of(nomalCarSpace, bookingCarSpace);
     }
 
     private static NomalBookingCarSpaceInfo useNomalBookingCarSpaceInfo(List<ParkMgtInfo> parkMgtInfos) {
-        int nomalCarSpace = 0 ;
-        int bookingCarSpace = 0 ;
-        for (ParkMgtInfo parkMgtInfo : parkMgtInfos){
-            if (parkMgtInfo.getExitTime() == null && parkMgtInfo.getParkBookingInfo() == null){
+        int nomalCarSpace = 0;
+        int bookingCarSpace = 0;
+        for (ParkMgtInfo parkMgtInfo : parkMgtInfos) {
+            if (parkMgtInfo.getExitTime() == null && parkMgtInfo.getParkBookingInfo() == null) {
                 nomalCarSpace++;
-            }else if (parkMgtInfo.getExitTime() == null){
+            } else if (parkMgtInfo.getExitTime() == null) {
                 bookingCarSpace++;
             }
         }
-        return NomalBookingCarSpaceInfo.of(nomalCarSpace,bookingCarSpace);
+        return NomalBookingCarSpaceInfo.of(nomalCarSpace, bookingCarSpace);
     }
 }
