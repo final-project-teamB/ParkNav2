@@ -25,4 +25,6 @@ public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
     Optional<ParkMgtInfo> findByParkBookingInfoId(Long id);
 
     int countByParkBookingInfoIn(List<ParkBookingInfo> bookingInfoList);
+
+    Boolean existsByParkBookingInfoIdAndExitTimeIsNotNull(Long bookingInfoId);
 }

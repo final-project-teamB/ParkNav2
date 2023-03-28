@@ -98,7 +98,7 @@ public class BookingService {
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
         ); // 2~5 , 1~3
         // SCENARIO BOOKING 4
-        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndUserId(parkInfo.getId(), user.getId());
+        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndUserIdAndCarNum(parkInfo.getId(), user.getId(), car.getCarNum());
         for (ParkBookingInfo p : parkBookingInfo) {
             if (p != null) {
                 if (requestDto.getStartDate().isBefore(p.getEndTime())&&requestDto.getEndDate().isAfter(p.getStartTime())) {
@@ -150,8 +150,8 @@ public class BookingService {
                 status = now.isBefore(p.getEndTime()) ? StatusType.UNUSED : StatusType.EXPIRED;
             }
 
-            // 예약내역으로 주차 출차까지 한 경우, 요금계산을 위해 실제 사용시간을 구한다.
-            if (parkMgtInfo.isPresent() && parkMgtInfo.get().getExitTime() != null) {
+            // 예약시간보다 오래 주차하고 출차한 경우, 요금계산을 위해 실제 사용시간을 구한다. 예약시간 이전에 출차했다면 예약한 시간만큼 요금을 받는다.
+            if (parkMgtInfo.isPresent() && parkMgtInfo.get().getExitTime() != null && parkMgtInfo.get().getExitTime().isAfter(p.getEndTime())) {
                 minutes = Duration.between(parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()).toMinutes();
             }
 
