@@ -31,9 +31,10 @@ public class ParkSearchController {
     public String mypage(){
         return "mypage";
     }
+
     @ResponseBody
     @GetMapping("/api/parks")
-    public ApiResponseDto<ParkSearchResponseDto> serchPark(ParkSearchRequestDto parkSearchRequestDto){
+    public ApiResponseDto<ParkSearchResponseDto> searchPark(ParkSearchRequestDto parkSearchRequestDto){
 
         return ResponseUtils.ok(parkSearchService.searchPark(parkSearchRequestDto), MsgType.SEARCH_SUCCESSFULLY);
 
