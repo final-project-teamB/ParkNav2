@@ -19,5 +19,7 @@ public interface ParkInfoRepository extends JpaRepository<ParkInfo,Long> {
 
     List<ParkInfo> findAllByIdBetween(Long firstParkInfoId, Long lastParkInfoId);
 
+    List<ParkInfo> findByNameContains(String keyword);
+
 }
 

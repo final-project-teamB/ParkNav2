@@ -79,6 +79,11 @@ public class MgtService {
             int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
             // 예약된 차량 찾기
             ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
+            // 이미 예약내역으로 입차, 출차를 마친 경우는 예약시간 내 입차해도 일반차량으로 분류된다.
+            // SCENARIO ENTER 6
+            if (parkBookingNow != null && parkMgtInfoRepository.existsByParkBookingInfoIdAndExitTimeIsNotNull(parkBookingNow.getId())) {
+                parkBookingNow = null;
+            }
             // 주차 구획수
             int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
             // 일반, 예약구역 개수를 나눔
