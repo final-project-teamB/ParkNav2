@@ -25,9 +25,10 @@ public class ParkOperInfoDto {
     private String lo;
     private String name;
     private int totCharge;
+    private String available;
 
     @Builder
-    private ParkOperInfoDto(ParkOperInfo parkOperInfo, int totCharge) {
+    private ParkOperInfoDto(ParkOperInfo parkOperInfo, int totCharge, String available) {
         this.id = parkOperInfo.getParkInfo().getId();
         this.chargeAditUnitChrg =  parkOperInfo.getChargeAditUnitChrg();
         this.chargeAditUnitTime = parkOperInfo.getChargeAditUnitTime();
@@ -47,12 +48,14 @@ public class ParkOperInfoDto {
         this.lo = parkOperInfo.getParkInfo().getLo();
         this.name = parkOperInfo.getParkInfo().getName();
         this.totCharge = totCharge;
+        this.available = available;
     }
 
-    public static ParkOperInfoDto of(ParkOperInfo parkOperInfo, int totCharge){
+    public static ParkOperInfoDto of(ParkOperInfo parkOperInfo, int totCharge, String available){
         return ParkOperInfoDto.builder()
                 .parkOperInfo(parkOperInfo)
                 .totCharge(totCharge)
+                .available(available)
                 .build();
     }
 }

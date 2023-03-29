@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +52,7 @@ public class BookingService {
 
         String available;
         // 현재 운영여부 확인
-        if (checkOperation(LocalDateTime.now(), parkOperInfo)) {
+        if (OperationChecking.checkOperation(LocalDateTime.now(), parkOperInfo)) {
             // 현재 주차 가능 대수 = 주차 가능 대수 - 출차시간이 없는 현황 수(주차중인 경우)
             available = (parkOperInfo.getCmprtCo() - parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(id)) + "대";
         } else {
@@ -63,7 +62,7 @@ public class BookingService {
 
         String booking;
         // 선택한 날짜 운영여부 확인
-        if (checkOperation(requestDto.getStartDate(), parkOperInfo) && checkOperation(requestDto.getEndDate(), parkOperInfo)) {
+        if (OperationChecking.checkOperation(requestDto.getStartDate(), parkOperInfo) && OperationChecking.checkOperation(requestDto.getEndDate(), parkOperInfo)) {
             // 선택시간 예약 차량 = 기존 예약 중에서 사용자가 선택한 시간 사이에 예약 시작 시간이 있거나 예약 끝나는 시간이 있는 경우
             List<ParkBookingInfo> selectedTimeBooking = parkBookingInfoRepository.getSelectedTimeBookingList(id, requestDto.getStartDate(), requestDto.getEndDate());
             // 예약차량 중 현재 입차한 차량 수
@@ -162,41 +161,6 @@ public class BookingService {
         }
 
         return new PageImpl<>(responseDtoList,pageable,bookingInfoList.getTotalElements());
-    }
-
-
-    private boolean checkOperation(LocalDateTime selectedTime, ParkOperInfo parkOperInfo) {
-
-        LocalTime openTime;
-        LocalTime closeTime;
-
-        // selectedTime 의 요일에 따른 운영시간 체크
-        switch(selectedTime.getDayOfWeek()) {
-            case SATURDAY -> {
-                openTime = LocalTime.parse(parkOperInfo.getSatOpen());
-                closeTime = LocalTime.parse(parkOperInfo.getSatClose());
-            }
-            case SUNDAY -> {
-                openTime = LocalTime.parse(parkOperInfo.getSunOpen());
-                closeTime = LocalTime.parse(parkOperInfo.getSunClose());
-            }
-            default -> {
-                openTime = LocalTime.parse(parkOperInfo.getWeekdayOpen());
-                closeTime = LocalTime.parse(parkOperInfo.getWeekdayClose());
-            }
-        }
-
-        // 시작시간, 종료시간이 00:00시라면 해당일엔 운영하지 않음
-        if (openTime.equals(LocalTime.of(0, 0)) && closeTime.equals(LocalTime.of(0, 0))) {
-            return false;
-        }
-
-        // selectedTime 이 운영시작시간 전이거나 운영종료시간 후인 경우 -> 선택한 시간은 운영 안함
-        if (selectedTime.toLocalTime().isBefore(openTime) || (!closeTime.equals(LocalTime.of(0, 0)) && selectedTime.toLocalTime().isAfter(closeTime))) {
-            return false;
-        }
-
-        return true;
     }
 
 }

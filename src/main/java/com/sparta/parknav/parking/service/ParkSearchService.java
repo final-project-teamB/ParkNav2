@@ -1,6 +1,9 @@
 package com.sparta.parknav.parking.service;
 
 import com.sparta.parknav._global.data.KakaoMapService;
+import com.sparta.parknav._global.response.MsgType;
+import com.sparta.parknav.booking.service.OperationChecking;
+import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.dto.*;
 import com.sparta.parknav.parking.entity.ParkInfo;
@@ -11,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +24,7 @@ public class ParkSearchService {
 
     private final KakaoMapService kakaoMapService;
     private final ParkInfoRepository parkInfoRepository;
+    private final ParkMgtInfoRepository parkMgtInfoRepository;
 
     public ParkSearchResponseDto searchPark(ParkSearchRequestDto parkSearchRequestDto) {
         String lo = null, la = null, placeName = null;
@@ -82,7 +87,17 @@ public class ParkSearchService {
         }
 
         for (ParkOperInfo park : result) {
-            ParkOperInfoDto parkOperInfoDto = ParkOperInfoDto.of(park, ParkingFeeCalculator.calculateParkingFee(parkSearchRequestDto.getParktime() * 60L, park));
+            String available;
+            // 현재 운영여부 확인
+            if (OperationChecking.checkOperation(LocalDateTime.now(), park)) {
+                // 현재 주차 가능 대수 = 주차 가능 대수 - 출차시간이 없는 현황 수(주차중인 경우)
+                available = (park.getCmprtCo() - parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(park.getId())) + "대";
+            } else {
+                // 운영중이 아니라면 메시지 출력
+                available = MsgType.NOT_OPEN_NOW.getMsg();
+            }
+
+            ParkOperInfoDto parkOperInfoDto = ParkOperInfoDto.of(park, ParkingFeeCalculator.calculateParkingFee(parkSearchRequestDto.getParktime() * 60L, park), available);
             if (parkOperInfoDto.getTotCharge() <= parkSearchRequestDto.getCharge()) {
                 parkOperInfoDtos.add(parkOperInfoDto);
             }
