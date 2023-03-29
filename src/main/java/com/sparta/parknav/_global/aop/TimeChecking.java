@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class TimeChecking {
     private long beforeTime = 0L;
     private long afterTime = 0L;
+
     // 해당 경로의 모든 메서드 실행시 aop 동작, nochecking annotation을 해당 경로의 메서드에 추가시 aop 동작x
     @Before("execution(* com..service..*(..))")
     public void beforeMethod() {
@@ -24,6 +25,6 @@ public class TimeChecking {
     @After("execution(* com..service..*(..))")
     public void afterMethod() {
         afterTime = System.currentTimeMillis();
-        log.info("코드 실행 시간 = {}",(afterTime-beforeTime)/1000);
+        log.info("코드 실행 시간 = {}", (afterTime - beforeTime) / 1000);
     }
 }
