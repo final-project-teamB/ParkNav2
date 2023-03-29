@@ -406,12 +406,12 @@ function axiosMapRenderFromKakao(url) {
             map = new kakao.maps.Map(mapContainer, mapOption);
 
             // 마커 이미지 생성
-            var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(50, 50), {
-                offset: new kakao.maps.Point(25, 26)
+            var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(25, 25), {
+                offset: new kakao.maps.Point(10, 10)
             });
             //중심 좌표 마커이미지 생성
-            var centerMarkerImage = new kakao.maps.MarkerImage('/img/clocation.png', new kakao.maps.Size(50, 50), {
-                offset: new kakao.maps.Point(25, 26)
+            var centerMarkerImage = new kakao.maps.MarkerImage('/img/clocation.png', new kakao.maps.Size(45, 45), {
+                offset: new kakao.maps.Point(20, 21)
             });
             // 결과값이 한 화면에 보이게 LatLngBounds 객체 생성
             var bounds = new kakao.maps.LatLngBounds();
@@ -458,6 +458,7 @@ function axiosMapRenderFromKakao(url) {
                         $("#parking-lot-operation-hours").attr("value", item.weekdayOpen + " ~ " + item.weekdayClose);
                         $("#parking-lot-basic-price").attr("value", item.chargeBsTime + "분 " + item.chargeBsChrg + "원");
                         $("#parking-lot-additional-price").attr("value", item.chargeAditUnitTime + "분당 " + item.chargeAditUnitChrg + "원");
+                        $("#parking-lot-available").attr("value", item.available);
                         $("#weekOpen").text("평일: " + item.weekdayOpen + " ~ " + item.weekdayClose);
                         $("#satOpen").text("토요일: " + item.satOpen + " ~ " + item.satClose);
                         $("#sunOpen").text("휴일: " + item.sunOpen + " ~ " + item.sunClose);
@@ -468,5 +469,6 @@ function axiosMapRenderFromKakao(url) {
             }
             //bound를 셋팅하여 결과가 한 화면에 보이게 설정
             map.setBounds(bounds);
+            map.setLevel(map.getLevel() - 3);
         });
 }

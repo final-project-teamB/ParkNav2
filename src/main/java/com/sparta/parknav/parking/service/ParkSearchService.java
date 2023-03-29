@@ -81,9 +81,9 @@ public class ParkSearchService {
         List<ParkOperInfo> result;
         //주차장 유형에 따라 쿼리를 다르게 지정
         if (parkSearchRequestDto.getType() == 1) {
-            result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 3000);
+            result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 2000);
         } else {
-            result = parkInfoRepository.findParkInfoWithOperInfoAndType(lo, la, 3000, ParkType.fromValue(parkSearchRequestDto.getType()));
+            result = parkInfoRepository.findParkInfoWithOperInfoAndType(lo, la, 2000, ParkType.fromValue(parkSearchRequestDto.getType()));
         }
 
         for (ParkOperInfo park : result) {
@@ -91,7 +91,7 @@ public class ParkSearchService {
             // 현재 운영여부 확인
             if (OperationChecking.checkOperation(LocalDateTime.now(), park)) {
                 // 현재 주차 가능 대수 = 주차 가능 대수 - 출차시간이 없는 현황 수(주차중인 경우)
-                available = (park.getCmprtCo() - parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(park.getId())) + "대";
+                available = (park.getCmprtCo() - parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(park.getParkInfo().getId())) + "대";
             } else {
                 // 운영중이 아니라면 메시지 출력
                 available = MsgType.NOT_OPEN_NOW.getMsg();
