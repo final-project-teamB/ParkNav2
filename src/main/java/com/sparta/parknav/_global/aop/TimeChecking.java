@@ -1,0 +1,28 @@
+package com.sparta.parknav._global.aop;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class TimeChecking {
+    private long beforeTime = 0L;
+    private long afterTime = 0L;
+    @Before("execution(* com..service..*(..))")
+    public void beforeMethod() {
+        beforeTime = System.currentTimeMillis();
+        log.info("코드 실행 이전");
+    }
+
+    @After("execution(* com..service..*(..))")
+    public void afterMethod() {
+        afterTime = System.currentTimeMillis();
+        log.info("코드 실행 시간 = {}",(afterTime-beforeTime)/1000);
+    }
+}
