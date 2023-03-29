@@ -5,8 +5,8 @@ import com.sparta.parknav._global.exception.ErrorType;
 
 public enum ParkType {
     ALL("전체"),
-    PUBLIC_PARKING("공영주차장"),
-    PARKING("주차장");
+    PUBLIC_PARKING("공영"),
+    PARKING("민영");
 
     private final String value;
     ParkType(String value) {
