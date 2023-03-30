@@ -80,11 +80,9 @@ public class ParkSearchService {
         //lo,la 값을 기준으로 주변 3키로미터 이내의 주차장 검색
         List<ParkOperInfo> result;
         //주차장 유형에 따라 쿼리를 다르게 지정
-        if (parkSearchRequestDto.getType() == 1) {
-            result = parkInfoRepository.findParkInfoWithOperInfo(lo, la, 2000);
-        } else {
-            result = parkInfoRepository.findParkInfoWithOperInfoAndType(lo, la, 2000, ParkType.fromValue(parkSearchRequestDto.getType()));
-        }
+
+            result = parkInfoRepository.findParkInfoWithOperInfoAndTypeQueryDsl(lo, la, 2000, ParkType.fromValue(parkSearchRequestDto.getType()));
+
 
         for (ParkOperInfo park : result) {
             String available;
