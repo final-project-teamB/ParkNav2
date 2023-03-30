@@ -392,14 +392,13 @@ function axiosMapRenderFromKakao(url) {
                 alert("결과가 없습니다");
             }
 
-
             // 지도를 표시할 div
             var mapContainer = document.getElementById('map'),
                 mapOption = {
                     // 지도의 중심 좌표
                     center: new kakao.maps.LatLng(data[0].la, data[0].lo),
                     // 지도의 확대 레벨
-                    level: 1
+                    level: 5
                 };
 
             // 지도 생성 및 객체 리턴
@@ -413,10 +412,7 @@ function axiosMapRenderFromKakao(url) {
             var centerMarkerImage = new kakao.maps.MarkerImage('/img/clocation.png', new kakao.maps.Size(45, 45), {
                 offset: new kakao.maps.Point(20, 21)
             });
-            // 결과값이 한 화면에 보이게 LatLngBounds 객체 생성
-            var bounds = new kakao.maps.LatLngBounds();
             // 받아온 데이터를 이용하여 마커 생성
-
             var marker = new kakao.maps.Marker({
                 // 마커를 표시할 지도 객체
                 map: map,
@@ -427,12 +423,11 @@ function axiosMapRenderFromKakao(url) {
                 // 마커 이미지 설정
                 image: centerMarkerImage
             });
-            bounds.extend(new kakao.maps.LatLng(centerLa, centerLo));
+            var markers = []
+            var i=0;
             if (result) {
                 data.forEach(function (item) {
-                    //bound에 좌표값 추가
-                    bounds.extend(new kakao.maps.LatLng(item.la, item.lo));
-                    var marker = new kakao.maps.Marker({
+                    markers.push(new kakao.maps.Marker({
                         // 마커를 표시할 지도 객체
                         map: map,
                         // 마커의 위치 좌표
@@ -441,9 +436,8 @@ function axiosMapRenderFromKakao(url) {
                         title: item.name,
                         // 마커 이미지 설정
                         image: markerImage
-                    });
-
-                    //클릭 이벤트 리스너가 작동되면 해당 주차장의 이름을 input 요소에 표시
+                    }));
+                                       //클릭 이벤트 리스너가 작동되면 해당 주차장의 이름을 input 요소에 표시
                     var handleClickMarker = function () {
                         $("#parking-lot-name").attr("value", item.name);
                         //도로명주소가 없을경우 지번주소로 입력
@@ -464,11 +458,23 @@ function axiosMapRenderFromKakao(url) {
                         $("#sunOpen").text("휴일: " + item.sunOpen + " ~ " + item.sunClose);
                     };
                     // 마커에 클릭 이벤트 리스너 추가
-                    kakao.maps.event.addListener(marker, 'click', handleClickMarker);
+                    kakao.maps.event.addListener(markers[i++], 'click', handleClickMarker);
                 });
             }
-            //bound를 셋팅하여 결과가 한 화면에 보이게 설정
-            map.setBounds(bounds);
-            map.setLevel(map.getLevel() - 3);
+            // 클러스터러를 생성합니다.
+            var clusterer = new kakao.maps.MarkerClusterer({
+                map: map,
+                markers: markers,
+                gridSize: 50,
+                averageCenter: true,
+                minLevel: 4
+            });
+            // 클러스터 클릭 이벤트를 추가합니다.
+            kakao.maps.event.addListener(clusterer, 'clusterclick', function(cluster) {
+                var level = map.getLevel()-1;
+                map.setLevel(level, {anchor: cluster.getCenter()});
+
+            });
+
         });
 }
