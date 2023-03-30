@@ -23,7 +23,15 @@ public class ParkInfoRepositoryImpl implements ParkInfoRepositoryCustom {
         Double longitude = Double.parseDouble(x);
         Double latitude = Double.parseDouble(y);
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(Expressions.booleanTemplate("ST_Distance_Sphere(Point({0}, {1}), Point({2}, {3})) < {4}", longitude, latitude, qParkInfo.lo, qParkInfo.la, distance));
+        builder.and(Expressions.booleanTemplate(
+                "(6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({4})) * sin(radians({5})))) < {6}",
+                latitude,
+                qParkInfo.la,
+                qParkInfo.lo,
+                longitude, latitude,
+                qParkInfo.la,
+                distance
+        ));
 
         if (!type.equals("전체")) {
             builder.and(qParkOperInfo.parkCtgy.eq(type));
@@ -31,8 +39,16 @@ public class ParkInfoRepositoryImpl implements ParkInfoRepositoryCustom {
 
         return jpaQueryFactory.selectFrom(qParkOperInfo)
                 .join(qParkOperInfo.parkInfo, qParkInfo)
+                .fetchJoin()
                 .where(builder)
-                .orderBy(Expressions.stringTemplate("ST_Distance_Sphere(Point({0}, {1}), Point({2}, {3}))", longitude, latitude, qParkInfo.lo, qParkInfo.la).asc())
+                .orderBy(Expressions.booleanTemplate(
+                        "(6371 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({4})) * sin(radians({5}))))",
+                        latitude,
+                        qParkInfo.la,
+                        qParkInfo.lo,
+                        longitude, latitude,
+                        qParkInfo.la
+                ).asc())
                 .fetch();
     }
 
