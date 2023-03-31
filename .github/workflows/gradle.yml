@@ -31,6 +31,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
         
+    ## 코드리뷰  
+    - name: Code Review
+      uses: anc95/ChatGPT-CodeReview@main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        LANGUAGE: Korean
+    
     # push 할때마다 다시 gradle을 install하지 않기 위한 설정
     # 해당 프로젝트의 gradle값이 변경됐을 경우에만 install
     - name: Cache Gradle packages
@@ -80,15 +88,6 @@ jobs:
         chmod +x ./gradlew
         
         ./gradlew build
-      
-      ## 코드리뷰  
-    - name: Code Review
-      uses: anc95/ChatGPT-CodeReview@main
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        LANGUAGE: Korean
-
           
       # Spring 어플리케이션 Docker Image 빌드
       # CD 시작 
