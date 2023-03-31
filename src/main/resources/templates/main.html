@@ -7,7 +7,8 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>Title</title>
     <!-- Map API -->
-    <script th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?'+'appkey='+${@environment.getProperty('kakao.api.mapkey')}}"></script>
+    <script th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?'+'appkey='+${@environment.getProperty('kakao.api.mapkey')}+'&libraries=clusterer'}"></script>
+
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -90,6 +91,12 @@
                                                placeholder="기본 요금"
                                                readonly>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="parking-lot-price">예상 요금:</label>
+                                        <input type="text" class="form-control" id="parking-lot-price"
+                                               placeholder="주차 요금"
+                                               readonly>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -106,14 +113,15 @@
                                                placeholder="추가 요금"
                                                readonly>
                                     </div>
-                                </div>
-                                <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="parking-lot-price">예상 요금:</label>
-                                        <input type="text" class="form-control" id="parking-lot-price"
-                                               placeholder="주차 요금"
+                                        <label for="parking-lot-available">현재 예약 가능:</label>
+                                        <input type="text" class="form-control" id="parking-lot-available"
+                                               placeholder="현재 예약 가능"
                                                readonly>
                                     </div>
+                                </div>
+                                <div class="col-md-12">
+
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -269,7 +277,7 @@
                                     <select class="form-control" id="type">
                                         <option value="1">전체</option>
                                         <option value="2">공영주차장</option>
-                                        <option value="3">주차장</option>
+                                        <option value="3">민영주차장</option>
                                     </select>
                                 </div>
                             </div>

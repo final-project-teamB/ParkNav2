@@ -2,7 +2,6 @@ package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
-import com.sparta.parknav._global.response.MsgType;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
 import com.sparta.parknav.booking.dto.BookingResponseDto;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,37 +49,22 @@ public class BookingService {
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
 
-        String available;
-        // 현재 운영여부 확인
-        if (checkOperation(LocalDateTime.now(), parkOperInfo)) {
-            // 현재 주차 가능 대수 = 주차 가능 대수 - 출차시간이 없는 현황 수(주차중인 경우)
-            available = (parkOperInfo.getCmprtCo() - parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(id)) + "대";
-        } else {
-            // 운영중이 아니라면 메시지 출력
-            available = MsgType.NOT_OPEN_NOW.getMsg();
-        }
-
-        String booking;
-        // 선택한 날짜 운영여부 확인
-        if (checkOperation(requestDto.getStartDate(), parkOperInfo) && checkOperation(requestDto.getEndDate(), parkOperInfo)) {
-            // 선택시간 예약 차량 = 기존 예약 중에서 사용자가 선택한 시간 사이에 예약 시작 시간이 있거나 예약 끝나는 시간이 있는 경우
-            List<ParkBookingInfo> selectedTimeBooking = parkBookingInfoRepository.getSelectedTimeBookingList(id, requestDto.getStartDate(), requestDto.getEndDate());
-            // 예약차량 중 현재 입차한 차량 수
-            int enterCnt = parkMgtInfoRepository.countByParkBookingInfoIn(selectedTimeBooking);
-            // 선택시간 예약 차량 수에서 현재 입차한 차량 수는 제외한다.
-            booking = (selectedTimeBooking.size() - enterCnt) + "대";
-        } else {
-            // 선택시간이 운영중이 아니라면 메시지 출력
-            booking = MsgType.NOT_OPEN_SELECT_DATE.getMsg();
-        }
-
         // 주차 시간 구하기
         long bookingTime = Duration.between(requestDto.getStartDate(), requestDto.getEndDate()).toMinutes();
-
         // 주차 요금 구하기
         int charge = ParkingFeeCalculator.calculateParkingFee(bookingTime, parkOperInfo);
 
-        return BookingInfoResponseDto.of(available, booking, charge);
+        // 선택한 날짜 운영여부 확인
+        boolean isOperation = OperationChecking.checkOperation(requestDto.getStartDate(), parkOperInfo) && OperationChecking.checkOperation(requestDto.getEndDate(), parkOperInfo);
+        // 선택 날짜에 운영하지 않는다면 notAllowedTimeList는 빈 배열을 바로 리턴한다.
+        if (!isOperation) {
+            return BookingInfoResponseDto.of(new ArrayList<>(), charge, false);
+        }
+
+        // 시간별 예약가능 여부를 확인하여 불가한 경우의 시간을 List에 담는다.
+        List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(id, requestDto, parkOperInfo);
+
+        return BookingInfoResponseDto.of(notAllowedTimeList, charge, true);
     }
 
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
@@ -105,6 +88,16 @@ public class BookingService {
                     throw new CustomException(ErrorType.ALREADY_RESERVED);
                 }
             }
+        }
+
+        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkId).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+        );
+        // 시간별 예약가능 여부를 확인하여 불가한 경우의 시간을 List에 담는다.
+        List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkId, requestDto, parkOperInfo);
+
+        if (notAllowedTimeList.size() > 0) {
+            throw new CustomException(ErrorType.NOT_ALLOWED_BOOKING_TIME);
         }
 
         ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
@@ -165,38 +158,27 @@ public class BookingService {
     }
 
 
-    private boolean checkOperation(LocalDateTime selectedTime, ParkOperInfo parkOperInfo) {
+    private List<LocalDateTime> getNotAllowedTimeList(Long id, BookingInfoRequestDto requestDto, ParkOperInfo parkOperInfo) {
 
-        LocalTime openTime;
-        LocalTime closeTime;
+        List<LocalDateTime> notAllowedTimeList = new ArrayList<>();
 
-        // selectedTime 의 요일에 따른 운영시간 체크
-        switch(selectedTime.getDayOfWeek()) {
-            case SATURDAY -> {
-                openTime = LocalTime.parse(parkOperInfo.getSatOpen());
-                closeTime = LocalTime.parse(parkOperInfo.getSatClose());
-            }
-            case SUNDAY -> {
-                openTime = LocalTime.parse(parkOperInfo.getSunOpen());
-                closeTime = LocalTime.parse(parkOperInfo.getSunClose());
-            }
-            default -> {
-                openTime = LocalTime.parse(parkOperInfo.getWeekdayOpen());
-                closeTime = LocalTime.parse(parkOperInfo.getWeekdayClose());
+        // 예약 구역 수 = 총 구획 수 / 2 로 설정 -> 구역 수는 바뀔 수 있다. 모든 시간별 예약 구역 수는 동일하다고 가정하고 우선 이렇게 설정하였다.
+        int bookingSectionCnt = parkOperInfo.getCmprtCo() / 2;
+
+        long hours = Duration.between(requestDto.getStartDate(), requestDto.getEndDate()).toHours();
+        LocalDateTime start = requestDto.getStartDate();
+        // 선택한 시간만큼 반복
+        for (int i = 0; i < hours; i++) {
+            // 선택 시작 시간부터 한시간 단위로 예약 건수를 구한다.
+            LocalDateTime time = start.plusHours(i);
+            int bookingCnt = parkBookingInfoRepository.getSelectedTimeBookingCnt(id, time, time.plusHours(1));
+            // 예약 건수가 예약 구역수보다 같거나 크면, 예약불가 시간 리스트에 추가한다.
+            if (bookingCnt >= bookingSectionCnt) {
+                notAllowedTimeList.add(time);
             }
         }
 
-        // 시작시간, 종료시간이 00:00시라면 해당일엔 운영하지 않음
-        if (openTime.equals(LocalTime.of(0, 0)) && closeTime.equals(LocalTime.of(0, 0))) {
-            return false;
-        }
-
-        // selectedTime 이 운영시작시간 전이거나 운영종료시간 후인 경우 -> 선택한 시간은 운영 안함
-        if (selectedTime.toLocalTime().isBefore(openTime) || (!closeTime.equals(LocalTime.of(0, 0)) && selectedTime.toLocalTime().isAfter(closeTime))) {
-            return false;
-        }
-
-        return true;
+        return notAllowedTimeList;
     }
 
 }
