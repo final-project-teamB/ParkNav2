@@ -2,7 +2,6 @@ package com.sparta.parknav.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
-import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.management.service.MgtService;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.user.entity.Admin;
@@ -31,7 +30,7 @@ import static org.mockito.Mockito.CALLS_REAL_METHODS;
 @SpringBootTest
 public class MgtServiceTest {
 
-    private static final Logger log = LoggerFactory.getLogger(MgtServiceTest2.class);
+    private static final Logger log = LoggerFactory.getLogger(MgtServiceTest.class);
     @Autowired
     private MgtService mgtService;
 
