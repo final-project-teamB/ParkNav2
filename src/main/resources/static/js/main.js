@@ -1,5 +1,7 @@
 //지도 전역변수 초기화
 var map;
+var searchParktime;
+var searchCharge;
 const token = localStorage.getItem('Authorization');
 $(document).ready(function () {
     axios.interceptors.response.use(function (response) {
@@ -326,6 +328,8 @@ async function searchData() {
         url = `/api/parks?keyword=${keyword}&parktime=${parktime}&charge=${charge}&type=${type}`;
     }
     axiosMapRenderFromKakao(url);
+    searchParktime = parktime;
+    searchCharge = charge;
 }
 
 function userLogin() {
@@ -398,11 +402,14 @@ function axiosMapRenderFromKakao(url) {
                     // 지도의 중심 좌표
                     center: new kakao.maps.LatLng(data[0].la, data[0].lo),
                     // 지도의 확대 레벨
-                    level: 5
+                    level: 3
                 };
 
             // 지도 생성 및 객체 리턴
             map = new kakao.maps.Map(mapContainer, mapOption);
+            // 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
+            var zoomControl = new kakao.maps.ZoomControl();
+            map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 
             // 마커 이미지 생성
             var markerImage = new kakao.maps.MarkerImage('/img/location.png', new kakao.maps.Size(25, 25), {
@@ -437,25 +444,39 @@ function axiosMapRenderFromKakao(url) {
                         // 마커 이미지 설정
                         image: markerImage
                     }));
-                                       //클릭 이벤트 리스너가 작동되면 해당 주차장의 이름을 input 요소에 표시
+                    //클릭 이벤트 리스너가 작동되면 해당 주차장의 정보을 input 요소에 표시
                     var handleClickMarker = function () {
+                        $("#parking-lot-id").attr("value", item.parkInfoId);
                         $("#parking-lot-name").attr("value", item.name);
-                        //도로명주소가 없을경우 지번주소로 입력
-                        let address = item.address1;
-                        if (address == "") {
-                            address = item.address2;
-                        }
-                        $("#parking-lot-id").attr("value", item.id);
-                        $("#parking-lot-address").attr("value", address);
-                        $("#parking-lot-price").attr("value", item.totCharge + "원");
-                        $("#parking-lot-total-spots").attr("value", item.cmprtCo + "대");
-                        $("#parking-lot-operation-hours").attr("value", item.weekdayOpen + " ~ " + item.weekdayClose);
-                        $("#parking-lot-basic-price").attr("value", item.chargeBsTime + "분 " + item.chargeBsChrg + "원");
-                        $("#parking-lot-additional-price").attr("value", item.chargeAditUnitTime + "분당 " + item.chargeAditUnitChrg + "원");
-                        $("#parking-lot-available").attr("value", item.available);
-                        $("#weekOpen").text("평일: " + item.weekdayOpen + " ~ " + item.weekdayClose);
-                        $("#satOpen").text("토요일: " + item.satOpen + " ~ " + item.satClose);
-                        $("#sunOpen").text("휴일: " + item.sunOpen + " ~ " + item.sunClose);
+                        const body = {
+                            parkInfoId: item.parkInfoId,
+                            parktime: searchParktime,
+                            charge: searchCharge
+                        };
+                        const params = new URLSearchParams(body).toString();
+                        axios.get(`/api/parks/oper-info?${params}`)
+                            .then(response => {
+                               operData = response.data.data;
+                                //도로명주소가 없을경우 지번주소로 입력
+                                let address = operData.address1;
+                                if (address == "") {
+                                    address = operData.address2;
+                                }
+                                $("#parking-lot-address").attr("value", address);
+                                $("#parking-lot-price").attr("value", operData.totCharge + "원");
+                                $("#parking-lot-total-spots").attr("value", operData.cmprtCo + "대");
+                                $("#parking-lot-operation-hours").attr("value", operData.weekdayOpen + " ~ " + operData.weekdayClose);
+                                $("#parking-lot-basic-price").attr("value", operData.chargeBsTime + "분 " + operData.chargeBsChrg + "원");
+                                $("#parking-lot-additional-price").attr("value", operData.chargeAditUnitTime + "분당 " + operData.chargeAditUnitChrg + "원");
+                                $("#parking-lot-available").attr("value", operData.available);
+                                $("#weekOpen").text("평일: " + operData.weekdayOpen + " ~ " + operData.weekdayClose);
+                                $("#satOpen").text("토요일: " + operData.satOpen + " ~ " + operData.satClose);
+                                $("#sunOpen").text("휴일: " + operData.sunOpen + " ~ " + operData.sunClose);
+                            })
+                            .catch(error => {
+                                alert("조회 에러입니다")
+                                return false;
+                            });
                     };
                     // 마커에 클릭 이벤트 리스너 추가
                     kakao.maps.event.addListener(markers[i++], 'click', handleClickMarker);
