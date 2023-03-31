@@ -44,6 +44,23 @@ public class MgtService {
 
     @Transactional
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
+
+        while (true) {
+            if (!redisLockRepository.lock(requestDto.getParkId())) {
+                // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
+                try {
+                    log.info("락 획득 실패");
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
+                }
+            } else {
+                log.info("락 획득 성공, lock number : {}",requestDto.getParkId());
+                break;
+            }
+        }
+
         // SCENARIO ENTER 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
@@ -58,21 +75,13 @@ public class MgtService {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
 
-        while (!redisLockRepository.lock(requestDto.getParkId())) {
-            // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-            }
-        }
         try {
+
             // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
             // SCENARIO ENTER 4
-            List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
-            List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
             LocalDateTime now = LocalDateTime.now();
+            List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndEndTimeAfter(requestDto.getParkId(), now);
+            List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
 
             // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
             int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
