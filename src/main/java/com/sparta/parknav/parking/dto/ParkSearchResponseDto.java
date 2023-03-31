@@ -14,19 +14,19 @@ public class ParkSearchResponseDto {
     private List<ParkLaLoNameDto> parkOperInfoDtos;
 
     @Builder
-    public ParkSearchResponseDto(String la, String lo, String placeName, List<ParkLaLoNameDto> parkOperInfoDtos) {
+    public ParkSearchResponseDto(String la, String lo, String placeName, List<ParkLaLoNameDto> parkLaLoNameDtos) {
         this.la = la;
         this.lo = lo;
         this.placeName = placeName;
-        this.parkOperInfoDtos = parkOperInfoDtos;
+        this.parkOperInfoDtos = parkLaLoNameDtos;
     }
 
-    public static ParkSearchResponseDto of(String la, String lo, String placeName, List<ParkLaLoNameDto> parkOperInfoDtos) {
+    public static ParkSearchResponseDto of(String la, String lo, String placeName, List<ParkLaLoNameDto> parkLaLoNameDtos) {
         return builder()
                 .la(la)
                 .lo(lo)
                 .placeName(placeName)
-                .parkOperInfoDtos(parkOperInfoDtos)
+                .parkLaLoNameDtos(parkLaLoNameDtos)
                 .build();
     }
 }
