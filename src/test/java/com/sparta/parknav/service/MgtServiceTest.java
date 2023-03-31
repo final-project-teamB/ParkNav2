@@ -37,7 +37,7 @@ public class MgtServiceTest {
     @Transactional
     @Test
     public void testEnter() throws NoSuchFieldException, IllegalAccessException, InterruptedException {
-
+ 
         // Given
         log.info("enter 동시성 테스트 시작");
 
