@@ -12,8 +12,6 @@ import java.util.List;
 
 public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo,Long> {
 
-    List<ParkBookingInfo> findAllByParkInfoId(Long parkId);
-
     Page<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id, Pageable pageable);
 
     @Query(value = "SELECT p FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
@@ -25,4 +23,6 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
     List<ParkBookingInfo> findAllByParkInfoIdAndUserId(Long parkInfoId, Long userId);
 
     List<ParkBookingInfo> findAllByParkInfoIdAndUserIdAndCarNum(Long parkInfoId, Long userId, String carNum);
+
+    List<ParkBookingInfo> findAllByParkInfoIdAndEndTimeAfter(Long parkId, LocalDateTime now);
 }
