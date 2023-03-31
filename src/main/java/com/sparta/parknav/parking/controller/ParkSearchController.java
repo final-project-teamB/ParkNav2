@@ -44,7 +44,8 @@ public class ParkSearchController {
 
     @ResponseBody
     @GetMapping("/api/parks/oper-info")
-    public ApiResponseDto<ParkOperInfoDto> OperationInfos(@RequestBody ParkOperRequestDto parkOperRequestDto) {
+    public ApiResponseDto<ParkOperInfoDto> OperationInfos(ParkOperRequestDto parkOperRequestDto) {
+
         return ResponseUtils.ok(parkSearchService.OperationInfos(parkOperRequestDto), MsgType.AVAILABLE_SUCCESSFULLY);
     }
 }
