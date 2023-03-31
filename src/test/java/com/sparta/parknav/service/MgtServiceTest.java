@@ -40,7 +40,7 @@ public class MgtServiceTest {
 
         // Given
         log.info("enter 동시성 테스트 시작");
- 
+
         Long parkId = 5L;
         int cmptrCo = 10;
         // admin 객체를 생성하기 위한 parkInfo 생성
