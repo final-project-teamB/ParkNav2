@@ -85,7 +85,8 @@ public class ParkSearchService {
         List<ParkOperInfo> result;
         //주차장 유형에 따라 쿼리를 다르게 지정
 
-        result = parkInfoRepository.findParkInfoWithOperInfoAndTypeQueryDsl(lo, la, 2000, ParkType.fromValue(parkSearchRequestDto.getType()));
+
+        result = parkInfoRepository.findParkInfoWithOperInfoAndTypeQueryDsl(lo, la, 2, ParkType.fromValue(parkSearchRequestDto.getType()));
 
         for (ParkOperInfo park : result) {
 
