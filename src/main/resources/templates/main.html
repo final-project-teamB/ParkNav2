@@ -7,7 +7,8 @@
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
     <title>Title</title>
     <!-- Map API -->
-    <script th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?'+'appkey='+${@environment.getProperty('kakao.api.mapkey')}}"></script>
+    <script th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?'+'appkey='+${@environment.getProperty('kakao.api.mapkey')}+'&libraries=clusterer'}"></script>
+
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -276,7 +277,7 @@
                                     <select class="form-control" id="type">
                                         <option value="1">전체</option>
                                         <option value="2">공영주차장</option>
-                                        <option value="3">주차장</option>
+                                        <option value="3">민영주차장</option>
                                     </select>
                                 </div>
                             </div>

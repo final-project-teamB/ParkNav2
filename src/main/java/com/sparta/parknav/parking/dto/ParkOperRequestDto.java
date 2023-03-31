@@ -5,13 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ParkSearchRequestDto {
+public class ParkOperRequestDto {
 
-    private String keyword;
+    private Long parkInfoId;
     private int parktime;
     private int charge;
-    private int type;
-    private String la;
-    private String lo;
-
 }
