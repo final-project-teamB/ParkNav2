@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class ParkOperInfoDto {
-    private Long id;
+
     private int chargeAditUnitChrg;
     private int chargeAditUnitTime;
     private int chargeBsChrg;
@@ -27,7 +27,6 @@ public class ParkOperInfoDto {
 
     @Builder
     private ParkOperInfoDto(ParkOperInfo parkOperInfo, int totCharge, String available) {
-        this.id = parkOperInfo.getId();
         this.chargeAditUnitChrg = parkOperInfo.getChargeAditUnitChrg();
         this.chargeAditUnitTime = parkOperInfo.getChargeAditUnitTime();
         this.chargeBsChrg = parkOperInfo.getChargeBsChrg();
