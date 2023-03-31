@@ -11,7 +11,6 @@ public class ParkSearchRequestDto {
     private int parktime;
     private int charge;
     private int type;
-    private boolean available;
     private String la;
     private String lo;
 
