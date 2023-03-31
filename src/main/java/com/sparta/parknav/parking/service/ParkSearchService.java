@@ -87,11 +87,12 @@ public class ParkSearchService {
 
         result = parkInfoRepository.findParkInfoWithOperInfoAndTypeQueryDsl(lo, la, 2000, ParkType.fromValue(parkSearchRequestDto.getType()));
 
-// 이름, id 위도, 경도
         for (ParkOperInfo park : result) {
 
             ParkLaLoNameDto parkLaLoNameDto = ParkLaLoNameDto.of(park);
-            parkInfoDtos.add(parkLaLoNameDto);
+            if (ParkingFeeCalculator.calculateParkingFee(parkSearchRequestDto.getParktime() * 60L, park) <= parkSearchRequestDto.getCharge()) {
+                parkInfoDtos.add(parkLaLoNameDto);
+            }
         }
         return ParkSearchResponseDto.of(la, lo, placeName, parkInfoDtos);
     }
@@ -113,11 +114,7 @@ public class ParkSearchService {
             available = MsgType.NOT_OPEN_NOW.getMsg();
         }
 
-        ParkOperInfoDto parkOperInfoDto = ParkOperInfoDto.of(parkOperInfo, ParkingFeeCalculator.calculateParkingFee(parkOperRequestDto.getParktime() * 60L, parkOperInfo), available);
-//        if (parkOperInfoDto.getTotCharge() > parkOperRequestDto.getCharge()) {
-//            throw new CustomException(ErrorType.)
-//        }
-        return parkOperInfoDto;
+        return ParkOperInfoDto.of(parkOperInfo, ParkingFeeCalculator.calculateParkingFee(parkOperRequestDto.getParktime() * 60L, parkOperInfo), available);
     }
 
     public static int similarKeyword(String userKeyword, String keyword) {
