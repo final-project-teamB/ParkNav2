@@ -25,6 +25,6 @@ public class TimeChecking {
     @After("execution(* com..service..*(..))")
     public void afterMethod() {
         afterTime = System.currentTimeMillis();
-        log.info("코드 실행 시간 = {}", (afterTime - beforeTime) / 1000);
+        log.info("코드 실행 시간 = {}", (afterTime - beforeTime));
     }
 }
