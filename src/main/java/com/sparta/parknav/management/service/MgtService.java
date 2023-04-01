@@ -42,9 +42,8 @@ public class MgtService {
     private final ParkInfoRepository parkInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
 
-    @Transactional
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-
+//        TransactionHandler transactionHandler = new TransactionHandler(transactionTemplate);
         while (true) {
             if (!redisLockRepository.lock(requestDto.getParkId())) {
                 // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
@@ -56,10 +55,21 @@ public class MgtService {
                     throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
                 }
             } else {
-                log.info("락 획득 성공, lock number : {}",requestDto.getParkId());
+                log.info("락 획득 성공, lock number : {}", requestDto.getParkId());
                 break;
             }
         }
+        try {
+            return enterLogic(requestDto, user);
+        } finally {
+            // Lock 해제
+            redisLockRepository.unlock(requestDto.getParkId());
+        }
+    }
+
+
+    @Transactional
+    public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
 
         // SCENARIO ENTER 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
@@ -75,40 +85,34 @@ public class MgtService {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
 
-        try {
+        // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
+        // SCENARIO ENTER 4
+        LocalDateTime now = LocalDateTime.now();
+        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndEndTimeAfter(requestDto.getParkId(), now);
+        List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
 
-            // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
-            // SCENARIO ENTER 4
-            LocalDateTime now = LocalDateTime.now();
-            List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndEndTimeAfter(requestDto.getParkId(), now);
-            List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
-
-            // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
-            int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
-            // 예약된 차량 찾기
-            ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
-            // 이미 예약내역으로 입차, 출차를 마친 경우는 예약시간 내 입차해도 일반차량으로 분류된다.
-            // SCENARIO ENTER 6
-            if (parkBookingNow != null && parkMgtInfoRepository.existsByParkBookingInfoIdAndExitTimeIsNotNull(parkBookingNow.getId())) {
-                parkBookingNow = null;
-            }
-            // 주차 구획수
-            int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
-            // 이 주차장에 현재 입차되어있는 차량 수
-            int mgtNum = getMgtNum(parkMgtInfo);
-            if (bookingNowCnt + mgtNum >= cmprtCoNum) {
-                throw new CustomException(ErrorType.NOT_PARKING_SPACE);
-            }
-
-            ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
-            parkMgtInfoRepository.save(mgtSave);
-
-            return CarInResponseDto.of(requestDto.getCarNum(), now);
-
-        } finally {
-            // Lock 해제
-            redisLockRepository.unlock(requestDto.getParkId());
+        // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
+        int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
+        // 예약된 차량 찾기
+        ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
+        // 이미 예약내역으로 입차, 출차를 마친 경우는 예약시간 내 입차해도 일반차량으로 분류된다.
+        // SCENARIO ENTER 6
+        if (parkBookingNow != null && parkMgtInfoRepository.existsByParkBookingInfoIdAndExitTimeIsNotNull(parkBookingNow.getId())) {
+            parkBookingNow = null;
         }
+        // 주차 구획수
+        int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
+        // 이 주차장에 현재 입차되어있는 차량 수
+        int mgtNum = getMgtNum(parkMgtInfo);
+        if (bookingNowCnt + mgtNum >= cmprtCoNum) {
+            throw new CustomException(ErrorType.NOT_PARKING_SPACE);
+        }
+
+        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
+        parkMgtInfoRepository.save(mgtSave);
+
+        return CarInResponseDto.of(requestDto.getCarNum(), now);
+
     }
 
     @Transactional
