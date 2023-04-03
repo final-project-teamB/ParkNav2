@@ -4,6 +4,7 @@ import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
+import com.sparta.parknav.management.dto.NomalBookingCarSpaceInfo;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
@@ -85,6 +86,23 @@ public class MgtService {
             }
             // 주차 구획수
             int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
+            // 일반, 예약구역 개수를 나눔
+            NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo = nomalBookingCarSpaceInfo(cmprtCoNum);
+            // 사용중인 구역 개수를 가져옴
+            NomalBookingCarSpaceInfo useNomalBookingCarSpaceInfo = useNomalBookingCarSpaceInfo(parkMgtInfo);
+            // 들어온 차량정보가 예약한 차량인지 여부를 판단
+            Optional<ParkBookingInfo> enterCarBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(requestDto.getParkId(), requestDto.getCarNum(), now, now);
+            if (enterCarBookingInfo.isPresent()) {
+                // 예약이 꽉 찼을경우
+                if (nomalBookingCarSpaceInfo.getBookingCarSpace() < useNomalBookingCarSpaceInfo.getBookingCarSpace() + 1) {
+                    throw new CustomException(ErrorType.NOT_PARKING_SPACE);
+                }
+            } else {
+                // 예약이 꽉 찼을경우
+                if (nomalBookingCarSpaceInfo.getNomalCarSpace() < useNomalBookingCarSpaceInfo.getNomalCarSpace() + 1) {
+                    throw new CustomException(ErrorType.NOT_PARKING_SPACE);
+                }
+            }
             // 이 주차장에 현재 입차되어있는 차량 수
             int mgtNum = getMgtNum(parkMgtInfo);
             if (bookingNowCnt + mgtNum >= cmprtCoNum) {
@@ -194,5 +212,24 @@ public class MgtService {
             }
         }
         return mgtNum;
+    }
+
+    private static NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo(int cmprtCoNum) {
+        int nomalCarSpace = cmprtCoNum % 2 == 1 ? (cmprtCoNum / 2) + 1 : cmprtCoNum / 2;
+        int bookingCarSpace = cmprtCoNum / 2;
+        return NomalBookingCarSpaceInfo.of(nomalCarSpace, bookingCarSpace);
+    }
+
+    private static NomalBookingCarSpaceInfo useNomalBookingCarSpaceInfo(List<ParkMgtInfo> parkMgtInfos) {
+        int nomalCarSpace = 0;
+        int bookingCarSpace = 0;
+        for (ParkMgtInfo parkMgtInfo : parkMgtInfos) {
+            if (parkMgtInfo.getExitTime() == null && parkMgtInfo.getParkBookingInfo() == null) {
+                nomalCarSpace++;
+            } else if (parkMgtInfo.getExitTime() == null) {
+                bookingCarSpace++;
+            }
+        }
+        return NomalBookingCarSpaceInfo.of(nomalCarSpace, bookingCarSpace);
     }
 }

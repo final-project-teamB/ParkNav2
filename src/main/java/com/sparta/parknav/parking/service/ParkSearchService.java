@@ -102,7 +102,7 @@ public class ParkSearchService {
     public ParkOperInfoDto OperationInfos(ParkOperRequestDto parkOperRequestDto) {
 
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkOperRequestDto.getParkInfoId()).orElseThrow(
-                () -> new CustomException(ErrorType.NOT_VALID_OPER_ID)
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
 
         String available;

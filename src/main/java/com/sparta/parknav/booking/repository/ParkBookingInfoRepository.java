@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo,Long> {
 
@@ -16,13 +17,15 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
 
     Page<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id, Pageable pageable);
 
-    @Query(value = "SELECT p FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
+    @Query(value = "SELECT count(p) FROM ParkBookingInfo p WHERE p.parkInfo.id = :parkId " +
             "AND ((p.startTime >= :startTime and p.startTime < :endTime) " +
             "OR (p.endTime > :startTime and p.endTime <= :endTime)" +
             "OR (p.startTime <= :startTime and p.endTime >= :endTime))")
-    List<ParkBookingInfo> getSelectedTimeBookingList(@Param("parkId") Long parkId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    int getSelectedTimeBookingCnt(@Param("parkId") Long parkId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     List<ParkBookingInfo> findAllByParkInfoIdAndUserId(Long parkInfoId, Long userId);
+
+    Optional<ParkBookingInfo> findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(Long parkInfoId, String carNum, LocalDateTime startTime, LocalDateTime endTime);
 
     List<ParkBookingInfo> findAllByParkInfoIdAndUserIdAndCarNum(Long parkInfoId, Long userId, String carNum);
 }
