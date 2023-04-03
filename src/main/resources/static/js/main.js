@@ -31,7 +31,7 @@ $(document).ready(function () {
     // 종료 날짜 input의 기본값을 오늘 날짜로 설정
     $('#exit-date').val(todayStr);
     // 시작 시간과 종료 시간을 설정합니다.
-    var startTime = now.getHours() + ':00:00';
+    var startTime = now.getHours() < 10 ? '0' + now.getHours() + ':00:00' : now.getHours() + ':00:00';
     // 시작 시간과 종료 시간의 옵션 중 선택된 것을 해제합니다.
     $('#start-time, #exit-time').find('option:selected').prop('selected', false);
     // 현재 시간에 해당하는 시작 시간의 옵션을 선택합니다.
@@ -142,10 +142,30 @@ $(document).ready(function () {
         $('#reservation-modal').modal('show');
         axios.get(`/api/booking/${id}?${params}`)
             .then(response => {
-                const data = response.data;
-                $("#parking-lot-available-modal").attr("value", data.data.available);
-                $("#parking-lot-booking-modal").attr("value", data.data.booking);
-                $("#parking-lot-price-modal").attr("value", data.data.charge + "원");
+                console.log(response)
+                const data = response.data.data;
+                $("#parking-lot-not-allowed-time").empty();
+                if (data.isOperation === false) {
+                    $("#parking-lot-booking-modal").attr("class","alert alert-warning")
+                    $('#parking-lot-booking-modal').text("운영시간이 아닙니다");
+                    $("#parking-lot-not-allowed-time-div").hide();
+                    $("#parking_reservation").hide();
+                } else if (data.notAllowedTimeList.length > 0) {
+                    $("#parking-lot-booking-modal").attr("class","alert alert-danger")
+                    $('#parking-lot-booking-modal').text("예약불가 시간이 있습니다");
+                    $("#parking-lot-not-allowed-time-div").show();
+                    $("#parking-lot-price-modal-div").hide();
+                    data.notAllowedTimeList.map(s => {
+                        $("#parking-lot-not-allowed-time").append("<option>" + s.replace("T", " ") + "</option>")
+                    })
+                    $("#parking_reservation").hide();
+                } else {
+                    $("#parking-lot-booking-modal").attr("class","alert alert-success")
+                    $('#parking-lot-booking-modal').text("예약이 가능합니다");
+                    $("#parking_reservation").show();
+                    $("#parking-lot-not-allowed-time-div").hide();
+                    $("#parking-lot-price-modal-div").hide();
+                }
             })
             .catch(error => {
                 alert("조회 에러입니다")
@@ -155,23 +175,11 @@ $(document).ready(function () {
 
     $('#parking_reservation').click(function () {
         const id = $("#parking-lot-id").val();
-        available = parseInt($("#parking-lot-available-modal").val(), 10);
-        booking = parseInt($("#parking-lot-booking-modal").val(), 10);
-        total = parseInt($("#parking-lot-total-spots").val(), 10);
         const startDate = $('#start-date').val() + "T" + $('#start-time').val();
         const endDate = $('#exit-date').val() + "T" + $('#exit-time').val();
         const body = {
             startDate: startDate,
             endDate: endDate
-        }
-
-        if (isNaN(available) || isNaN(booking)) {
-            alert("운영시간이 아닙니다");
-            return false;
-        }
-        if (available <= booking ) {
-            alert("예약 할 수 없습니다");
-            return false;
         }
 
         axios.post(`/api/booking/${id}`, body)
@@ -431,7 +439,7 @@ function axiosMapRenderFromKakao(url) {
                 image: centerMarkerImage
             });
             var markers = []
-            var i=0;
+            var i = 0;
             if (result) {
                 data.forEach(function (item) {
                     markers.push(new kakao.maps.Marker({
@@ -456,7 +464,7 @@ function axiosMapRenderFromKakao(url) {
                         const params = new URLSearchParams(body).toString();
                         axios.get(`/api/parks/oper-info?${params}`)
                             .then(response => {
-                               operData = response.data.data;
+                                operData = response.data.data;
                                 //도로명주소가 없을경우 지번주소로 입력
                                 let address = operData.address1;
                                 if (address == "") {
@@ -491,8 +499,8 @@ function axiosMapRenderFromKakao(url) {
                 minLevel: 4
             });
             // 클러스터 클릭 이벤트를 추가합니다.
-            kakao.maps.event.addListener(clusterer, 'clusterclick', function(cluster) {
-                var level = map.getLevel()-1;
+            kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster) {
+                var level = map.getLevel() - 1;
                 map.setLevel(level, {anchor: cluster.getCenter()});
 
             });

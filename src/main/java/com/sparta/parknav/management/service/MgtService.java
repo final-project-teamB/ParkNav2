@@ -4,6 +4,7 @@ import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
+import com.sparta.parknav.management.dto.NomalBookingCarSpaceInfo;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
@@ -107,7 +108,7 @@ public class MgtService {
         if (bookingNowCnt + mgtNum >= cmprtCoNum) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
-
+        
         ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
         parkMgtInfoRepository.save(mgtSave);
 
@@ -207,5 +208,24 @@ public class MgtService {
             }
         }
         return mgtNum;
+    }
+
+    private static NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo(int cmprtCoNum) {
+        int nomalCarSpace = cmprtCoNum % 2 == 1 ? (cmprtCoNum / 2) + 1 : cmprtCoNum / 2;
+        int bookingCarSpace = cmprtCoNum / 2;
+        return NomalBookingCarSpaceInfo.of(nomalCarSpace, bookingCarSpace);
+    }
+
+    private static NomalBookingCarSpaceInfo useNomalBookingCarSpaceInfo(List<ParkMgtInfo> parkMgtInfos) {
+        int nomalCarSpace = 0;
+        int bookingCarSpace = 0;
+        for (ParkMgtInfo parkMgtInfo : parkMgtInfos) {
+            if (parkMgtInfo.getExitTime() == null && parkMgtInfo.getParkBookingInfo() == null) {
+                nomalCarSpace++;
+            } else if (parkMgtInfo.getExitTime() == null) {
+                bookingCarSpace++;
+            }
+        }
+        return NomalBookingCarSpaceInfo.of(nomalCarSpace, bookingCarSpace);
     }
 }
