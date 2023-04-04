@@ -1,5 +1,8 @@
 package com.sparta.parknav.management.entity;
 
+import lombok.Getter;
+
+@Getter
 public enum ZoneType {
     GENERAL("일반"),
     BOOKING("예약"),

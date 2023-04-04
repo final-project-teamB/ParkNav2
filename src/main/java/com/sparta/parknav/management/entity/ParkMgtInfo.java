@@ -34,7 +34,7 @@ public class ParkMgtInfo {
     private LocalDateTime exitTime;
 
     @Column
-    private int charge;
+    private Integer charge;
 
     @Column(nullable = false)
     private String carNum;
@@ -54,8 +54,7 @@ public class ParkMgtInfo {
         this.zone = zone;
     }
 
-    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime
-            , LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo) {
+    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime, LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo, ZoneType zone) {
         return builder()
                 .parkInfo(parkInfo)
                 .carNum(carNum)
@@ -63,6 +62,26 @@ public class ParkMgtInfo {
                 .exitTime(exitTime)
                 .charge(charge)
                 .parkBookingInfo(parkBookingInfo)
+                .zone(zone)
+                .build();
+    }
+
+    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime, ParkBookingInfo parkBookingInfo, ZoneType zone) {
+        return builder()
+                .parkInfo(parkInfo)
+                .carNum(carNum)
+                .enterTime(enterTime)
+                .parkBookingInfo(parkBookingInfo)
+                .zone(zone)
+                .build();
+    }
+
+    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime, ZoneType zone) {
+        return builder()
+                .parkInfo(parkInfo)
+                .carNum(carNum)
+                .enterTime(enterTime)
+                .zone(zone)
                 .build();
     }
 
