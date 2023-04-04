@@ -79,15 +79,11 @@ public class BookingService {
         // SCENARIO BOOKING 3
         Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
-        ); // 2~5 , 1~3
+        );
         // SCENARIO BOOKING 4
-        List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndUserIdAndCarNum(parkInfo.getId(), user.getId(), car.getCarNum());
-        for (ParkBookingInfo p : parkBookingInfo) {
-            if (p != null) {
-                if (requestDto.getStartDate().isBefore(p.getEndTime())&&requestDto.getEndDate().isAfter(p.getStartTime())) {
-                    throw new CustomException(ErrorType.ALREADY_RESERVED);
-                }
-            }
+        ParkBookingInfo alreadyBookingInfo = parkBookingInfoRepository.getAlreadyBookingInfo(parkInfo.getId(), car.getCarNum(), requestDto.getStartDate(), requestDto.getEndDate());
+        if (alreadyBookingInfo != null) {
+            throw new CustomException(ErrorType.ALREADY_RESERVED);
         }
 
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkId).orElseThrow(
