@@ -3,7 +3,7 @@
  
 # Repo Action 페이지에 나타날 이름 
 name: Spring Boot & Gradle CI/CD
-
+ 
 permissions:
       contents: read
       pull-requests: write
