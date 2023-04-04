@@ -39,15 +39,19 @@ public class ParkMgtInfo {
     @Column(nullable = false)
     private String carNum;
 
+    @Column(length = 10)
+    @Enumerated(EnumType.STRING)
+    private ZoneType zone;
+
     @Builder
-    private ParkMgtInfo(ParkInfo parkInfo, String carNum, LocalDateTime enterTime
-            , LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo) {
+    private ParkMgtInfo(ParkInfo parkInfo, String carNum, LocalDateTime enterTime, LocalDateTime exitTime, int charge, ParkBookingInfo parkBookingInfo, ZoneType zone) {
         this.parkInfo = parkInfo;
         this.carNum = carNum;
         this.enterTime = enterTime;
         this.exitTime = exitTime;
         this.charge = charge;
         this.parkBookingInfo = parkBookingInfo;
+        this.zone = zone;
     }
 
     public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime
