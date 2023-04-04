@@ -46,7 +46,7 @@ public class MgtService {
     private final ParkInfoRepository parkInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final RedissonClient redissonClient;
-
+ 
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
         if (requestDto.getParkId() == null) {
             throw new CustomException(ErrorType.CONTENT_IS_NULL);
