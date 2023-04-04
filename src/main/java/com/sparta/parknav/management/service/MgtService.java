@@ -47,27 +47,70 @@ public class MgtService {
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final RedissonClient redissonClient;
 
+//    public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
+//        if (requestDto.getParkId() == null) {
+//            throw new CustomException(ErrorType.CONTENT_IS_NULL);
+//        }
+//        int MAX_RETRIES = 5;
+//        int RETRY_INTERVAL_MS = 50;
+//        RLock lock = redissonClient.getLock("EnterLock" + requestDto.getParkId());
+//        boolean lockAcquired = false;
+//        int retries = 0;
+//        while (!lockAcquired && retries < MAX_RETRIES) {
+//            try {
+//                if (lock.tryLock(10, 10, TimeUnit.SECONDS)) {
+//                    lockAcquired = true;
+//                } else {
+//                    retries++;
+//                    log.info("락 획득 실패, 재시도 중 ({}/{})", retries, MAX_RETRIES);
+//                    Thread.sleep(RETRY_INTERVAL_MS);
+//                }
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//                throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
+//            }
+//        }
+//
+//        if (!lockAcquired) {
+//            log.info("락 획득 실패");
+//            throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
+//        }
+//
+//        try {
+//            log.info("락 획득 성공");
+//            return enterLogic(requestDto, user);
+//        } finally {
+//            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//                log.info("언락 실행");
+//            }
+//        }
+//    }
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
         if (requestDto.getParkId() == null) {
             throw new CustomException(ErrorType.CONTENT_IS_NULL);
         }
-        RLock lock = redissonClient.getLock("EnterLock"+ requestDto.getParkId());
+        RLock lock = redissonClient.getLock("EnterLock" + requestDto.getParkId());
         try {
             //선행 락 점유 스레드가 존재하면 waitTime동안 락 점유를 기다리며 leaseTime 시간 이후로는 자동으로 락이 해제되기 때문에 다른 스레드도 일정 시간이 지난 후 락을 점유할 수 있습니다.
-            if(!lock.tryLock(3, 5, TimeUnit.SECONDS)) {
+            if (!lock.tryLock(30, 10, TimeUnit.SECONDS)) {
+                log.info("락 획득 실패");
                 throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
             }
+            log.info("락 획득 성공");
             return enterLogic(requestDto, user);
         } catch (InterruptedException e) {
+            log.info("락 획득 대기 중 인터럽트 발생");
             Thread.currentThread().interrupt();
             throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
         } finally {
-            if(lock != null && lock.isLocked()) {
+            log.info("finally문 실행");
+            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
                 lock.unlock();
+                log.info("언락 실행");
             }
         }
     }
-
 
     @Transactional
     public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
@@ -108,7 +151,7 @@ public class MgtService {
         if (bookingNowCnt + mgtNum >= cmprtCoNum) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
-        
+
         ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
         parkMgtInfoRepository.save(mgtSave);
 
