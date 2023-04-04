@@ -10,6 +10,7 @@ import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.management.entity.ParkMgtInfo;
+import com.sparta.parknav.management.entity.ZoneType;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.entity.ParkInfo;
@@ -183,7 +184,7 @@ public class MakeData {
 
                 int charge = ParkingFeeCalculator.calculateParkingFee(Duration.between(startTime, endTime).toMinutes(), parkOperInfo);
 
-                ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), startTime, endTime, charge, null);
+                ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), startTime, endTime, charge, null, ZoneType.GENERAL);
                 mgtInfoList.add(mgtInfo);
             }
         }
@@ -233,7 +234,7 @@ public class MakeData {
                 int charge = exitTime != null ? ParkingFeeCalculator.calculateParkingFee(Duration.between(enterTime, exitTime).toMinutes(), parkOperInfo) : 0;
 
                 // 예약정보 포함하여 저장
-                ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), enterTime, exitTime, charge, bookingInfo);
+                ParkMgtInfo mgtInfo = ParkMgtInfo.of(parkInfo, car.getCarNum(), enterTime, exitTime, charge, bookingInfo, ZoneType.BOOKING);
                 mgtInfoList.add(mgtInfo);
             }
         }
