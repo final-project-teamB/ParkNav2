@@ -47,45 +47,6 @@ public class MgtService {
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final RedissonClient redissonClient;
 
-//    public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-//        if (requestDto.getParkId() == null) {
-//            throw new CustomException(ErrorType.CONTENT_IS_NULL);
-//        }
-//        int MAX_RETRIES = 5;
-//        int RETRY_INTERVAL_MS = 50;
-//        RLock lock = redissonClient.getLock("EnterLock" + requestDto.getParkId());
-//        boolean lockAcquired = false;
-//        int retries = 0;
-//        while (!lockAcquired && retries < MAX_RETRIES) {
-//            try {
-//                if (lock.tryLock(10, 10, TimeUnit.SECONDS)) {
-//                    lockAcquired = true;
-//                } else {
-//                    retries++;
-//                    log.info("락 획득 실패, 재시도 중 ({}/{})", retries, MAX_RETRIES);
-//                    Thread.sleep(RETRY_INTERVAL_MS);
-//                }
-//            } catch (InterruptedException e) {
-//                Thread.currentThread().interrupt();
-//                throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
-//            }
-//        }
-//
-//        if (!lockAcquired) {
-//            log.info("락 획득 실패");
-//            throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-//        }
-//
-//        try {
-//            log.info("락 획득 성공");
-//            return enterLogic(requestDto, user);
-//        } finally {
-//            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
-//                lock.unlock();
-//                log.info("언락 실행");
-//            }
-//        }
-//    }
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
         if (requestDto.getParkId() == null) {
             throw new CustomException(ErrorType.CONTENT_IS_NULL);
