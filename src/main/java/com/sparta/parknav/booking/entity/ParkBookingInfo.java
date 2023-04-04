@@ -67,4 +67,13 @@ public class ParkBookingInfo {
                 .build();
     }
 
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, ParkInfo parkInfo, String carNum) {
+        return ParkBookingInfo.builder()
+                .startTime(requestDto.getStartDate())
+                .endTime(requestDto.getEndDate())
+                .parkInfo(parkInfo)
+                .carNum(carNum)
+                .build();
+    }
+
 }

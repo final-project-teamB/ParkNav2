@@ -2,6 +2,10 @@ package com.sparta.parknav._global.exception;
 
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 @Getter
 public enum ErrorType {
 
@@ -27,7 +31,8 @@ public enum ErrorType {
     ALREADY_RESERVED(400, "이미 예약된 시간입니다."),
     FAILED_TO_ACQUIRE_LOCK(100, "락 권한을 얻는데 실패했습니다."),
     NOT_ALLOWED_BOOKING_TIME(400, "예약불가한 시간이 포함되어 있습니다."),
-    NOT_FOUND_PARK_OPER_INFO(400, "해당 주차장 운영정보가 없습니다.")
+    NOT_FOUND_PARK_OPER_INFO(400, "해당 주차장 운영정보가 없습니다."),
+    NOT_OPEN_SELECTED_DATE(400, "선택하신 시간에는 운영하지 않습니다.")
     ;
 
     private int code;
@@ -36,5 +41,17 @@ public enum ErrorType {
     ErrorType(int code, String msg) {
         this.code = code;
         this.msg = msg;
+    }
+
+    public static ErrorType printLocalDateTimeList(List<LocalDateTime> notAllowedTimeList) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<String> dateTimeStrings = notAllowedTimeList.stream()
+                .map(dateTime -> dateTime.format(formatter))
+                .toList();
+
+        ErrorType errorType = NOT_ALLOWED_BOOKING_TIME;
+        errorType.msg = dateTimeStrings.toString();
+
+        return errorType;
     }
 }
