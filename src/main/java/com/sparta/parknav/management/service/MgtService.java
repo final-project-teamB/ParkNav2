@@ -48,21 +48,24 @@ public class MgtService {
     private final RedissonClient redissonClient;
 
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-        RLock lock = redissonClient.getLock("myLock");
+        if (requestDto.getParkId() == null) {
+            throw new CustomException(ErrorType.CONTENT_IS_NULL);
+        }
+        RLock lock = redissonClient.getLock("EnterLock"+ requestDto.getParkId());
         try {
             //선행 락 점유 스레드가 존재하면 waitTime동안 락 점유를 기다리며 leaseTime 시간 이후로는 자동으로 락이 해제되기 때문에 다른 스레드도 일정 시간이 지난 후 락을 점유할 수 있습니다.
             if(!lock.tryLock(3, 5, TimeUnit.SECONDS)) {
-                return null;
+                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
             }
             return enterLogic(requestDto, user);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
         } finally {
             if(lock != null && lock.isLocked()) {
                 lock.unlock();
             }
         }
-        return enterLogic(requestDto, user);
     }
 
 
