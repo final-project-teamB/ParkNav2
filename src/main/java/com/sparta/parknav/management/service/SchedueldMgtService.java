@@ -38,7 +38,6 @@ public class SchedueldMgtService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime DateTimeHour = LocalDateTime.of(now.toLocalDate(), LocalTime.of(now.getHour(), 0, 0));
         LocalDateTime startTime = DateTimeHour.minusMinutes(59).minusSeconds(59);
-        System.out.println("startTime : " + startTime + " endTime : " + DateTimeHour);
 
         // 예약시작시간이 현재시간 00시 00분인 예약정보를 모두 가져옴
         List<ParkBookingInfo> bookingInfoStartTimeCarList = parkBookingInfoRepository.findAllByStartTimeEquals(DateTimeHour);
