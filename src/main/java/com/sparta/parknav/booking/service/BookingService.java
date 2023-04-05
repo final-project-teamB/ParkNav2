@@ -11,8 +11,10 @@ import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.entity.StatusType;
 import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
+import com.sparta.parknav.management.dto.ParkSpaceInfo;
 import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
+import com.sparta.parknav.management.service.MgtService;
 import com.sparta.parknav.management.service.ParkingFeeCalculator;
 import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
@@ -20,6 +22,9 @@ import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +37,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -42,6 +49,10 @@ public class BookingService {
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final ParkInfoRepository parkInfoRepository;
     private final CarRepository carRepository;
+    private final RedissonClient redissonClient;
+
+    private final MgtService mgtService;
+
 
     public BookingInfoResponseDto getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
@@ -68,8 +79,33 @@ public class BookingService {
     }
 
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
+
+        RLock lock = redissonClient.getLock("BookingLock" + parkId);
+
+        try {
+            if (!lock.tryLock(30, 10, TimeUnit.SECONDS)) {
+                log.info("락 획득 실패");
+                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
+            }
+            log.info("락 획득 성공");
+            return bookingLogic(parkId, requestDto, user);
+        } catch (InterruptedException e) {
+            log.info("락 획득 대기 중 인터럽트 발생");
+            Thread.currentThread().interrupt();
+            throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
+        } finally {
+            log.info("finally문 실행");
+            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+                log.info("언락 실행");
+            }
+        }
+    }
+
+    @Transactional
+    public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
         // SCENARIO BOOKING 1
-        if (requestDto.getStartDate().equals(requestDto.getEndDate())||requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
+        if (requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
         }
         // SCENARIO BOOKING 2
@@ -144,7 +180,11 @@ public class BookingService {
                 minutes = Duration.between(parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()).toMinutes();
             }
 
-            int charge = ParkingFeeCalculator.calculateParkingFee(minutes, p.getParkInfo().getParkOperInfo());
+            ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(p.getParkInfo().getId()).orElseThrow(
+                    () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+            );
+
+            int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
             MyBookingResponseDto responseDto = MyBookingResponseDto.of(p, charge, status);
             responseDtoList.add(responseDto);
@@ -158,8 +198,7 @@ public class BookingService {
 
         List<LocalDateTime> notAllowedTimeList = new ArrayList<>();
 
-        // 예약 구역 수 = 총 구획 수 / 2 로 설정 -> 구역 수는 바뀔 수 있다. 모든 시간별 예약 구역 수는 동일하다고 가정하고 우선 이렇게 설정하였다.
-        int bookingSectionCnt = parkOperInfo.getCmprtCo() / 2;
+        ParkSpaceInfo spaceInfo = mgtService.getParkSpaceInfo(parkOperInfo);
 
         long hours = Duration.between(requestDto.getStartDate(), requestDto.getEndDate()).toHours();
         LocalDateTime start = requestDto.getStartDate();
@@ -167,9 +206,12 @@ public class BookingService {
         for (int i = 0; i < hours; i++) {
             // 선택 시작 시간부터 한시간 단위로 예약 건수를 구한다.
             LocalDateTime time = start.plusHours(i);
-            int bookingCnt = parkBookingInfoRepository.getSelectedTimeBookingCnt(id, time, time.plusHours(1));
+            // 선택시간 사이 예약정보
+            List<ParkBookingInfo> bookingList = parkBookingInfoRepository.getSelectedTimeBookingList(id, time, time.plusHours(1));
+            // 예약정보 중 이미 출차한 차량 수는 제외한다.
+            int bookingCnt = bookingList.size() - parkMgtInfoRepository.countByParkBookingInfoInAndExitTimeNotNull(bookingList);
             // 예약 건수가 예약 구역수보다 같거나 크면, 예약불가 시간 리스트에 추가한다.
-            if (bookingCnt >= bookingSectionCnt) {
+            if (bookingCnt >= spaceInfo.getBookingCarSpace()) {
                 notAllowedTimeList.add(time);
             }
         }
