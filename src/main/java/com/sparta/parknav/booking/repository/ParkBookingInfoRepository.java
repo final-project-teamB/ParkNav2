@@ -29,4 +29,7 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
             "AND ((p.startTime between :startTime and :endTime) OR (p.endTime between :startTime and :endTime))")
     ParkBookingInfo getAlreadyBookingInfo(@Param("parkId") Long parkId, @Param("carNum") String carNum, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
+    List<ParkBookingInfo> findAllByEndTimeBetween(LocalDateTime startTime,LocalDateTime endTime);
+
+    List<ParkBookingInfo> findAllByStartTimeEquals(LocalDateTime startTime);
 }

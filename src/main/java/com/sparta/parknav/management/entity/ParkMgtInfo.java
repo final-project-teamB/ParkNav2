@@ -89,4 +89,8 @@ public class ParkMgtInfo {
         this.charge = charge;
         this.exitTime = exitTime;
     }
+
+    public void zoneUpdate(ZoneType zone){
+        this.zone = zone;
+    }
 }
