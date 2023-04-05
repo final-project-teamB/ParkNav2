@@ -1,11 +1,13 @@
 package com.sparta.parknav.management.repository;
 
+import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.entity.ZoneType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
@@ -25,5 +27,9 @@ public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
     Optional<ParkMgtInfo> findByParkBookingInfoIdAndExitTimeNullAndZone(Long parkBookingInfoId, ZoneType zone);
 
     Optional<ParkMgtInfo> findByParkInfoIdAndCarNumAndExitTimeNullAndZone(Long parkInfoId, String carNum, ZoneType zone);
+
+    Optional<ParkMgtInfo> findTopByParkInfoIdAndZoneAndExitTimeNullOrderByEnterTimeAsc(Long parkInfoId, ZoneType zone);
+
+    int countByParkBookingInfoInAndExitTimeNotNull(List<ParkBookingInfo> bookingInfoList);
 
 }

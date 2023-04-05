@@ -1,7 +1,5 @@
 package com.sparta.parknav.management.service;
 
-import com.sparta.parknav._global.exception.CustomException;
-import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.management.dto.ParkSpaceInfo;
@@ -16,7 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -56,7 +53,7 @@ public class SchedueldMgtService {
                 // 여유 공간이 있을때만 이동
                 if (useSpaceInfo.getBookingCarSpace() < spaceInfo.getBookingCarSpace()) {
                     // 차량 구획을 예약구획으로 이동
-                    parkMgtInfo.zoneUpdate(ZoneType.BOOKING);
+                    parkMgtInfo.updateZone(ZoneType.BOOKING);
                 }
             }
         }
@@ -78,7 +75,7 @@ public class SchedueldMgtService {
                 // 여유 공간이 있을때만 이동
                 if (useSpaceInfo.getCommonCarSpace() < spaceInfo.getCommonCarSpace()) {
                     // 차량을 공통 구획으로 이동
-                    parkMgtInfo.zoneUpdate(ZoneType.COMMON);
+                    parkMgtInfo.updateZone(ZoneType.COMMON);
                 }
             }
         }

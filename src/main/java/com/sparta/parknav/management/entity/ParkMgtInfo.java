@@ -66,11 +66,12 @@ public class ParkMgtInfo {
                 .build();
     }
 
-    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime, ParkBookingInfo parkBookingInfo, ZoneType zone) {
+    public static ParkMgtInfo of(ParkInfo parkInfo, String carNum, LocalDateTime enterTime, int charge, ParkBookingInfo parkBookingInfo, ZoneType zone) {
         return builder()
                 .parkInfo(parkInfo)
                 .carNum(carNum)
                 .enterTime(enterTime)
+                .charge(charge)
                 .parkBookingInfo(parkBookingInfo)
                 .zone(zone)
                 .build();
@@ -90,7 +91,7 @@ public class ParkMgtInfo {
         this.exitTime = exitTime;
     }
 
-    public void zoneUpdate(ZoneType zone){
+    public void updateZone(ZoneType zone){
         this.zone = zone;
     }
 }
