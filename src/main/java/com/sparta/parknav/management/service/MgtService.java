@@ -109,8 +109,8 @@ public class MgtService {
         );
 
         // 현재 시간대 주차 가능대수를 확인한다.
-        Optional<ParkBookingByHour> parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());
-        int availableCnt = parkBookingByHour.isPresent() ? parkBookingByHour.get().getAvailable() : parkOperInfo.getCmprtCo();
+        ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());
+        int availableCnt = parkBookingByHour!=null ? parkBookingByHour.getAvailable() : parkOperInfo.getCmprtCo();
         if (availableCnt < 0 || parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(parkInfo.getId()) >= parkOperInfo.getCmprtCo()) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }

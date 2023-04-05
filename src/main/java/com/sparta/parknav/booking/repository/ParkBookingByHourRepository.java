@@ -9,7 +9,5 @@ import java.util.Optional;
 
 public interface ParkBookingByHourRepository extends JpaRepository<ParkBookingByHour, Long> {
 
-    List<ParkBookingByHour> findByParkInfoIdAndDateBetweenAndAvailableEquals (Long parkInfoId, LocalDate startDate, LocalDate endDate, int available);
-
-    Optional<ParkBookingByHour> findByParkInfoIdAndDateAndTime (Long parkInfoId, LocalDate startDate, int time);
+    ParkBookingByHour findByParkInfoIdAndDateAndTime(Long parkInfoId, LocalDate startDate, int time);
 }
