@@ -19,6 +19,8 @@ import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,32 +45,33 @@ public class MgtService {
     private final ParkBookingInfoRepository parkBookingInfoRepository;
     private final ParkInfoRepository parkInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
+    private final RedissonClient redissonClient;
 
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-//        TransactionHandler transactionHandler = new TransactionHandler(transactionTemplate);
-        while (true) {
-            if (!redisLockRepository.lock(requestDto.getParkId())) {
-                // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
-                try {
-                    log.info("락 획득 실패");
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-                }
-            } else {
-                log.info("락 획득 성공, lock number : {}", requestDto.getParkId());
-                break;
+        if (requestDto.getParkId() == null) {
+            throw new CustomException(ErrorType.CONTENT_IS_NULL);
+        }
+        RLock lock = redissonClient.getLock("EnterLock" + requestDto.getParkId());
+        try {
+            //선행 락 점유 스레드가 존재하면 waitTime동안 락 점유를 기다리며 leaseTime 시간 이후로는 자동으로 락이 해제되기 때문에 다른 스레드도 일정 시간이 지난 후 락을 점유할 수 있습니다.
+            if (!lock.tryLock(30, 10, TimeUnit.SECONDS)) {
+                log.info("락 획득 실패");
+                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
+            }
+            log.info("락 획득 성공");
+            return enterLogic(requestDto, user);
+        } catch (InterruptedException e) {
+            log.info("락 획득 대기 중 인터럽트 발생");
+            Thread.currentThread().interrupt();
+            throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
+        } finally {
+            log.info("finally문 실행");
+            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+                log.info("언락 실행");
             }
         }
-        try {
-            return enterLogic(requestDto, user);
-        } finally {
-            // Lock 해제
-            redisLockRepository.unlock(requestDto.getParkId());
-        }
     }
-
 
     @Transactional
     public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
@@ -108,7 +112,7 @@ public class MgtService {
         if (bookingNowCnt + mgtNum >= cmprtCoNum) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
-        
+
         ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
         parkMgtInfoRepository.save(mgtSave);
 
