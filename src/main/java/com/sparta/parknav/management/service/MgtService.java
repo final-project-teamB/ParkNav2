@@ -166,14 +166,14 @@ public class MgtService {
     }
 
 
-    private ParkSpaceInfo getUseSpaceInfo(ParkInfo parkInfo) {
+    public ParkSpaceInfo getUseSpaceInfo(ParkInfo parkInfo) {
         int generalUseCnt = parkMgtInfoRepository.countByParkInfoIdAndZoneAndExitTimeIsNull(parkInfo.getId(), ZoneType.GENERAL);
         int bookingUseCnt = parkMgtInfoRepository.countByParkInfoIdAndZoneAndExitTimeIsNull(parkInfo.getId(), ZoneType.BOOKING);
         int commonUseCnt = parkMgtInfoRepository.countByParkInfoIdAndZoneAndExitTimeIsNull(parkInfo.getId(), ZoneType.COMMON);
         return ParkSpaceInfo.of(generalUseCnt, bookingUseCnt, commonUseCnt);
     }
 
-    private ParkSpaceInfo getParkSpaceInfo(ParkOperInfo parkOperInfo) {
+    public ParkSpaceInfo getParkSpaceInfo(ParkOperInfo parkOperInfo) {
         int cmprtCoNum = parkOperInfo.getCmprtCo();
         int generalZoneCnt = (int) (cmprtCoNum * GENERAL_RATE);
         int bookingZoneCnt = (int) (cmprtCoNum * BOOKING_RATE);
