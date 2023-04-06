@@ -31,9 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,22 +90,31 @@ public class MgtService {
         if (park.isPresent() && park.get().getExitTime() == null) {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
-
+        // SCENARIO ENTER 4-1
         LocalDateTime now = LocalDateTime.now();
         ParkBookingInfo bookingInfo;
         // 예약된 차량 찾기
-        Optional<ParkBookingInfo> parkBookingNow = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now, now);
+        Optional<ParkBookingInfo> parkBookingNow = parkBookingInfoRepository
+                .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now, now);
         // 예약된 차량이 아니라면 즉시 예약을 시도한다.
         if (parkBookingNow.isEmpty()) {
-            bookingInfo = bookingService.bookingParkNow(parkInfo, LocalDateTime.now(), LocalDateTime.now().plusHours(requestDto.getParkingTime()), requestDto.getCarNum());
+            bookingInfo = bookingService
+                    .bookingParkNow(parkInfo, LocalDateTime.now(), LocalDateTime.now().plusHours(requestDto.getParkingTime()), requestDto.getCarNum());
         } else {
             bookingInfo = parkBookingNow.get();
         }
+        // SCENARIO ENTER 4-2
+        ParkBookingInfo parkBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now);
+        List<LocalDateTime> notAllowedTimeList = findOverlappedTime(parkBookingInfo.getStartTime(), parkBookingInfo.getEndTime(), now, now.plusHours(requestDto.getParkingTime()));
+        if (notAllowedTimeList.size() > 0) {
+            throw new CustomException(ErrorType.printLocalDateTimeList(notAllowedTimeList));
+        }
 
+        // SCENARIO ENTER 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkInfo.getId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
-
+        // SCENARIO ENTER 6
         // 현재 시간대 주차 가능대수를 확인한다.
         ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());
         int availableCnt = parkBookingByHour!=null ? parkBookingByHour.getAvailable() : parkOperInfo.getCmprtCo();
@@ -168,4 +175,28 @@ public class MgtService {
         Page page1 = new PageImpl(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements());
         return ParkMgtListResponseDto.of(page1, parkName);
     }
+
+    public List<LocalDateTime> findOverlappedTime(LocalDateTime start1, LocalDateTime end1,
+                                                    LocalDateTime start2, LocalDateTime end2) {
+
+        List<LocalDateTime> betweenTime = new ArrayList<>();
+        if (start1.isAfter(end1) || start2.isAfter(end2)) {
+            throw new IllegalArgumentException("Invalid input: start cannot be after end");
+        }
+
+        if (start1.isEqual(end1) || start2.isEqual(end2)) {
+            return Collections.emptyList();
+        }
+
+        LocalDateTime start3 = start1.isAfter(start2) ? start1 : start2;
+        LocalDateTime end3 = end1.isBefore(end2) ? end1 : end2;
+
+        if (start3.isAfter(end3)) {
+            return Collections.emptyList();
+        }
+        betweenTime.add(start3);
+        betweenTime.add(end3);
+        return betweenTime;
+    }
+
 }
