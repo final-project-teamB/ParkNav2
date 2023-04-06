@@ -77,7 +77,6 @@ public class MgtService {
 //            // Lock 해제
 //            redisLockRepository.unlock(requestDto.getParkId());
 //        }
-    private final RedissonClient redissonClient;
 
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
         if (requestDto.getParkId() == null) {
