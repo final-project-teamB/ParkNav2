@@ -78,7 +78,7 @@ public class MgtService {
 //            redisLockRepository.unlock(requestDto.getParkId());
 //        }
 
-    public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
+    public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
         if (requestDto.getParkId() == null) {
             throw new CustomException(ErrorType.CONTENT_IS_NULL);
         }
