@@ -22,8 +22,6 @@ import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,10 +32,6 @@ import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,6 +71,8 @@ public class MgtService {
 //            // Lock 해제
 //            redisLockRepository.unlock(requestDto.getParkId());
 //        }
+    }
+
 
     @Transactional
     public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
@@ -130,7 +126,6 @@ public class MgtService {
         int charge = ParkingFeeCalculator.calculateParkingFee(Duration.between(bookingInfo.getStartTime(), bookingInfo.getEndTime()).toMinutes(), parkOperInfo);
 
         ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, charge, bookingInfo);
-        ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
         parkMgtInfoRepository.save(mgtSave);
 
         return CarInResponseDto.of(requestDto.getCarNum(), now);
