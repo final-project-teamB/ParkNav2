@@ -1,5 +1,6 @@
 package com.sparta.parknav.user.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
@@ -16,4 +17,16 @@ public class SignupRequestDto {
     @Pattern(regexp = "^[a-zA-Z0-9~!@#$%^&*()_+=?,./<>{}\\[\\]\\-]{8,16}$", message = "비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.")
     private String password;
 
+    @Builder
+    private SignupRequestDto(String userId, String password) {
+        this.userId = userId;
+        this.password = password;
+    }
+
+    public static SignupRequestDto of (String userId, String password){
+        return builder()
+                .userId(userId)
+                .password(password)
+                .build();
+    }
 }
