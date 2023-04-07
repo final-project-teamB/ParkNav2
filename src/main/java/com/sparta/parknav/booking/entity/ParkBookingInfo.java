@@ -44,7 +44,7 @@ public class ParkBookingInfo {
         this.endTime = endTime;
         this.user = user;
         this.parkInfo = parkInfo;
-        this.carNum =carNum;
+        this.carNum = carNum;
     }
 
     public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum) {
@@ -76,8 +76,11 @@ public class ParkBookingInfo {
                 .build();
     }
 
-    public void startTimeUpdate(LocalDateTime dateTime){
+    public void startTimeUpdate(LocalDateTime dateTime) {
         this.startTime = dateTime;
     }
 
+    public void endTimePlus(int hour) {
+        this.endTime = this.endTime.plusHours(hour);
+    }
 }
