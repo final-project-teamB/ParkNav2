@@ -156,7 +156,7 @@ public class MgtService {
         ParkBookingInfo bookingInfo = parkMgtInfo.getParkBookingInfo();
         long minutes = Duration.between(bookingInfo.getStartTime(), now).toMinutes();
 
-        if (bookingInfo.getUser() != null && bookingInfo.getEndTime().isAfter(now)) {
+        if (bookingInfo.getUser() != null) {
             minutes = Duration.between(bookingInfo.getStartTime(), bookingInfo.getEndTime()).toMinutes();
         }
 
