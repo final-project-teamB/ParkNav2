@@ -33,7 +33,8 @@ public enum ErrorType {
     FAILED_TO_ACQUIRE_LOCK(100, "락 권한을 얻는데 실패했습니다."),
     NOT_ALLOWED_BOOKING_TIME(400, "예약불가한 시간이 포함되어 있습니다."),
     NOT_FOUND_PARK_OPER_INFO(400, "해당 주차장 운영정보가 없습니다."),
-    NOT_OPEN_SELECTED_DATE(400, "선택하신 시간에는 운영하지 않습니다.")
+    NOT_OPEN_SELECTED_DATE(400, "선택하신 시간에는 운영하지 않습니다."),
+    PARK_TIME_NOT_EXIST(400, "주차 예정 시간을 입력 해주세요.")
     ;
 
     private int code;

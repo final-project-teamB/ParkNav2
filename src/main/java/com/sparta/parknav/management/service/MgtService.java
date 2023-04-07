@@ -133,6 +133,7 @@ public class MgtService {
                 bookingInfo = parkBookingPlusHour.get();
                 bookingInfo.startTimeUpdate(now);
             } else {
+                if (requestDto.getParkingTime() <= 0) throw new CustomException(ErrorType.PARK_TIME_NOT_EXIST);
                 bookingInfo = bookingService.bookingParkNow(parkInfo, LocalDateTime.now(), LocalDateTime.now().plusHours(requestDto.getParkingTime()), requestDto.getCarNum());
             }
         } else {
