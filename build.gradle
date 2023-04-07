@@ -86,7 +86,7 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.00
             }
-
+            // 테스트 커버리지에서 Q클래스 제외
             excludes = [] + Qdomains
 
         }
@@ -95,12 +95,13 @@ jacocoTestCoverageVerification {
 }
 
 jacocoTestReport {
+    //레포트 파일 생성
     reports {
         html.enabled true
         xml.enabled false
         csv.enabled true
     }
-
+    // jacocoReport 에서 q 클래스는 제외
     def Qdomains = []
     for(qPattern in "**/QA" .. "**/QZ"){
         Qdomains.add(qPattern+"*")
