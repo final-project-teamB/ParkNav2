@@ -32,8 +32,6 @@ public class ParkBookingByHourRepositoryImpl implements ParkBookingByHourReposit
         int startTime = startDate.getHour();
         int endTime = endDate.getHour();
 
-        log.info("days = " + days);
-
         List<ParkBookingByHour> result = new ArrayList<>();
         if (days == 0) {
             result = jpaQueryFactory.selectFrom(qParkBookingByHour)
