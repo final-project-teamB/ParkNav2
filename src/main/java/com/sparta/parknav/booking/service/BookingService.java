@@ -220,12 +220,12 @@ public class BookingService {
     public void parkBookingByHourSave(Long id, ParkOperInfo parkOperInfo, LocalDateTime startDate, LocalDateTime endDate) {
 
         List<ParkBookingByHour> parkBookingByHourList = new ArrayList<>();
-        // 시간차이를 구한다
-        int startTime = startDate.getHour();
-        int endTime = endDate.getMinute() != 0 ? endDate.getHour() + 1 : endDate.getHour();
-        long hours = endTime - startTime;
-        // 시작시간을 구한다
-        // 총 시간만큼 For문을 순회한다
+
+        long hours = Duration.between(startDate, endDate).toHours();
+        if (endDate.getMinute() != 0 || endDate.getSecond() != 0) {
+            hours++;
+        }
+
         for (int i = 0; i < hours; i++) {
             LocalDateTime time = startDate.plusHours(i);
             // 기존에 저장 된 ParkBookingByHour가 있으면 available -1 없을경우 새로 저장한다
