@@ -3,8 +3,10 @@ package com.sparta.parknav.user.service;
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav._global.jwt.JwtUtil;
+import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.user.dto.LoginRequestDto;
 import com.sparta.parknav.user.dto.SignupRequestDto;
+import com.sparta.parknav.user.entity.Admin;
 import com.sparta.parknav.user.entity.User;
 import com.sparta.parknav.user.repository.AdminRepository;
 import com.sparta.parknav.user.repository.UserRepository;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("유저 테스트")
 class UserServiceTest {
     @InjectMocks
     private UserService userService;
@@ -55,7 +58,7 @@ class UserServiceTest {
         Exception exception = assertThrows(CustomException.class, () -> {
             userService.signup(signupRequestDto);
         });
-        assertTrue(exception instanceof CustomException);
+        assertEquals(exception.getMessage(), ErrorType.DUPLICATED_USERID.getMsg());
 
     }
 
@@ -93,6 +96,47 @@ class UserServiceTest {
         when(userRepository.findByUserId(any())).thenReturn(Optional.of(user));
         Exception exception = assertThrows(CustomException.class, () -> {
             userService.login(loginRequestDto, responseMock);
+        });
+        assertEquals(exception.getMessage(), ErrorType.NOT_MATCHING_INFO.getMsg());
+    }
+    
+    @Test
+    @DisplayName("관리자로그인-성공")
+    void adminLoginTest(){
+        LoginRequestDto loginRequestDto = LoginRequestDto.of("admin","1234");
+        ParkInfo parkInfo = ParkInfo.of("테스트주차장", "주소1", "주소2", "31","123");;
+        Admin admin = Admin.of("admin","1234",parkInfo);
+        when(adminRepository.findByAdminId(loginRequestDto.getUserId())).thenReturn(Optional.of(admin));
+        adminRepository.save(admin);
+        HttpServletResponse responseMock = mock(HttpServletResponse.class);
+        userService.loginAdmin(loginRequestDto,responseMock);
+    }
+
+    @Test
+    @DisplayName("관리자로그인-아이디-실패")
+    void adminLoginFailIdTest(){
+        LoginRequestDto loginRequestDto = LoginRequestDto.of("admin2","1234");
+        ParkInfo parkInfo = ParkInfo.of("테스트주차장", "주소1", "주소2", "31","123");;
+        Admin admin = Admin.of("admin","1234",parkInfo);
+        adminRepository.save(admin);
+        HttpServletResponse responseMock = mock(HttpServletResponse.class);
+        Exception exception = assertThrows(CustomException.class, () -> {
+            userService.loginAdmin(loginRequestDto,responseMock);
+        });
+        assertEquals(exception.getMessage(), ErrorType.NOT_MATCHING_INFO.getMsg());
+    }
+
+    @Test
+    @DisplayName("관리자로그인-패스워드-실패")
+    void adminLoginFailPwTest(){
+        LoginRequestDto loginRequestDto = LoginRequestDto.of("admin","12345");
+        ParkInfo parkInfo = ParkInfo.of("테스트주차장", "주소1", "주소2", "31","123");;
+        Admin admin = Admin.of("admin", "1234",parkInfo);
+        adminRepository.save(admin);
+        when(adminRepository.findByAdminId(any())).thenReturn(Optional.of(admin));
+        HttpServletResponse responseMock = mock(HttpServletResponse.class);
+        Exception exception = assertThrows(CustomException.class, () -> {
+            userService.loginAdmin(loginRequestDto,responseMock);
         });
         assertEquals(exception.getMessage(), ErrorType.NOT_MATCHING_INFO.getMsg());
     }

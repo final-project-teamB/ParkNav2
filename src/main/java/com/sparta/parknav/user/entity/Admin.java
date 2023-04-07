@@ -2,6 +2,7 @@ package com.sparta.parknav.user.entity;
 
 import com.sparta.parknav.parking.entity.ParkInfo;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,4 +27,20 @@ public class Admin {
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "park_info_id")
     private ParkInfo parkInfo;
+
+    @Builder
+    public Admin(String adminId, String password, ParkInfo parkInfo) {
+        this.adminId = adminId;
+        this.password = password;
+        this.parkInfo = parkInfo;
+    }
+
+    public static Admin of(String adminId, String password, ParkInfo parkInfo) {
+        return builder()
+                .adminId(adminId)
+                .password(password)
+                .parkInfo(parkInfo)
+                .build();
+    }
+
 }
