@@ -86,8 +86,12 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.00
             }
-            // 테스트 커버리지에서 Q클래스 제외
-            excludes = [] + Qdomains
+            // 테스트 커버리지에서 제외 항목 추가
+            excludes = [ "**/*Application*",
+                         "**/_global/*",
+                         "**/dto/*",
+                         "**/redis/*"
+            ] + Qdomains
 
         }
 
@@ -108,10 +112,14 @@ jacocoTestReport {
     }
 
     afterEvaluate {
-
+        // 레포트에서 제외 항목 추가
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it,
-                    exclude: [] + Qdomains)
+                    exclude: ["**/*Application*",
+                              "**/_global/*",
+                              "**/dto/*",
+                              "**/redis/*"
+                    ] + Qdomains)
         }))
     }
 
