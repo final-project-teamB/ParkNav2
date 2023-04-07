@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -103,20 +104,40 @@ public class MgtService {
                 throw new CustomException(ErrorType.printLocalDateTimeList(notAllowedTimeList));
             }
         }
-        // SCENARIO ENTER 4-1
-        // 예약된 차량이 아니라면 즉시 예약을 시도한다.
-        if (parkBookingNow.isEmpty()) {
-            bookingInfo = bookingService
-                    .bookingParkNow(parkInfo, LocalDateTime.now(), LocalDateTime.now().plusHours(requestDto.getParkingTime()), requestDto.getCarNum());
-        } else {
-            bookingInfo = parkBookingNow.get();
-        }
-
 
         // SCENARIO ENTER 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkInfo.getId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
+
+        // SCENARIO ENTER 4-1
+        // 예약된 차량이 아니라면 즉시 예약을 시도한다.
+        if (parkBookingNow.isEmpty()) {
+            // 예약정보가 없을경우 +1시간을 해서 예약이 있는지를 확인한다
+            LocalDateTime hourPlusTime = LocalDateTime.of(now.plusHours(1).toLocalDate(), LocalTime.of(now.plusHours(1).getHour(), 0, 0));
+            Optional<ParkBookingInfo> parkBookingPlusHour = parkBookingInfoRepository
+                    .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), hourPlusTime, hourPlusTime);
+            // +1시간 예약이 있다면 예약시간을 업데이트 후 해당 예약으로 진행한다
+            if (parkBookingPlusHour.isPresent()) {
+                // 즉시 예약 로직이 아닌 기존 예약에 시간을 추가하는것이기 때문에 주차공간이 있는지 여부를 검증하고 available을 추가해줘야함
+                ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());
+                if (parkBookingByHour == null) {
+                    parkBookingByHourRepository.save(ParkBookingByHour.of(now.toLocalDate(), now.getHour(), parkOperInfo.getCmprtCo() - 1, parkOperInfo.getParkInfo()));
+                } else if (parkBookingByHour.getAvailable() <= 0) {
+                    throw new CustomException(ErrorType.NOT_PARKING_SPACE);
+                } else {
+                    parkBookingByHour.updateCnt(-1);
+                }
+                bookingInfo = parkBookingPlusHour.get();
+                bookingInfo.startTimeUpdate(now);
+            } else {
+                bookingInfo = bookingService.bookingParkNow(parkInfo, LocalDateTime.now(), LocalDateTime.now().plusHours(requestDto.getParkingTime()), requestDto.getCarNum());
+            }
+        } else {
+            bookingInfo = parkBookingNow.get();
+        }
+
+
         // SCENARIO ENTER 6
         // 현재 시간대 주차 가능대수를 확인한다.
         ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());

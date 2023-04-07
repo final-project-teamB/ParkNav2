@@ -76,4 +76,8 @@ public class ParkBookingInfo {
                 .build();
     }
 
+    public void startTimeUpdate(LocalDateTime dateTime){
+        this.startTime = dateTime;
+    }
+
 }
