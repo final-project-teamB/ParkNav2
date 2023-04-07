@@ -5,6 +5,7 @@ import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav.booking.entity.ParkBookingByHour;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingByHourRepository;
+import com.sparta.parknav.booking.repository.ParkBookingByHourRepositoryCustom;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.booking.service.BookingService;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
@@ -45,6 +46,7 @@ public class MgtService {
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final ParkBookingByHourRepository parkBookingByHourRepository;
     private final ParkOperInfoRepository parkOperInfoRepository;
+    private final ParkBookingByHourRepositoryCustom parkBookingByHourRepositoryCustom;
 
     private final BookingService bookingService;
 
@@ -163,9 +165,7 @@ public class MgtService {
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
         // SCENARIO EXIT 5
-        int endHour = (bookingInfo.getEndTime().getMinute() == 0 && bookingInfo.getEndTime().getSecond() == 0) ? bookingInfo.getEndTime().getHour() - 1 : bookingInfo.getEndTime().getHour();
-        List<ParkBookingByHour> hourList = parkBookingByHourRepository
-                .findByParkInfoIdAndDateAndTimeBetween(parkOperInfo.getParkInfo().getId(), now.toLocalDate(), now.getHour(), endHour);
+        List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(parkOperInfo.getParkInfo().getId(), now, bookingInfo.getEndTime());
         hourList.forEach(hour -> hour.updateCnt(1));
 
         parkMgtInfo.update(charge, now);
