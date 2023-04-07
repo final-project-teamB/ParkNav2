@@ -1,4 +1,4 @@
-package com.sparta.parknav.scheduler;
+package com.sparta.parknav._global.scheduler;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
