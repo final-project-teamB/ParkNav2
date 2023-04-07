@@ -25,71 +25,33 @@ public class SchedulerService {
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final ParkOperInfoRepository parkOperInfoRepository;
 
-    public void scheduleRunTestPre(List<ParkMgtInfo> parkMgtInfos) {
-
-        for (ParkMgtInfo p : parkMgtInfos) {
-            ParkBookingInfo parkBookingInfo = p.getParkBookingInfo();
-            int endTime = parkBookingInfo.getEndTime().getHour();
-            ParkBookingByHour parkBookingByHour = parkBookingByHourRepository
-                    .findByParkInfoIdAndDateAndTime(p.getParkInfo().getId(), parkBookingInfo.getEndTime().plusHours(1).toLocalDate(), endTime + 1);
-
-            System.out.println("id = " + p.getId());
-            System.out.println("carNum = " + p.getCarNum());
-            System.out.println("현재 예약 종료 시간 = " + p.getParkBookingInfo().getEndTime());
-            if (parkBookingByHour != null) {
-                System.out.println("현재 예약 종료 시간 + 1시간의 parkBookingByHour.available  = " + parkBookingByHour.getAvailable());
-            } else {
-                System.out.println("한 시간 뒤의 parkBookingByHour.available은 존재하지 않습니다.");
-            }
-        }
-    }
-
-    public void scheduleRunTestPost(List<ParkMgtInfo> parkMgtInfos) {
-
-        for (ParkMgtInfo p : parkMgtInfos) {
-            ParkBookingInfo parkBookingInfo = p.getParkBookingInfo();
-            int endTime = parkBookingInfo.getEndTime().getHour();
-            ParkBookingByHour parkBookingByHour = parkBookingByHourRepository
-                    .findByParkInfoIdAndDateAndTime(p.getParkInfo().getId(), parkBookingInfo.getEndTime().toLocalDate(), endTime);
-
-            System.out.println("id = " + p.getId());
-            System.out.println("carNum = " + p.getCarNum());
-            System.out.println("parkBookingByHour.getId() = " + parkBookingByHour.getId());
-            System.out.println("이후 예약 종료 시간 = " + p.getParkBookingInfo().getEndTime());
-            if (parkBookingByHour != null) {
-                System.out.println("이후 시간의 parkBookingByHour.available  = " + parkBookingByHour.getAvailable());
-            } else {
-                System.out.println("한 시간 뒤의 parkBookingByHour.available은 존재하지 않습니다.");
-            }
-        }
-    }
-
     @Transactional
-    @Scheduled(cron = "* * */1 * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void scheduleRun() {
 
         List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByExitTimeIsNullAndParkBookingInfoEndTimeBefore(LocalDateTime.now());
-        scheduleRunTestPre(parkMgtInfos);
 
         for (ParkMgtInfo p : parkMgtInfos) {
             ParkBookingInfo parkBookingInfo = p.getParkBookingInfo();
+            if (parkBookingInfo == null) {
+                throw new CustomException(ErrorType.NOT_FOUND_BOOKING);
+            }
             ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(p.getParkInfo().getId()).orElseThrow(
                     () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
             );
-
-            parkBookingInfo.endTimeUpdate(parkBookingInfo.getEndTime().getHour() + 1);
-            int endTime = parkBookingInfo.getEndTime().getHour();
+            parkBookingInfo.endTimePlus(1);
+            LocalDateTime endDateTime = parkBookingInfo.getEndTime();
+            int endTime = endDateTime.getHour();
             ParkBookingByHour parkBookingByHour = parkBookingByHourRepository
-                    .findByParkInfoIdAndDateAndTime(p.getParkInfo().getId(), parkBookingInfo.getEndTime().toLocalDate(), endTime);
+                    .findByParkInfoIdAndDateAndTime(p.getParkInfo().getId(), endDateTime.toLocalDate(), endTime);
 
             if (parkBookingByHour != null) {
                 parkBookingByHour.updateCnt(-1);
             } else {
                 parkBookingByHour = ParkBookingByHour
-                        .of(parkBookingInfo.getEndTime().toLocalDate(), endTime, parkOperInfo.getCmprtCo() - 1, p.getParkInfo());
+                        .of(endDateTime.toLocalDate(), endTime, parkOperInfo.getCmprtCo() - 1, p.getParkInfo());
                 parkBookingByHourRepository.save(parkBookingByHour);
             }
         }
-        scheduleRunTestPost(parkMgtInfos);
     }
 }

@@ -80,7 +80,7 @@ public class ParkBookingInfo {
         this.startTime = dateTime;
     }
 
-    public void endTimeUpdate(int hour) {
-        this.endTime = this.endTime.withHour(hour);
+    public void endTimePlus(int hour) {
+        this.endTime = this.endTime.plusHours(hour);
     }
 }
