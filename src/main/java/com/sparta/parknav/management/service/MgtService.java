@@ -85,8 +85,8 @@ public class MgtService {
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
         // SCENARIO ENTER 3
-        Optional<ParkMgtInfo> park = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
-        if (park.isPresent() && park.get().getExitTime() == null) {
+        Optional<ParkMgtInfo> park = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumAndExitTimeNullOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
+        if (park.isPresent()) {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
         // SCENARIO ENTER 4-1
@@ -141,26 +141,35 @@ public class MgtService {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
 
-        LocalDateTime now = LocalDateTime.now();
         // SCENARIO EXIT 2
-        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
-                () -> new CustomException(ErrorType.NOT_FOUND_CAR)
+        ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumAndExitTimeNullOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_CAR_IN_PARK)
         );
-        // SCENARIO EXIT 3
-        if (parkMgtInfo.getExitTime() != null) {
-            throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
-        }
 
+        // SCENARIO EXIT 3
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkMgtInfo.getParkInfo().getId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
 
-        Duration duration = Duration.between(parkMgtInfo.getEnterTime(), now);
-        long minutes = duration.toMinutes();
         // SCENARIO EXIT 4
+        LocalDateTime now = LocalDateTime.now();
+        ParkBookingInfo bookingInfo = parkMgtInfo.getParkBookingInfo();
+        long minutes = Duration.between(bookingInfo.getStartTime(), now).toMinutes();
+
+        if (bookingInfo.getUser() != null && bookingInfo.getEndTime().isAfter(now)) {
+            minutes = Duration.between(bookingInfo.getStartTime(), bookingInfo.getEndTime()).toMinutes();
+        }
+
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
+        // SCENARIO EXIT 5
+        int endHour = (bookingInfo.getEndTime().getMinute() == 0 && bookingInfo.getEndTime().getSecond() == 0) ? bookingInfo.getEndTime().getHour() - 1 : bookingInfo.getEndTime().getHour();
+        List<ParkBookingByHour> hourList = parkBookingByHourRepository
+                .findByParkInfoIdAndDateAndTimeBetween(parkOperInfo.getParkInfo().getId(), now.toLocalDate(), now.getHour(), endHour);
+        hourList.forEach(hour -> hour.updateCnt(1));
+
         parkMgtInfo.update(charge, now);
+
         return CarOutResponseDto.of(charge, now);
     }
 

@@ -20,7 +20,7 @@ public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo,Long> {
 
     int countByParkInfoIdAndExitTimeIsNull(Long id);
 
-    Optional<ParkMgtInfo> findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(Long parkId, String carNum);
+    Optional<ParkMgtInfo> findTopByParkInfoIdAndCarNumAndExitTimeNullOrderByEnterTimeDesc(Long parkId, String carNum);
 
     Optional<ParkMgtInfo> findByParkBookingInfoId(Long id);
 
