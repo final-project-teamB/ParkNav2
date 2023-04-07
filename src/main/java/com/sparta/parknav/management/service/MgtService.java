@@ -49,7 +49,6 @@ public class MgtService {
     private final BookingService bookingService;
 
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-//        TransactionHandler transactionHandler = new TransactionHandler(transactionTemplate);
 //        while (true) {
 //            if (!redisLockRepository.lock(requestDto.getParkId())) {
 //                // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
@@ -66,7 +65,7 @@ public class MgtService {
 //            }
 //        }
 //        try {
-            return enterLogic(requestDto, user);
+        return enterLogic(requestDto, user);
 //        } finally {
 //            // Lock 해제
 //            redisLockRepository.unlock(requestDto.getParkId());
@@ -96,6 +95,15 @@ public class MgtService {
         // 예약된 차량 찾기
         Optional<ParkBookingInfo> parkBookingNow = parkBookingInfoRepository
                 .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now, now);
+        // SCENARIO ENTER 4-2
+        ParkBookingInfo parkBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now.minusMinutes(10));
+        if (parkBookingInfo != null) {
+            List<LocalDateTime> notAllowedTimeList = findOverlappedTime(parkBookingInfo.getStartTime(), parkBookingInfo.getEndTime(), now, now.plusHours(requestDto.getParkingTime()));
+            if (notAllowedTimeList.size() > 0) {
+                throw new CustomException(ErrorType.printLocalDateTimeList(notAllowedTimeList));
+            }
+        }
+        // SCENARIO ENTER 4-1
         // 예약된 차량이 아니라면 즉시 예약을 시도한다.
         if (parkBookingNow.isEmpty()) {
             bookingInfo = bookingService
@@ -103,12 +111,7 @@ public class MgtService {
         } else {
             bookingInfo = parkBookingNow.get();
         }
-        // SCENARIO ENTER 4-2
-        ParkBookingInfo parkBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now);
-        List<LocalDateTime> notAllowedTimeList = findOverlappedTime(parkBookingInfo.getStartTime(), parkBookingInfo.getEndTime(), now, now.plusHours(requestDto.getParkingTime()));
-        if (notAllowedTimeList.size() > 0) {
-            throw new CustomException(ErrorType.printLocalDateTimeList(notAllowedTimeList));
-        }
+
 
         // SCENARIO ENTER 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkInfo.getId()).orElseThrow(
@@ -117,7 +120,7 @@ public class MgtService {
         // SCENARIO ENTER 6
         // 현재 시간대 주차 가능대수를 확인한다.
         ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());
-        int availableCnt = parkBookingByHour!=null ? parkBookingByHour.getAvailable() : parkOperInfo.getCmprtCo();
+        int availableCnt = parkBookingByHour != null ? parkBookingByHour.getAvailable() : parkOperInfo.getCmprtCo();
         if (availableCnt < 0 || parkMgtInfoRepository.countByParkInfoIdAndExitTimeIsNull(parkInfo.getId()) >= parkOperInfo.getCmprtCo()) {
             throw new CustomException(ErrorType.NOT_PARKING_SPACE);
         }
@@ -177,7 +180,7 @@ public class MgtService {
     }
 
     public List<LocalDateTime> findOverlappedTime(LocalDateTime start1, LocalDateTime end1,
-                                                    LocalDateTime start2, LocalDateTime end2) {
+                                                  LocalDateTime start2, LocalDateTime end2) {
 
         List<LocalDateTime> betweenTime = new ArrayList<>();
         if (start1.isAfter(end1) || start2.isAfter(end2)) {
