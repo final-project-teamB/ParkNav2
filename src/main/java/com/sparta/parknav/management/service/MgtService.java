@@ -119,7 +119,6 @@ public class MgtService {
                     .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), hourPlusTime, hourPlusTime);
             // +1시간 예약이 있다면 예약시간을 업데이트 후 해당 예약으로 진행한다
             if (parkBookingPlusHour.isPresent()) {
-                LocalDateTime hourMinusTime = LocalDateTime.of(now.minusHours(1).toLocalDate(), LocalTime.of(now.minusHours(1).getHour(), 0, 0));
                 // 즉시 예약 로직이 아닌 기존 예약에 시간을 추가하는것이기 때문에 주차공간이 있는지 여부를 검증하고 available을 추가해줘야함
                 ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(parkInfo.getId(), now.toLocalDate(), now.getHour());
                 if (parkBookingByHour == null) {
@@ -130,7 +129,7 @@ public class MgtService {
                     parkBookingByHour.updateCnt(-1);
                 }
                 bookingInfo = parkBookingPlusHour.get();
-                bookingInfo.startTimeUpdate(1);
+                bookingInfo.startTimeUpdate(now);
             } else {
                 bookingInfo = bookingService.bookingParkNow(parkInfo, LocalDateTime.now(), LocalDateTime.now().plusHours(requestDto.getParkingTime()), requestDto.getCarNum());
             }
