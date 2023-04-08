@@ -68,6 +68,10 @@ $(document).ready(function () {
     $('#enter-btn').click(function () {
         let carNum = $("#enterCarNum").val();
         let parkingTime = $("#enterParkTime").val();
+        if (carNum ===""){
+            alert("차량 번호를 입력해주세요");
+            return false;
+        }
         if (parkingTime > 72) {
             alert("입차 최대 가능시간은 72시간입니다");
             return false
