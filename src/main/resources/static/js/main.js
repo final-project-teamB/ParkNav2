@@ -140,6 +140,10 @@ $(document).ready(function () {
         const params = new URLSearchParams(body).toString();
         // 주차예약 버튼 클릭 시 모달창 띄우기
         $('#reservation-modal').modal('show');
+        $("#parking-lot-booking-modal").attr("class","alert alert-warning")
+        $('#parking-lot-booking-modal').text("운영시간이 아닙니다");
+        $("#parking-lot-not-allowed-time-div").hide();
+        $("#parking_reservation").hide();
         axios.get(`/api/booking/${id}?${params}`)
             .then(response => {
                 console.log(response)
