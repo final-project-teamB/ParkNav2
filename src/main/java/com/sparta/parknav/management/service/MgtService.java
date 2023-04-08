@@ -114,7 +114,7 @@ public class MgtService {
         // 예약차량이며 해당 예약내역으로 주차장을 사용하지 않은 경우
         if (enterCarBookingInfo.isPresent() && !parkMgtInfoRepository.existsByParkBookingInfoIdAndExitTimeIsNotNull(enterCarBookingInfo.get().getId())) {
             mgtSave = getParkMgtBookingCar(requestDto, parkInfo, parkOperInfo, parkSpaceInfo, useSpaceInfo, now, enterCarBookingInfo);
-        // 일반차량인 경우
+            // 일반차량인 경우
         } else {
             mgtSave = getParkMgtGeneralCar(requestDto, parkInfo, parkSpaceInfo, useSpaceInfo, now);
         }
@@ -148,6 +148,8 @@ public class MgtService {
             // 예약종료시간 이전에 출차해도 요금은 예약종료시간까지로 계산하며, 예약종료시간 이후에 출차하면 예약시작시간부터 출차한 시간까지로 요금을 계산한다.
             LocalDateTime chargeEndTime = now.isBefore(bookingInfo.getEndTime()) ? bookingInfo.getEndTime() : now;
             minutes = Duration.between(bookingInfo.getStartTime(), chargeEndTime).toMinutes();
+            // 예약 종료 시간을 현재시간으로 변경
+            bookingInfo.endTimeUpdate(now);
         }
 
         // 일반구역 차량 출차시 공통구역에 일반차량이 있다면, 공통구역에서 일반구역으로 옮긴다.
@@ -164,6 +166,7 @@ public class MgtService {
 
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
         parkMgtInfo.update(charge, now);
+
 
         return CarOutResponseDto.of(charge, now);
     }
@@ -204,10 +207,10 @@ public class MgtService {
         // 일반구역 자리가 있는 경우
         if (parkSpaceInfo.getGeneralCarSpace() > useSpaceInfo.getGeneralCarSpace()) {
             mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, ZoneType.GENERAL);
-        // 일반구역 자리 없고 공통 구역 자리 있는 경우
-        } else if (parkSpaceInfo.getCommonCarSpace() > useSpaceInfo.getCommonCarSpace()){
+            // 일반구역 자리 없고 공통 구역 자리 있는 경우
+        } else if (parkSpaceInfo.getCommonCarSpace() > useSpaceInfo.getCommonCarSpace()) {
             mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, ZoneType.COMMON);
-        // 일반구역, 공통구역 모두 자리 없는 경우
+            // 일반구역, 공통구역 모두 자리 없는 경우
         } else {
             throw new CustomException(ErrorType.NOT_PARKING_COMMON_SPACE);
         }
