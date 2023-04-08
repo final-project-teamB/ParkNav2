@@ -190,6 +190,9 @@ public class MgtService {
         List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(parkOperInfo.getParkInfo().getId(), now, bookingInfo.getEndTime());
         hourList.forEach(hour -> hour.updateCnt(1));
 
+        // SCENARIO EXIT 6
+        bookingInfo.endTimeUpdate(now);
+
         parkMgtInfo.update(charge, now);
 
         return CarOutResponseDto.of(charge, now);
