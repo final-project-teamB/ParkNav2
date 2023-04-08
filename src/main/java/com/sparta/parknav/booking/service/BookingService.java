@@ -12,6 +12,7 @@ import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.entity.StatusType;
 import com.sparta.parknav.booking.repository.CarRepository;
 import com.sparta.parknav.booking.repository.ParkBookingByHourRepository;
+import com.sparta.parknav.booking.repository.ParkBookingByHourRepositoryCustom;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
@@ -49,6 +50,7 @@ public class BookingService {
     private final ParkInfoRepository parkInfoRepository;
     private final CarRepository carRepository;
     private final ParkBookingByHourRepository parkBookingByHourRepository;
+    private final ParkBookingByHourRepositoryCustom parkBookingByHourRepositoryCustom;
 
     public BookingInfoResponseDto getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
@@ -154,6 +156,9 @@ public class BookingService {
         if (!bookingInfo.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorType.NOT_BOOKING_USER);
         }
+
+        List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(bookingInfo.getParkInfo().getId(), bookingInfo.getStartTime(), bookingInfo.getEndTime());
+        hourList.forEach(hour -> hour.updateCnt(1));
 
         parkBookingInfoRepository.deleteById(id);
     }
