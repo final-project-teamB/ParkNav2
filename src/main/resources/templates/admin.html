@@ -31,6 +31,7 @@
             <button class="btn btn-outline-success mx-2" id="login-button" data-toggle="modal"
                     data-target="#loginModal">로그인
             </button>
+            <button class="btn btn-outline-warning mx-2" id="enter-button" data-toggle="modal" data-target="#enterModal">입차하기</button>
             <button class="btn btn-outline-danger mx-2" id="logout-button">로그아웃</button>
 
         </div>
@@ -49,6 +50,7 @@
                     <th>출차시간</th>
                     <th>주차요금</th>
                     <th>현재상태</th>
+                    <th>출차버튼</th>
                 </tr>
                 </thead>
                 <tbody id="parking-list">
@@ -91,6 +93,28 @@
         </div>
     </div>
 </div>
-
+<!-- 입차하기 Modal -->
+<div class="modal fade" id="enterModal" tabindex="-1" aria-labelledby="enterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signupModalLabel">입차</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="enterCarNum" class="form-label">차량번호</label>
+                        <input type="text" class="form-control" id="enterCarNum" aria-describedby="emailHelp">
+                    </div>
+                    <div class="mb-3">
+                        <label for="enterParkTime" class="form-label">입차시간</label>
+                        <input type="number" class="form-control" id="enterParkTime" max="72">
+                    </div>
+                    <button type="button" id="enter-btn" class="btn btn-primary">입차하기</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -204,13 +204,14 @@ public class MgtService {
         Pageable pageable = PageRequest.of(page, size);
         Optional<ParkInfo> parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId());
         String parkName = parkInfo.get().getName();
+        Long parkId = parkInfo.get().getId();
         Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoIdOrderByEnterTimeDesc(admin.getParkInfo().getId(), pageable);
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
                 .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
                 .collect(Collectors.toList());
 
         Page page1 = new PageImpl(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements());
-        return ParkMgtListResponseDto.of(page1, parkName);
+        return ParkMgtListResponseDto.of(page1, parkName,parkId);
     }
 
     public List<LocalDateTime> findOverlappedTime(LocalDateTime start1, LocalDateTime end1,
