@@ -32,12 +32,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -205,21 +205,14 @@ public class BookingService {
         return new PageImpl<>(responseDtoList, pageable, bookingInfoList.getTotalElements());
     }
 
-    private List<LocalDateTime> getNotAllowedTimeList(Long id, BookingInfoRequestDto requestDto) {
+    private List<LocalDateTime> getNotAllowedTimeList(Long parkId, BookingInfoRequestDto requestDto) {
 
-        List<LocalDateTime> notAllowedTimeList = new ArrayList<>();
+        List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(parkId, requestDto.getStartDate(), requestDto.getEndDate());
 
-        LocalDate startDate = requestDto.getStartDate().toLocalDate();
-        int startTime = requestDto.getStartDate().getHour();
-        int endTime = requestDto.getEndDate().getMinute() != 0 ? requestDto.getEndDate().getHour() + 1 : requestDto.getEndDate().getHour();
-        int term = endTime - startTime;
-        for (int i = 0; i < term; i++, startTime++) {
-            ParkBookingByHour parkBookingByHour = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(id, startDate, startTime);
-            if (parkBookingByHour != null && parkBookingByHour.getAvailable() == 0) {
-                notAllowedTimeList.add(LocalDateTime.of(parkBookingByHour.getDate(), LocalTime.of(parkBookingByHour.getTime(), 0, 0)));
-            }
-        }
-        return notAllowedTimeList;
+        return hourList.stream()
+                .filter(hour -> hour.getAvailable() <= 0)
+                .map(hour -> LocalDateTime.of(hour.getDate(), LocalTime.of(hour.getTime(), 0, 0)))
+                .collect(Collectors.toList());
     }
 
     public void parkBookingByHourSave(Long id, ParkOperInfo parkOperInfo, LocalDateTime startDate, LocalDateTime endDate) {
