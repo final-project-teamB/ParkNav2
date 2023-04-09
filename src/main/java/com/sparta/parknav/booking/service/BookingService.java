@@ -68,18 +68,22 @@ public class BookingService {
     }
 
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
+
         // SCENARIO BOOKING 1
         if (requestDto.getStartDate().equals(requestDto.getEndDate())||requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
         }
+
         // SCENARIO BOOKING 2
         ParkInfo parkInfo = parkInfoRepository.findById(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
+
         // SCENARIO BOOKING 3
         Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
-        ); // 2~5 , 1~3
+        );
+
         // SCENARIO BOOKING 4
         List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoIdAndUserIdAndCarNum(parkInfo.getId(), user.getId(), car.getCarNum());
         for (ParkBookingInfo p : parkBookingInfo) {
@@ -90,12 +94,13 @@ public class BookingService {
             }
         }
 
+        // SCENARIO BOOKING 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
-        // 시간별 예약가능 여부를 확인하여 불가한 경우의 시간을 List에 담는다.
-        List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkId, requestDto, parkOperInfo);
 
+        // SCENARIO BOOKING 6
+        List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkId, requestDto, parkOperInfo);
         if (notAllowedTimeList.size() > 0) {
             throw new CustomException(ErrorType.NOT_ALLOWED_BOOKING_TIME);
         }
@@ -162,7 +167,7 @@ public class BookingService {
 
         List<LocalDateTime> notAllowedTimeList = new ArrayList<>();
 
-        // 예약 구역 수 = 총 구획 수 / 2 로 설정 -> 구역 수는 바뀔 수 있다. 모든 시간별 예약 구역 수는 동일하다고 가정하고 우선 이렇게 설정하였다.
+        // 예약 구역 수 = 총 구획 수 / 2 로 설정
         int bookingSectionCnt = parkOperInfo.getCmprtCo() / 2;
 
         long hours = Duration.between(requestDto.getStartDate(), requestDto.getEndDate()).toHours();

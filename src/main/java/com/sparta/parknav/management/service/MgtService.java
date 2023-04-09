@@ -45,14 +45,17 @@ public class MgtService {
 
     @Transactional
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
+
         // SCENARIO ENTER 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
+
         // SCENARIO ENTER 2
         ParkInfo parkInfo = parkInfoRepository.findById(requestDto.getParkId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
+
         // SCENARIO ENTER 3
         Optional<ParkMgtInfo> park = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
         if (park.isPresent() && park.get().getExitTime() == null) {
@@ -69,44 +72,31 @@ public class MgtService {
             }
         }
         try {
-            // 이 주차장에 예약된 모든 list를 통한 현재 예약된 차량수 구하기
             // SCENARIO ENTER 4
-            List<ParkBookingInfo> parkBookingInfo = parkBookingInfoRepository.findAllByParkInfoId(requestDto.getParkId());
-            List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
-            LocalDateTime now = LocalDateTime.now();
-
-            // 입차하려는 현재 예약이 되어있는 차량수(예약자가 입차할 경우 -1)
-            int bookingNowCnt = getBookingNowCnt(requestDto.getCarNum(), parkBookingInfo, now, parkMgtInfo);
-            // 예약된 차량 찾기
-            ParkBookingInfo parkBookingNow = getParkBookingInfo(requestDto, parkBookingInfo, now);
-            // 이미 예약내역으로 입차, 출차를 마친 경우는 예약시간 내 입차해도 일반차량으로 분류된다.
-            // SCENARIO ENTER 6
-            if (parkBookingNow != null && parkMgtInfoRepository.existsByParkBookingInfoIdAndExitTimeIsNotNull(parkBookingNow.getId())) {
-                parkBookingNow = null;
-            }
-            // 주차 구획수
             int cmprtCoNum = parkInfo.getParkOperInfo().getCmprtCo();
-            // 일반, 예약구역 개수를 나눔
             NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo = nomalBookingCarSpaceInfo(cmprtCoNum);
-            // 사용중인 구역 개수를 가져옴
+
+            // SCENARIO ENTER 5
+            List<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findAllByParkInfoId(requestDto.getParkId());
             NomalBookingCarSpaceInfo useNomalBookingCarSpaceInfo = useNomalBookingCarSpaceInfo(parkMgtInfo);
-            // 들어온 차량정보가 예약한 차량인지 여부를 판단
+
+            // SCENARIO ENTER 6
+            LocalDateTime now = LocalDateTime.now();
             Optional<ParkBookingInfo> enterCarBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(requestDto.getParkId(), requestDto.getCarNum(), now, now);
+
+            // SCENARIO ENTER 7
+            ParkBookingInfo parkBookingNow = null;
             if (enterCarBookingInfo.isPresent()) {
-                // 예약이 꽉 찼을경우
-                if (nomalBookingCarSpaceInfo.getBookingCarSpace() < useNomalBookingCarSpaceInfo.getBookingCarSpace() + 1) {
+                // 예약구역이 꽉 찼을 경우
+                if (nomalBookingCarSpaceInfo.getBookingCarSpace() <= useNomalBookingCarSpaceInfo.getBookingCarSpace()) {
                     throw new CustomException(ErrorType.NOT_PARKING_SPACE);
                 }
+                parkBookingNow = enterCarBookingInfo.get();
             } else {
-                // 예약이 꽉 찼을경우
-                if (nomalBookingCarSpaceInfo.getNomalCarSpace() < useNomalBookingCarSpaceInfo.getNomalCarSpace() + 1) {
+                // 일반구역이 꽉 찼을 경우
+                if (nomalBookingCarSpaceInfo.getNomalCarSpace() <= useNomalBookingCarSpaceInfo.getNomalCarSpace()) {
                     throw new CustomException(ErrorType.NOT_PARKING_SPACE);
                 }
-            }
-            // 이 주차장에 현재 입차되어있는 차량 수
-            int mgtNum = getMgtNum(parkMgtInfo);
-            if (bookingNowCnt + mgtNum >= cmprtCoNum) {
-                throw new CustomException(ErrorType.NOT_PARKING_SPACE);
             }
 
             ParkMgtInfo mgtSave = ParkMgtInfo.of(parkInfo, requestDto.getCarNum(), now, null, 0, parkBookingNow);
@@ -122,12 +112,12 @@ public class MgtService {
 
     @Transactional
     public CarOutResponseDto exit(CarNumRequestDto requestDto, Admin user) {
+
         // SCENARIO EXIT 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
 
-        LocalDateTime now = LocalDateTime.now();
         // SCENARIO EXIT 2
         ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
@@ -136,14 +126,17 @@ public class MgtService {
         if (parkMgtInfo.getExitTime() != null) {
             throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
         }
-        ParkOperInfo parkOperInfo = parkMgtInfo.getParkInfo().getParkOperInfo();
 
+        // SCENARIO EXIT 4
+        LocalDateTime now = LocalDateTime.now();
         Duration duration = Duration.between(parkMgtInfo.getEnterTime(), now);
         long minutes = duration.toMinutes();
-        // SCENARIO EXIT 4
+        ParkOperInfo parkOperInfo = parkMgtInfo.getParkInfo().getParkOperInfo();
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
+        // SCENARIO EXIT 5
         parkMgtInfo.update(charge, now);
+
         return CarOutResponseDto.of(charge, now);
     }
 
@@ -162,57 +155,6 @@ public class MgtService {
         return ParkMgtListResponseDto.of(page1, parkName);
     }
 
-    private static ParkBookingInfo getParkBookingInfo(CarNumRequestDto requestDto, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now) {
-
-        ParkBookingInfo parkBookingNow = null;
-        for (ParkBookingInfo p : parkBookingInfo) {
-            if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
-                if (Objects.equals(p.getCarNum(), requestDto.getCarNum())) {
-                    parkBookingNow = p;
-                    break;
-                }
-            }
-        }
-        return parkBookingNow;
-    }
-
-    private static int getBookingNowCnt(String carNum, List<ParkBookingInfo> parkBookingInfo, LocalDateTime now, List<ParkMgtInfo> parkMgtInfo) {
-        // 3시 입차
-        // 2~5시 예약
-        int bookingNowCnt = 0;
-        for (ParkBookingInfo p : parkBookingInfo) {
-            if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
-                if (Objects.equals(p.getCarNum(), carNum)) {
-                    continue;
-                }
-                bookingNowCnt++;
-            }
-        }
-        // 예약된 차량이 주차장에 이미 입차되어 있는지 확인
-        for (ParkBookingInfo p : parkBookingInfo) {
-            // 현재 시간이 예약 시작 시간-1보다 크고, 예약 종료 시간보다 작을때
-            if ((p.getStartTime().minusHours(1).isEqual(now) || p.getStartTime().minusHours(1).isBefore(now)) && p.getEndTime().isAfter(now)) {
-                for (ParkMgtInfo m : parkMgtInfo) {
-                    // 예약차가 입차해있고, 입차된 차량의 예약번호와 같을 때
-                    if (Objects.equals(m.getCarNum(), p.getCarNum()) && Objects.equals(m.getParkBookingInfo().getId(), p.getId())) {
-                        bookingNowCnt--;
-                    }
-                }
-            }
-        }
-        return bookingNowCnt;
-    }
-
-    private static int getMgtNum(List<ParkMgtInfo> parkMgtInfo) {
-
-        int mgtNum = 0;
-        for (ParkMgtInfo p : parkMgtInfo) {
-            if (p.getExitTime() == null) {
-                mgtNum++;
-            }
-        }
-        return mgtNum;
-    }
 
     private static NomalBookingCarSpaceInfo nomalBookingCarSpaceInfo(int cmprtCoNum) {
         int nomalCarSpace = cmprtCoNum % 2 == 1 ? (cmprtCoNum / 2) + 1 : cmprtCoNum / 2;
