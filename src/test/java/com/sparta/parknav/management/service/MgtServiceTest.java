@@ -8,6 +8,7 @@ import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import com.sparta.parknav.user.entity.Admin;
 import com.sparta.parknav.user.repository.AdminRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -24,11 +25,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
 public class MgtServiceTest {
 
-    private static final Logger log = LoggerFactory.getLogger(com.sparta.parknav.service.MgtServiceTest3.class);
+
     @Autowired
     private MgtService mgtService;
     @Autowired
