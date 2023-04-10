@@ -58,11 +58,11 @@ public class MgtService {
         }
         return redisLockRepository.runOnLock(
                 requestDto.getParkId(),
-                transactionHandler.runOnWriteTransaction(()->() -> enterLogic(requestDto, user)));
+                ()->transactionHandler.runOnWriteTransaction(() -> enterLogic(requestDto, user)));
     }
 
 
-    @Transactional
+
     public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
 
         // SCENARIO ENTER 1
