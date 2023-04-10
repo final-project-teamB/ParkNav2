@@ -2,6 +2,7 @@ package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
+import com.sparta.parknav._global.handler.TransactionHandler;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
 import com.sparta.parknav.booking.dto.BookingResponseDto;
@@ -21,6 +22,7 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
+import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +54,8 @@ public class BookingService {
     private final CarRepository carRepository;
     private final ParkBookingByHourRepository parkBookingByHourRepository;
     private final ParkBookingByHourRepositoryCustom parkBookingByHourRepositoryCustom;
+    private final RedisLockRepository redisLockRepository;
+    private final TransactionHandler transactionHandler;
 
     public BookingInfoResponseDto getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
@@ -78,6 +82,12 @@ public class BookingService {
     }
 
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
+        return redisLockRepository.runOnLock(
+                parkId,
+                ()->transactionHandler.runOnWriteTransaction(() -> bookingLogic(parkId, requestDto, user)));
+    }
+
+    public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
 
         // SCENARIO BOOKING PRE 1
         if (!requestDto.getStartDate().isBefore(requestDto.getEndDate())) {
