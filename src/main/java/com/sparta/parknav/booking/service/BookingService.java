@@ -84,7 +84,7 @@ public class BookingService {
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
         return redisLockRepository.runOnLock(
                 parkId,
-                transactionHandler.runOnWriteTransaction(()->() -> bookingLogic(parkId, requestDto, user)));
+                ()-> transactionHandler.runOnWriteTransaction(() -> bookingLogic(parkId, requestDto, user)));
     }
 
 
