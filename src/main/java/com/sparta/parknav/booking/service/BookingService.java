@@ -80,11 +80,11 @@ public class BookingService {
         return BookingInfoResponseDto.of(notAllowedTimeList, charge, true);
     }
 
-    @Transactional
+
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
         return redisLockRepository.runOnLock(
                 parkId,
-                transactionHandler.runOnWriteTransaction(()->() -> bookingLogic(parkId, requestDto, user)));
+                ()->transactionHandler.runOnWriteTransaction(() -> bookingLogic(parkId, requestDto, user)));
     }
 
     public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
