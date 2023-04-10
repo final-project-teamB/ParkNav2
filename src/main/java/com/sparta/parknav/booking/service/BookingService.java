@@ -2,6 +2,7 @@ package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
+import com.sparta.parknav._global.handler.TransactionHandler;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
 import com.sparta.parknav.booking.dto.BookingResponseDto;
@@ -21,6 +22,7 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
+import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +53,8 @@ public class BookingService {
     private final CarRepository carRepository;
     private final ParkBookingByHourRepository parkBookingByHourRepository;
     private final ParkBookingByHourRepositoryCustom parkBookingByHourRepositoryCustom;
+    private final RedisLockRepository redisLockRepository;
+    private final TransactionHandler transactionHandler;
 
     public BookingInfoResponseDto getInfoBeforeBooking(Long id, BookingInfoRequestDto requestDto) {
 
@@ -76,7 +80,14 @@ public class BookingService {
         return BookingInfoResponseDto.of(notAllowedTimeList, charge, true);
     }
 
+    @Transactional
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
+        return redisLockRepository.runOnLock(
+                parkId,
+                transactionHandler.runOnWriteTransaction(()->() -> bookingLogic(parkId, requestDto, user)));
+    }
+
+    public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
         // SCENARIO BOOKING PRE 1
         if (!requestDto.getStartDate().isBefore(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
@@ -229,6 +240,7 @@ public class BookingService {
             // 기존에 저장 된 ParkBookingByHour가 있으면 available -1 없을경우 새로 저장한다
             ParkBookingByHour parkBookingByHourExist = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(id, time.toLocalDate(), time.getHour());
             if (parkBookingByHourExist != null) {
+                System.out.println("Hour show : "+parkBookingByHourExist.getAvailable());
                 parkBookingByHourExist.updateCnt(-1);
             } else {
                 parkBookingByHourList.add(ParkBookingByHour.of(time.toLocalDate(), time.getHour(), parkOperInfo.getCmprtCo() - 1, parkOperInfo.getParkInfo()));

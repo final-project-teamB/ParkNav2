@@ -2,6 +2,7 @@ package com.sparta.parknav.management.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
+import com.sparta.parknav._global.handler.TransactionHandler;
 import com.sparta.parknav.booking.entity.ParkBookingByHour;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingByHourRepository;
@@ -48,31 +49,16 @@ public class MgtService {
     private final ParkBookingByHourRepository parkBookingByHourRepository;
     private final ParkOperInfoRepository parkOperInfoRepository;
     private final ParkBookingByHourRepositoryCustom parkBookingByHourRepositoryCustom;
-
     private final BookingService bookingService;
+    private final TransactionHandler transactionHandler;
 
     public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-//        while (true) {
-//            if (!redisLockRepository.lock(requestDto.getParkId())) {
-//                // SpinLock 방식이 Redis 에게 주는 부하를 줄여주기 위한 sleep
-//                try {
-//                    log.info("락 획득 실패");
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                    throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-//                }
-//            } else {
-//                log.info("락 획득 성공, lock number : {}", requestDto.getParkId());
-//                break;
-//            }
-//        }
-//        try {
-        return enterLogic(requestDto, user);
-//        } finally {
-//            // Lock 해제
-//            redisLockRepository.unlock(requestDto.getParkId());
-//        }
+        if (requestDto.getParkId() == null) {
+            throw new CustomException(ErrorType.CONTENT_IS_NULL);
+        }
+        return redisLockRepository.runOnLock(
+                requestDto.getParkId(),
+                transactionHandler.runOnWriteTransaction(()->() -> enterLogic(requestDto, user)));
     }
 
 
