@@ -26,8 +26,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-@SpringBootTest
 @ActiveProfiles("test")
+@SpringBootTest(properties = "spring.profiles.active:test")
 public class MgtServiceTest {
 
 
