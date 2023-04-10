@@ -34,7 +34,8 @@ public enum ErrorType {
     NOT_ALLOWED_BOOKING_TIME(400, "예약불가한 시간이 포함되어 있습니다."),
     NOT_FOUND_PARK_OPER_INFO(400, "해당 주차장 운영정보가 없습니다."),
     NOT_OPEN_SELECTED_DATE(400, "선택하신 시간에는 운영하지 않습니다."),
-    PARK_TIME_NOT_EXIST(400, "주차 예정 시간을 입력 해주세요.")
+    PARK_TIME_NOT_EXIST(400, "주차 예정 시간을 입력 해주세요."),
+    CONTENT_IS_NULL(400,"입력되지 않은 정보가 있습니다.")
     ;
 
     private int code;
