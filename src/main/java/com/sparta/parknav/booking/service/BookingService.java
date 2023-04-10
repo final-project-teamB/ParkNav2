@@ -104,30 +104,35 @@ public class BookingService {
 
     @Transactional
     public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
+
         // SCENARIO BOOKING 1
         if (requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
         }
+
         // SCENARIO BOOKING 2
         ParkInfo parkInfo = parkInfoRepository.findById(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
+
         // SCENARIO BOOKING 3
         Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
         );
+
         // SCENARIO BOOKING 4
         ParkBookingInfo alreadyBookingInfo = parkBookingInfoRepository.getAlreadyBookingInfo(parkInfo.getId(), car.getCarNum(), requestDto.getStartDate(), requestDto.getEndDate());
         if (alreadyBookingInfo != null) {
             throw new CustomException(ErrorType.ALREADY_RESERVED);
         }
 
+        // SCENARIO BOOKING 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
-        // 시간별 예약가능 여부를 확인하여 불가한 경우의 시간을 List에 담는다.
-        List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkId, requestDto, parkOperInfo);
 
+        // SCENARIO BOOKING 6
+        List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkId, requestDto, parkOperInfo);
         if (notAllowedTimeList.size() > 0) {
             throw new CustomException(ErrorType.NOT_ALLOWED_BOOKING_TIME);
         }

@@ -34,7 +34,7 @@ public class ParkMgtInfo {
     private LocalDateTime exitTime;
 
     @Column
-    private Integer charge;
+    private int charge;
 
     @Column(nullable = false)
     private String carNum;

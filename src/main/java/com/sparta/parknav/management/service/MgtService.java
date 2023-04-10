@@ -87,30 +87,35 @@ public class MgtService {
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
+
         // SCENARIO ENTER 2
         ParkInfo parkInfo = parkInfoRepository.findById(requestDto.getParkId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
+
         // SCENARIO ENTER 3
         Optional<ParkMgtInfo> alreadyEnterInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
         if (alreadyEnterInfo.isPresent() && alreadyEnterInfo.get().getExitTime() == null) {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
         }
 
+        // SCENARIO ENTER 4
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkInfo.getId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
 
+        // SCENARIO ENTER 5
         // 주차장의 구역 수
         ParkSpaceInfo parkSpaceInfo = getParkSpaceInfo(parkOperInfo);
         // 구역별 현재 주차중인 차량 수
         ParkSpaceInfo useSpaceInfo = getUseSpaceInfo(parkInfo);
 
+        // SCENARIO ENTER 6
         LocalDateTime now = LocalDateTime.now();
-        ParkMgtInfo mgtSave;
-
-        // 들어온 차량정보가 예약한 차량인지 여부를 판단
         Optional<ParkBookingInfo> enterCarBookingInfo = parkBookingInfoRepository.findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(requestDto.getParkId(), requestDto.getCarNum(), now, now);
+
+        // SCENARIO ENTER 7
+        ParkMgtInfo mgtSave;
         // 예약차량이며 해당 예약내역으로 주차장을 사용하지 않은 경우
         if (enterCarBookingInfo.isPresent() && !parkMgtInfoRepository.existsByParkBookingInfoIdAndExitTimeIsNotNull(enterCarBookingInfo.get().getId())) {
             mgtSave = getParkMgtBookingCar(requestDto, parkInfo, parkOperInfo, parkSpaceInfo, useSpaceInfo, now, enterCarBookingInfo);
@@ -126,24 +131,34 @@ public class MgtService {
 
     @Transactional
     public CarOutResponseDto exit(CarNumRequestDto requestDto, Admin user) {
+
         // SCENARIO EXIT 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
             throw new CustomException(ErrorType.NOT_MGT_USER);
         }
+
         // SCENARIO EXIT 2
         ParkMgtInfo parkMgtInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_ENTER_CAR)
         );
+
         // SCENARIO EXIT 3
         if (parkMgtInfo.getExitTime() != null) {
             throw new CustomException(ErrorType.ALREADY_TAKEN_OUT_CAR);
         }
 
+        // SCENARIO EXIT 4
+        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkMgtInfo.getParkInfo().getId()).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+        );
+
+        // SCENARIO EXIT 5
+        ParkBookingInfo bookingInfo = parkMgtInfo.getParkBookingInfo();
+
         LocalDateTime now = LocalDateTime.now();
         long minutes = Duration.between(parkMgtInfo.getEnterTime(), now).toMinutes();
 
-        ParkBookingInfo bookingInfo = parkMgtInfo.getParkBookingInfo();
-        // 예약차량인 경우
+        // SCENARIO EXIT 6
         if (bookingInfo != null) {
             // 예약종료시간 이전에 출차해도 요금은 예약종료시간까지로 계산하며, 예약종료시간 이후에 출차하면 예약시작시간부터 출차한 시간까지로 요금을 계산한다.
             LocalDateTime chargeEndTime = now.isBefore(bookingInfo.getEndTime()) ? bookingInfo.getEndTime() : now;
@@ -152,7 +167,7 @@ public class MgtService {
             bookingInfo.endTimeUpdate(now);
         }
 
-        // 일반구역 차량 출차시 공통구역에 일반차량이 있다면, 공통구역에서 일반구역으로 옮긴다.
+        // SCENARIO EXIT 7
         if (parkMgtInfo.getZone() == ZoneType.GENERAL) {
             Optional<ParkMgtInfo> generalCarInCommon = parkMgtInfoRepository
                     .findTopByParkInfoIdAndZoneAndExitTimeNullOrderByEnterTimeAsc(requestDto.getParkId(), ZoneType.COMMON);
@@ -160,13 +175,9 @@ public class MgtService {
             generalCarInCommon.ifPresent(mgtInfo -> mgtInfo.updateZone(ZoneType.GENERAL));
         }
 
-        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkMgtInfo.getParkInfo().getId()).orElseThrow(
-                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
-        );
-
+        // SCENARIO EXIT 8
         int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
         parkMgtInfo.update(charge, now);
-
 
         return CarOutResponseDto.of(charge, now);
     }
