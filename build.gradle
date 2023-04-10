@@ -48,13 +48,13 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+test {
+    systemProperty 'spring.profiles.active', 'test'
+}
 bootRun {
     systemProperty "spring.profiles.active", "test"
 }
 
-test {
-    systemProperty 'spring.profiles.active', 'test'
-}
 //Annotation Processor가 생성한 Q객체를 저장할 디렉토리 경로를 설정합니다.
 def generated='src/main/generated'
 //Java 소스 파일의 위치를 지정합니다.
