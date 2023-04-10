@@ -30,7 +30,7 @@ public class ParkBookingInfo {
     private String carNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USERS_ID", nullable = false)
+    @JoinColumn(name = "USERS_ID")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
