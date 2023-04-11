@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @ActiveProfiles("test")
-@SpringBootTest(properties = "spring.profiles.active:test")
+@SpringBootTest
 class BookingServiceTest {
     @Autowired
     private BookingService bookingService;
