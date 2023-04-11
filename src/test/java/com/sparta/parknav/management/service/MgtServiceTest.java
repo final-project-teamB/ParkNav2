@@ -1,8 +1,6 @@
 package com.sparta.parknav.management.service;
 
 import com.sparta.parknav._global.exception.CustomException;
-import com.sparta.parknav.booking.entity.ParkBookingByHour;
-import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingByHourRepository;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
@@ -14,10 +12,7 @@ import com.sparta.parknav.user.entity.Admin;
 import com.sparta.parknav.user.repository.AdminRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -66,7 +61,7 @@ public class MgtServiceTest {
         int numOfUsers = 20;
         // 대기하는 스레드의 숫자를 지정
         CountDownLatch endLatch = new CountDownLatch(numOfUsers);
-        List<CarNumRequestDto> vehicleIds = generateVehicleIds(numOfUsers,parkInfo.getId());
+        List<CarNumRequestDto> vehicleIds = generateVehicleIds(numOfUsers, parkInfo.getId());
         // 20개의 스레드 생성
         ExecutorService executorService = Executors.newFixedThreadPool(numOfUsers);
         // 원자적인 연산을 보장해주는 Atomic 패키지 클래스로 멀티 스레드 환경에서 여러 스레드들이 동시에 값을 변경할 수 없도록 안전성 보장
@@ -102,7 +97,7 @@ public class MgtServiceTest {
         Assertions.assertEquals(numOfUsers - parkOperInfo.getCmprtCo(), failCount.get());
     }
 
-    private List<CarNumRequestDto> generateVehicleIds(int count,Long ParkId) throws NoSuchFieldException, IllegalAccessException {
+    private List<CarNumRequestDto> generateVehicleIds(int count, Long ParkId) throws NoSuchFieldException, IllegalAccessException {
         List<CarNumRequestDto> vehicleIds = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             CarNumRequestDto carNumRequestDto = new CarNumRequestDto();
