@@ -140,7 +140,7 @@ function myCarList() {
         });
 }
 
-// 주차예약 버튼 클릭 시 모달창 띄우기
+// 예약확인 버튼 클릭 시 모달창 띄우기
 function viewReservation(id, startDate, endDate) {
     $('#reservation-modal').modal('show');
     const dateFormat = 'YYYY-MM-DDTHH:mm:ss';
@@ -151,6 +151,7 @@ function viewReservation(id, startDate, endDate) {
     const params = new URLSearchParams(body).toString();
     axios.get(`/api/booking/${id}?${params}`)
         .then(response => {
+            console.log(response)
             const data = response.data;
             $("#parking-lot-available-modal").attr("value", data.data.available);
             $("#parking-lot-booking-modal").attr("value", data.data.booking);
@@ -230,8 +231,7 @@ function fetchData(page) {
             data.map((item) => {
                 let button;
                 if (item.status === "UNUSED") {
-                    button = `<button type="button" class="btn btn-outline-secondary btn-sm mx-1" onclick="viewReservation(${item.parkId},'${item.startDate}','${item.endDate}')">예약 확인</button>` +
-                        `<button type="button" class="btn btn-outline-warning btn-sm mx-1" onclick="cancelReservation(${item.bookingId})">예약 취소</button>`;
+                    button = `<button type="button" class="btn btn-outline-warning btn-sm mx-1" onclick="cancelReservation(${item.bookingId})">예약 취소</button>`;
                 } else if (item.status === "EXPIRED") {
                     button = `<button type="button" class="btn btn-outline-danger btn-sm mx-1">기간만료</button>`;
                 } else {
