@@ -29,9 +29,9 @@ class ParkInfoRepositoryTest {
     @Test
     void findNameTest(){
         // given
-        ParkInfo parkInfo = ParkInfo.of("테스트주차장", "주소1", "주소2", "31","123");
-        ParkInfo parkInfo2 = ParkInfo.of("테스트주차장2", "주소1", "주소2", "31","123");
-        ParkInfo parkInfo3 = ParkInfo.of("테스트주차장3", "주소1", "주소2", "31","123");
+        ParkInfo parkInfo = ParkInfo.of("findName주차장", "주소1", "주소2", "31","123");
+        ParkInfo parkInfo2 = ParkInfo.of("findName주차장2", "주소1", "주소2", "31","123");
+        ParkInfo parkInfo3 = ParkInfo.of("findName주차장3", "주소1", "주소2", "31","123");
         List<ParkInfo> parkInfoList = new ArrayList<>();
         parkInfoList.add(parkInfo);
         parkInfoList.add(parkInfo2);
@@ -55,23 +55,20 @@ class ParkInfoRepositoryTest {
     void findAllByIdBetween(){
         // given
         ParkInfo parkInfo = ParkInfo.of("테스트주차장", "주소1", "주소2", "31","123");
-        ReflectionTestUtils.setField(parkInfo, "id", 1L);
         ParkInfo parkInfo2 = ParkInfo.of("테스트주차장2", "주소1", "주소2", "31","123");
-        ReflectionTestUtils.setField(parkInfo2, "id", 2L);
         ParkInfo parkInfo3 = ParkInfo.of("테스트주차장3", "주소1", "주소2", "31","123");
-        ReflectionTestUtils.setField(parkInfo3, "id", 3L);
-        List<ParkInfo> parkInfoList = new ArrayList<>();
-        parkInfoList.add(parkInfo);
-        parkInfoList.add(parkInfo2);
-        parkInfoList.add(parkInfo3);
-        parkInfoRepository.saveAll(parkInfoList);
+        List<ParkInfo> parkInfoListTmp = new ArrayList<>();
+        parkInfoListTmp.add(parkInfo);
+        parkInfoListTmp.add(parkInfo2);
+        parkInfoListTmp.add(parkInfo3);
+        List<ParkInfo> parkInfos = parkInfoRepository.saveAll(parkInfoListTmp);
         parkInfoRepository.flush();
 
         // when
-        List<ParkInfo> found = parkInfoRepository.findAllByIdBetween(1L,2L);
+        List<ParkInfo> found = parkInfoRepository.findAllByIdBetween(parkInfos.get(0).getId(),parkInfos.get(2).getId());
 
         // then
-        assertThat(found.size()).isEqualTo(2);
+        assertThat(found.size()).isEqualTo(3);
 
     }
 }

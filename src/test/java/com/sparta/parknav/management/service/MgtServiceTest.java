@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
 public class MgtServiceTest {
@@ -54,12 +55,11 @@ public class MgtServiceTest {
         Admin admin = Admin.of("admin", "1234", parkInfo);
         adminRepository.save(admin);
         ParkSpaceInfo parkSpaceInfo = mgtService.getParkSpaceInfo(parkOperInfo);
-        ParkSpaceInfo useSpaceInfo = mgtService.getUseSpaceInfo(parkInfo);
 
         int numOfUsers = 20;
         // 대기하는 스레드의 숫자를 지정
         CountDownLatch endLatch = new CountDownLatch(numOfUsers);
-        List<CarNumRequestDto> vehicleIds = generateVehicleIds(numOfUsers);
+        List<CarNumRequestDto> vehicleIds = generateVehicleIds(numOfUsers, parkInfo.getId());
         // 20개의 스레드 생성
         ExecutorService executorService = Executors.newFixedThreadPool(numOfUsers);
         // 원자적인 연산을 보장해주는 Atomic 패키지 클래스로 멀티 스레드 환경에서 여러 스레드들이 동시에 값을 변경할 수 없도록 안전성 보장
@@ -94,13 +94,13 @@ public class MgtServiceTest {
         log.info("입차 실패 개수: {}", failCount.get());
     }
 
-    private List<CarNumRequestDto> generateVehicleIds(int count) throws NoSuchFieldException, IllegalAccessException {
+    private List<CarNumRequestDto> generateVehicleIds(int count, Long parkId) throws NoSuchFieldException, IllegalAccessException {
         List<CarNumRequestDto> vehicleIds = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             CarNumRequestDto carNumRequestDto = new CarNumRequestDto();
             Field parkIdField = CarNumRequestDto.class.getDeclaredField("parkId");
             parkIdField.setAccessible(true);
-            parkIdField.set(carNumRequestDto, 1L);
+            parkIdField.set(carNumRequestDto, parkId);
 
             Field carNumField = CarNumRequestDto.class.getDeclaredField("carNum");
             carNumField.setAccessible(true);
