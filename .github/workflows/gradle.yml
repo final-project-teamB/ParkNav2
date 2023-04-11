@@ -74,12 +74,16 @@ jobs:
         
         touch ./application-db.yml 
         
+        touch ./keystore.p12
+        
         # GitHub-Actions에서 설정한 값을 application.properties 파일에 쓰기
         echo "${{ secrets.YML_DEV }}" >> ./application.yml 
         
         echo "${{ secrets.COMMON_DEV }}" >> ./application-common.yml 
         
         echo "${{ secrets.DB_DEV }}" >> ./application-db.yml 
+        
+        echo "${{ secrets.KEYSTORE }}" | base64 --decode > ./keystore.p12
       shell: bash
       
        ## gradle build
