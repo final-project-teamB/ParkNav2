@@ -13,7 +13,7 @@ permissions:
 # branch 단위 외에도, tag나 cron 식 등을 사용할 수 있음
 on:
   push:
-    branches: [ develop ]
+    branches: [ develop, version2 ]
   pull_request:
     branches: [ develop, version2 ] 
     types: [opened, synchronize]
@@ -113,6 +113,6 @@ jobs:
           sudo docker stop $(docker ps -a -q) 
           sudo docker rm $(docker ps -a -q)
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
-          sudo docker run -d -p 80:8080 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+          sudo docker run -d -p 443:443 ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
       
       
