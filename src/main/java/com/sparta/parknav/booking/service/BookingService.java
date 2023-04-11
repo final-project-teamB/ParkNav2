@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -80,7 +81,6 @@ public class BookingService {
         return BookingInfoResponseDto.of(notAllowedTimeList, charge, true);
     }
 
-
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
         return redisLockRepository.runOnLock(
                 parkId,
@@ -88,42 +88,47 @@ public class BookingService {
     }
 
     public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
+
         // SCENARIO BOOKING PRE 1
         if (!requestDto.getStartDate().isBefore(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
         }
+
         // SCENARIO BOOKING PRE 2
         ParkInfo parkInfo = parkInfoRepository.findById(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
+
         // SCENARIO BOOKING PRE 3
         Car car = carRepository.findByUserIdAndIsUsingIs(user.getId(), true).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR)
         );
+
         // SCENARIO BOOKING PRE 4
         ParkBookingInfo alreadyBookingInfo = parkBookingInfoRepository.getAlreadyBookingInfo(parkInfo.getId(), car.getCarNum(), requestDto.getStartDate(), requestDto.getEndDate());
         if (alreadyBookingInfo != null) {
             throw new CustomException(ErrorType.ALREADY_RESERVED);
         }
+
         // SCENARIO BOOKING PRE 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
+
         // SCENARIO BOOKING PRE 6
-        // 선택시간 운영여부 확인
         boolean isOperation = OperationChecking.checkOperation(requestDto.getStartDate(), parkOperInfo) && OperationChecking.checkOperation(requestDto.getEndDate(), parkOperInfo);
         if (!isOperation) {
             throw new CustomException(ErrorType.NOT_OPEN_SELECTED_DATE);
         }
+
         // SCENARIO BOOKING PRE 7
-        // 시간별 예약가능 여부를 확인하여 불가한 경우의 시간을 List에 담는다.
         List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkId, requestDto);
         if (notAllowedTimeList.size() > 0) {
             throw new CustomException(ErrorType.printLocalDateTimeList(notAllowedTimeList));
         }
 
-        ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
         // SCENARIO BOOKING PRE 8
+        ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
         parkBookingByHourSave(parkId, parkOperInfo, requestDto.getStartDate(), requestDto.getEndDate());
 
         return BookingResponseDto.of(parkBookingInfoRepository.save(bookingInfo).getId());
@@ -131,26 +136,27 @@ public class BookingService {
 
     @Transactional
     public ParkBookingInfo bookingParkNow(ParkInfo parkInfo, LocalDateTime startTime, LocalDateTime endTime, String carNum) {
+
         // SCENARIO BOOKING NOW 1
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkInfo.getId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
+
         // SCENARIO BOOKING NOW 2
-        // 선택시간 운영여부 확인
         boolean isOperation = OperationChecking.checkOperation(startTime, parkOperInfo) && OperationChecking.checkOperation(endTime, parkOperInfo);
         if (!isOperation) {
             throw new CustomException(ErrorType.NOT_OPEN_SELECTED_DATE);
         }
+
         // SCENARIO BOOKING NOW 3
         BookingInfoRequestDto bookingInfoRequestDto = BookingInfoRequestDto.of(startTime, endTime);
-        // 시간별 예약가능 여부 확인
         List<LocalDateTime> notAllowedTimeList = getNotAllowedTimeList(parkInfo.getId(), bookingInfoRequestDto);
         if (notAllowedTimeList.size() > 0) {
             throw new CustomException(ErrorType.printLocalDateTimeList(notAllowedTimeList));
         }
+
         // SCENARIO BOOKING NOW 4
         ParkBookingInfo bookingInfo = ParkBookingInfo.of(bookingInfoRequestDto, parkInfo, carNum);
-
         parkBookingByHourSave(parkInfo.getId(), parkOperInfo, startTime, endTime);
 
         return parkBookingInfoRepository.save(bookingInfo);
@@ -226,7 +232,9 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    public void parkBookingByHourSave(Long id, ParkOperInfo parkOperInfo, LocalDateTime startDate, LocalDateTime endDate) {
+    public void parkBookingByHourSave(Long parkId, ParkOperInfo parkOperInfo, LocalDateTime startDate, LocalDateTime endDate) {
+
+        List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(parkId, startDate, endDate);
 
         List<ParkBookingByHour> parkBookingByHourList = new ArrayList<>();
 
@@ -236,16 +244,22 @@ public class BookingService {
         }
 
         for (int i = 0; i < hours; i++) {
-            LocalDateTime time = startDate.plusHours(i);
-            // 기존에 저장 된 ParkBookingByHour가 있으면 available -1 없을경우 새로 저장한다
-            ParkBookingByHour parkBookingByHourExist = parkBookingByHourRepository.findByParkInfoIdAndDateAndTime(id, time.toLocalDate(), time.getHour());
-            if (parkBookingByHourExist != null) {
-                System.out.println("Hour show : "+parkBookingByHourExist.getAvailable());
-                parkBookingByHourExist.updateCnt(-1);
+            LocalDateTime dateTime = startDate.plusHours(i);
+            LocalDate date = dateTime.toLocalDate();
+            int hourTime = dateTime.getHour();
+
+            ParkBookingByHour bookingHour = hourList.stream()
+                    .filter(hour -> hour.getDate().equals(date) && hour.getTime() == hourTime)
+                    .findFirst()
+                    .orElse(null);
+
+            if (bookingHour != null) {
+                bookingHour.updateCnt(-1);
             } else {
-                parkBookingByHourList.add(ParkBookingByHour.of(time.toLocalDate(), time.getHour(), parkOperInfo.getCmprtCo() - 1, parkOperInfo.getParkInfo()));
+                parkBookingByHourList.add(ParkBookingByHour.of(date, hourTime, parkOperInfo.getCmprtCo() - 1, parkOperInfo.getParkInfo()));
             }
         }
+
         if (parkBookingByHourList.size() > 0) {
             parkBookingByHourRepository.saveAll(parkBookingByHourList);
         }
