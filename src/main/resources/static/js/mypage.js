@@ -151,7 +151,6 @@ function viewReservation(id, startDate, endDate) {
     const params = new URLSearchParams(body).toString();
     axios.get(`/api/booking/${id}?${params}`)
         .then(response => {
-            console.log(response)
             const data = response.data;
             $("#parking-lot-available-modal").attr("value", data.data.available);
             $("#parking-lot-booking-modal").attr("value", data.data.booking);
