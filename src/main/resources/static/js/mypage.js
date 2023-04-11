@@ -140,27 +140,6 @@ function myCarList() {
         });
 }
 
-// 예약확인 버튼 클릭 시 모달창 띄우기
-function viewReservation(id, startDate, endDate) {
-    $('#reservation-modal').modal('show');
-    const dateFormat = 'YYYY-MM-DDTHH:mm:ss';
-    const body = {
-        startDate: moment(startDate, 'YYYY-MM-DD HH:mm').format(dateFormat),
-        endDate: moment(endDate, 'YYYY-MM-DD HH:mm').format(dateFormat)
-    };
-    const params = new URLSearchParams(body).toString();
-    axios.get(`/api/booking/${id}?${params}`)
-        .then(response => {
-            const data = response.data;
-            $("#parking-lot-available-modal").attr("value", data.data.available);
-            $("#parking-lot-booking-modal").attr("value", data.data.booking);
-        })
-        .catch(error => {
-            alert(error.response.data.error.msg);
-            return false;
-        });
-}
-
 // 예약 취소 버튼 클릭시 이벤트
 function cancelReservation(id) {
     if (confirm("예약을 취소 하시겠습니까?")) {
@@ -175,44 +154,6 @@ function cancelReservation(id) {
                 return false;
             });
     }
-}
-
-//예약 목록 불러오기
-function bookingList() {
-    $("#parking-list").empty();
-    axios.get("/api/booking/mypage")
-        .then(response => {
-            const data = response.data.data;
-            data.map((item) => {
-                let button;
-                if (item.status === "UNUSED") {
-                    button = `<button type="button" class="btn btn-outline-secondary btn-sm mx-1" onclick="viewReservation(${item.parkId},'${item.startDate}','${item.endDate}')">예약 확인</button>` +
-                        `<button type="button" class="btn btn-outline-warning btn-sm mx-1" onclick="cancelReservation(${item.bookingId})">예약 취소</button>`;
-                } else if (item.status === "EXPIRED") {
-                    button = `<button type="button" class="btn btn-outline-danger btn-sm mx-1">기간만료</button>`;
-                } else {
-                    button = `<button type="button" class="btn btn-outline-success btn-sm mx-1">사용완료</button>`;
-                }
-                $("#parking-list").append(`
-                    <tr>
-                        <td>${item.parkName}</td>
-                        <td>${item.carNum}</td>
-                        <td>${item.startDate} ~<br> ${item.endDate}</td>
-                        <td>${item.charge + "원"}</td>
-                        <td>
-                            ${button}
-                        </td>
-                    </tr>`
-                );
-            })
-            if (data.length == 0) {
-                $("#parking-list").append(`<tr><td colspan="5">데이터가 없습니다</td></tr>`)
-            }
-        })
-        .catch(error => {
-            alert(error.response.data.error.msg);
-            return false;
-        });
 }
 
 function fetchData(page) {
