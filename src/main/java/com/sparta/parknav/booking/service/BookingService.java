@@ -2,6 +2,7 @@ package com.sparta.parknav.booking.service;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
+import com.sparta.parknav._global.handler.TransactionHandler;
 import com.sparta.parknav.booking.dto.BookingInfoRequestDto;
 import com.sparta.parknav.booking.dto.BookingInfoResponseDto;
 import com.sparta.parknav.booking.dto.BookingResponseDto;
@@ -20,6 +21,7 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
+import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +52,8 @@ public class BookingService {
     private final ParkInfoRepository parkInfoRepository;
     private final CarRepository carRepository;
     private final RedissonClient redissonClient;
-
+    private final RedisLockRepository redisLockRepository;
+    private final TransactionHandler transactionHandler;
     private final MgtService mgtService;
 
 
@@ -79,30 +82,12 @@ public class BookingService {
     }
 
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
-
-        RLock lock = redissonClient.getLock("BookingLock" + parkId);
-
-        try {
-            if (!lock.tryLock(30, 10, TimeUnit.SECONDS)) {
-                log.info("락 획득 실패");
-                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-            }
-            log.info("락 획득 성공");
-            return bookingLogic(parkId, requestDto, user);
-        } catch (InterruptedException e) {
-            log.info("락 획득 대기 중 인터럽트 발생");
-            Thread.currentThread().interrupt();
-            throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
-        } finally {
-            log.info("finally문 실행");
-            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-                log.info("언락 실행");
-            }
-        }
+        return redisLockRepository.runOnLock(
+                parkId,
+                ()-> transactionHandler.runOnWriteTransaction(() -> bookingLogic(parkId, requestDto, user)));
     }
 
-    @Transactional
+
     public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
 
         // SCENARIO BOOKING 1
