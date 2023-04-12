@@ -29,7 +29,7 @@ public enum ErrorType {
     ALREADY_ENTER_CAR(400, "이미 입차된 차량입니다."),
     ALREADY_REG_REP_CAR(400, "이미 대표로 등록된 차량입니다."),
     ALREADY_RESERVED(400, "이미 예약된 시간입니다."),
-    FAILED_TO_ACQUIRE_LOCK(100, "락 권한을 얻는데 실패했습니다."),
+    FAILED_TO_ACQUIRE_LOCK(400, "락 권한을 얻는데 실패했습니다."),
     NOT_ALLOWED_BOOKING_TIME(400, "예약불가한 시간이 포함되어 있습니다."),
     NOT_FOUND_PARK_OPER_INFO(400, "해당 주차장 운영정보가 없습니다."),
     CONTENT_IS_NULL(400,"입력되지 않은 정보가 있습니다."),

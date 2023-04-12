@@ -17,12 +17,9 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
-import com.sparta.parknav.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +32,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,45 +39,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MgtService {
 
-    private final RedisLockRepository redisLockRepository;
     private final ParkBookingInfoRepository parkBookingInfoRepository;
     private final ParkInfoRepository parkInfoRepository;
     private final ParkMgtInfoRepository parkMgtInfoRepository;
     private final ParkOperInfoRepository parkOperInfoRepository;
-    private final RedissonClient redissonClient;
 
     final double GENERAL_RATE = 0.4;
     final double BOOKING_RATE = 0.4;
 
-
-    public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
-        if (requestDto.getParkId() == null) {
-            throw new CustomException(ErrorType.CONTENT_IS_NULL);
-        }
-        RLock lock = redissonClient.getLock("EnterLock" + requestDto.getParkId());
-        try {
-            //선행 락 점유 스레드가 존재하면 waitTime동안 락 점유를 기다리며 leaseTime 시간 이후로는 자동으로 락이 해제되기 때문에 다른 스레드도 일정 시간이 지난 후 락을 점유할 수 있습니다.
-            if (!lock.tryLock(30, 10, TimeUnit.SECONDS)) {
-                log.info("락 획득 실패");
-                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-            }
-            log.info("락 획득 성공");
-            return enterLogic(requestDto, user);
-        } catch (InterruptedException e) {
-            log.info("락 획득 대기 중 인터럽트 발생");
-            Thread.currentThread().interrupt();
-            throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
-        } finally {
-            log.info("finally문 실행");
-            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-                log.info("언락 실행");
-            }
-        }
-    }
-
     @Transactional
-    public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
+    public CarInResponseDto enter(CarNumRequestDto requestDto, Admin user) {
 
         // SCENARIO ENTER 1
         if (!Objects.equals(requestDto.getParkId(), user.getParkInfo().getId())) {
@@ -94,6 +61,7 @@ public class MgtService {
         );
 
         // SCENARIO ENTER 3
+        // LOCKING ENTER
         Optional<ParkMgtInfo> alreadyEnterInfo = parkMgtInfoRepository.findTopByParkInfoIdAndCarNumOrderByEnterTimeDesc(requestDto.getParkId(), requestDto.getCarNum());
         if (alreadyEnterInfo.isPresent() && alreadyEnterInfo.get().getExitTime() == null) {
             throw new CustomException(ErrorType.ALREADY_ENTER_CAR);
@@ -200,6 +168,7 @@ public class MgtService {
 
 
     public ParkSpaceInfo getUseSpaceInfo(ParkInfo parkInfo) {
+        // LOCKING ENTER
         int generalUseCnt = parkMgtInfoRepository.countByParkInfoIdAndZoneAndExitTimeIsNull(parkInfo.getId(), ZoneType.GENERAL);
         int bookingUseCnt = parkMgtInfoRepository.countByParkInfoIdAndZoneAndExitTimeIsNull(parkInfo.getId(), ZoneType.BOOKING);
         int commonUseCnt = parkMgtInfoRepository.countByParkInfoIdAndZoneAndExitTimeIsNull(parkInfo.getId(), ZoneType.COMMON);

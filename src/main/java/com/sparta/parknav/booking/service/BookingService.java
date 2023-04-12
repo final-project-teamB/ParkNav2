@@ -78,32 +78,8 @@ public class BookingService {
         return BookingInfoResponseDto.of(notAllowedTimeList, charge, true);
     }
 
-    public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
-
-        RLock lock = redissonClient.getLock("BookingLock" + parkId);
-
-        try {
-            if (!lock.tryLock(30, 10, TimeUnit.SECONDS)) {
-                log.info("락 획득 실패");
-                throw new CustomException(ErrorType.FAILED_TO_ACQUIRE_LOCK);
-            }
-            log.info("락 획득 성공");
-            return bookingLogic(parkId, requestDto, user);
-        } catch (InterruptedException e) {
-            log.info("락 획득 대기 중 인터럽트 발생");
-            Thread.currentThread().interrupt();
-            throw new CustomException(ErrorType.INTERRUPTED_WHILE_WAITING_FOR_LOCK);
-        } finally {
-            log.info("finally문 실행");
-            if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-                log.info("언락 실행");
-            }
-        }
-    }
-
     @Transactional
-    public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
+    public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
 
         // SCENARIO BOOKING 1
         if (requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
@@ -125,7 +101,7 @@ public class BookingService {
         if (alreadyBookingInfo != null) {
             throw new CustomException(ErrorType.ALREADY_RESERVED);
         }
-
+        // LOCKING RESERVATION
         // SCENARIO BOOKING 5
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkId).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
@@ -211,6 +187,7 @@ public class BookingService {
         for (int i = 0; i < hours; i++) {
             // 선택 시작 시간부터 한시간 단위로 예약 건수를 구한다.
             LocalDateTime time = start.plusHours(i);
+            // LOCKING RESERVATION
             // 선택시간 사이 예약정보
             List<ParkBookingInfo> bookingList = parkBookingInfoRepository.getSelectedTimeBookingList(id, time, time.plusHours(1));
             // 예약정보 중 이미 출차한 차량 수는 제외한다.
