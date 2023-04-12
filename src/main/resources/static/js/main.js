@@ -150,13 +150,12 @@ $(document).ready(function () {
                 const data = response.data.data;
                 $("#parking-lot-not-allowed-time").empty();
                 if (data.isOperation === false) {
-                    $("#parking-lot-booking-modal").attr("class","alert alert-warning")
-                    $('#parking-lot-booking-modal').text("운영시간이 아닙니다");
+                    $("#parking-lot-booking-modal").attr("class","alert alert-warning").text("운영시간이 아닙니다");
                     $("#parking-lot-not-allowed-time-div").hide();
+                    $("#parking-lot-price-modal-div").hide();
                     $("#parking_reservation").hide();
                 } else if (data.notAllowedTimeList.length > 0) {
-                    $("#parking-lot-booking-modal").attr("class","alert alert-danger")
-                    $('#parking-lot-booking-modal').text("예약불가 시간이 있습니다");
+                    $("#parking-lot-booking-modal").attr("class","alert alert-danger").text("예약불가 시간이 있습니다");
                     $("#parking-lot-not-allowed-time-div").show();
                     $("#parking-lot-price-modal-div").hide();
                     data.notAllowedTimeList.map(s => {
@@ -164,11 +163,11 @@ $(document).ready(function () {
                     })
                     $("#parking_reservation").hide();
                 } else {
-                    $("#parking-lot-booking-modal").attr("class","alert alert-success")
-                    $('#parking-lot-booking-modal').text("예약이 가능합니다");
+                    $("#parking-lot-booking-modal").attr("class","alert alert-success").text("예약이 가능합니다");
                     $("#parking_reservation").show();
                     $("#parking-lot-not-allowed-time-div").hide();
-                    $("#parking-lot-price-modal-div").hide();
+                    $("#parking-lot-price-modal-div").show();
+                    $("#parking-lot-price-modal").attr("value", data.charge);
                 }
             })
             .catch(error => {
