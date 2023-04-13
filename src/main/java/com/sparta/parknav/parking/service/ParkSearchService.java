@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,8 +61,14 @@ public class ParkSearchService {
                     }
                 }
             }
-            // DB에서 Like검색
-            List<ParkInfo> parkInfos = parkInfoRepository.findByNameContains(parkSearchRequestDto.getKeyword());
+
+            // DB에서 검색
+            String[] keywords = parkSearchRequestDto.getKeyword().split(" ");
+            String matchKeyword = Arrays.stream(keywords)
+                    .map(k -> "+" + k + " ")
+                    .collect(Collectors.joining());
+            
+            List<ParkInfo> parkInfos = parkInfoRepository.findAllParkInfoWithKeyword(matchKeyword);
             for (ParkInfo parkInfo : parkInfos) {
                 // 검색결과 별 유사도 비교
                 searchSimilarScore = similarKeyword(parkSearchRequestDto.getKeyword(), parkInfo.getName());

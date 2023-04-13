@@ -60,8 +60,6 @@ public class MgtService {
                 ()->transactionHandler.runOnWriteTransaction(() -> enterLogic(requestDto, user)));
     }
 
-
-
     public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
 
         // SCENARIO ENTER 1
