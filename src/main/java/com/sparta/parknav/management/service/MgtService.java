@@ -20,7 +20,7 @@ import com.sparta.parknav.parking.entity.ParkInfo;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
-import com.sparta.parknav.redis.RedisLockRepository;
+import com.sparta.parknav._global.redis.RedisLockRepository;
 import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

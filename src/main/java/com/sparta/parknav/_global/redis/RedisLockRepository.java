@@ -1,4 +1,4 @@
-package com.sparta.parknav.redis;
+package com.sparta.parknav._global.redis;
 
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
