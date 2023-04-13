@@ -21,6 +21,7 @@ import com.sparta.parknav.parking.repository.ParkInfoRepository;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import com.sparta.parknav.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -87,7 +89,7 @@ public class BookingService {
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
 
         // SCENARIO BOOKING 1
-        if (requestDto.getStartDate().isBefore(requestDto.getEndDate())) {
+        if (requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);
         }
 
