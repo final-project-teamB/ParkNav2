@@ -10,6 +10,7 @@ import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@EnableScheduling
 public class SchedulerService {
 
     private final ParkBookingByHourRepository parkBookingByHourRepository;
