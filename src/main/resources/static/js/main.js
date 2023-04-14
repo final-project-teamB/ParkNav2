@@ -56,14 +56,22 @@ $(document).ready(function () {
     $('#start-date').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        startDate: new Date()
+        startDate: new Date(),
+    }).on('changeDate', function (e) {
+        // start-date가 선택되었을 때
+        const startDate = e.date;
+        // 종료 날짜의 최소 날짜를 7일 후로 설정
+        const minEndDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 7);
+        $('#exit-date').datepicker('setEndDate', minEndDate);
+        $('#exit-date').datepicker('setStartDate', startDate);
     });
 
     // 종료 날짜를 datepicker로 초기화
     $('#exit-date').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        startDate: new Date()
+        startDate: new Date(),
+        endDate: new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000))
     });
 
     // 검색어 input에서 Enter 키 입력 시 이벤트
@@ -120,10 +128,13 @@ $(document).ready(function () {
         const endDateTime = endDate + "T" + endTime;
         const now = new Date();
         const startDateTimetoDate = new Date(startDateTime);
+        const endDateTimetoDate = new Date(endDateTime);
         // 년월일시까지만 비교할 현재 시간
         const nowTimeHours = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
-        // 년월일시까지만 비교할 사용자 입력 시간
-        const userStartDateTimeHours = new Date(startDateTimetoDate.getFullYear(), startDateTimetoDate.getMonth(), startDateTimetoDate.getDate(), startDateTimetoDate.getHours());
+        if (endDateTimetoDate.getTime()-startDateTimetoDate.getTime() > 604800000){
+            alert("일주일 이상 예약 할 수 없습니다");
+            return false;
+        }
 
         if (startDateTime >= endDateTime) {
             alert("종료 시간이 시작 시간보다 같거나 빠릅니다.");
@@ -133,6 +144,7 @@ $(document).ready(function () {
             alert("현재 시간 이후로만 선택 가능합니다")
             return false;
         }
+        console.log(startDateTimetoDate.getTime()-endDateTimetoDate.getTime());
         const body = {
             startDate: startDateTime,
             endDate: endDateTime,
@@ -180,6 +192,12 @@ $(document).ready(function () {
         const id = $("#parking-lot-id").val();
         const startDate = $('#start-date').val() + "T" + $('#start-time').val();
         const endDate = $('#exit-date').val() + "T" + $('#exit-time').val();
+        const startDateTimetoDate = new Date(startDate);
+        const endDateTimetoDate = new Date(endDate);
+        if (endDateTimetoDate.getTime()-startDateTimetoDate.getTime() > 604800000){
+            alert("일주일 이상 예약 할 수 없습니다");
+            return false;
+        }
         const body = {
             startDate: startDate,
             endDate: endDate
