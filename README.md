@@ -164,12 +164,12 @@
 - 예약 알고리즘 version2에 이르기까지 과정  
   👉 <a href="https://www.notion.so/park-nav/152d353a96734bb09175621f933c551e?pvs=4" target="_blank"> version2 알고리즘 트러블슈팅 보기 </a>
 
-- 테스트코드에 대한 고민
+- 테스트코드에 대한 고민  
   👉 <a href="https://park-nav.notion.site/Jacoco-0c8a8ee50fb54c17b77e6c45950fab79" target="_blank"> 코드 커버리지 적용 보기 </a>
   <br>
   👉 <a href="https://park-nav.notion.site/7011b2513bdd4589b295f69a0b671db0" target="_blank"> 테스트코드 작성 트러블슈팅 보기 </a>
 
-- Redis SpinLock 적용
+- Redis SpinLock 적용  
   👉 <a href="https://park-nav.notion.site/7ec0d3c0bef6487baacd605179d75110" target="_blank"> Redis SpinLock 적용 보기 </a>
 
 
