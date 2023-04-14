@@ -47,6 +47,7 @@
                     <th>번호</th>
                     <th>차량번호</th>
                     <th>입차시간</th>
+                    <th>예상출차시간</th>
                     <th>출차시간</th>
                     <th>주차요금</th>
                     <th>현재상태</th>
@@ -81,11 +82,11 @@
                 <form>
                     <div class="mb-3">
                         <label for="username" class="form-label">아이디</label>
-                        <input type="text" class="form-control" id="username" aria-describedby="username">
+                        <input type="text" class="form-control" id="username" aria-describedby="username" maxlength="20">
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">비밀번호</label>
-                        <input type="password" class="form-control" id="password">
+                        <input type="password" class="form-control" id="password" maxlength="20">
                     </div>
                     <button type="button" id="login-btn" class="btn btn-primary">로그인</button>
                 </form>
@@ -104,11 +105,11 @@
                 <form>
                     <div class="mb-3">
                         <label for="enterCarNum" class="form-label">차량번호</label>
-                        <input type="text" class="form-control" id="enterCarNum" aria-describedby="emailHelp">
+                        <input type="text" class="form-control" id="enterCarNum" aria-describedby="emailHelp" maxlength="20">
                     </div>
                     <div class="mb-3">
                         <label for="enterParkTime" class="form-label">입차시간</label>
-                        <input type="number" class="form-control" id="enterParkTime" max="72">
+                        <input type="number" class="form-control" id="enterParkTime" max="168">
                     </div>
                     <button type="button" id="enter-btn" class="btn btn-primary">입차하기</button>
                 </form>

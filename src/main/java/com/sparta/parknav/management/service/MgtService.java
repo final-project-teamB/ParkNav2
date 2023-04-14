@@ -57,7 +57,7 @@ public class MgtService {
         }
         return redisLockRepository.runOnLock(
                 requestDto.getParkId(),
-                ()->transactionHandler.runOnWriteTransaction(() -> enterLogic(requestDto, user)));
+                () -> transactionHandler.runOnWriteTransaction(() -> enterLogic(requestDto, user)));
     }
 
     public CarInResponseDto enterLogic(CarNumRequestDto requestDto, Admin user) {
@@ -96,7 +96,7 @@ public class MgtService {
         // SCENARIO ENTER 5
         if (parkBookingNow.isPresent()) {
             bookingInfo = parkBookingNow.get();
-        // SCENARIO ENTER 5-1
+            // SCENARIO ENTER 5-1
         } else if (parkBookingPlusHour.isPresent()) {
             bookingInfo = getUpdatedBookingInfo(parkInfo, now, parkOperInfo, parkBookingPlusHour.get());
         } else {
@@ -170,11 +170,11 @@ public class MgtService {
         Long parkId = parkInfo.get().getId();
         Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoIdOrderByEnterTimeDesc(admin.getParkInfo().getId(), pageable);
         List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
-                .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getCharge()))
+                .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getParkBookingInfo().getEndTime(), p.getCharge()))
                 .collect(Collectors.toList());
 
         Page page1 = new PageImpl(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements());
-        return ParkMgtListResponseDto.of(page1, parkName,parkId);
+        return ParkMgtListResponseDto.of(page1, parkName, parkId);
     }
 
 
