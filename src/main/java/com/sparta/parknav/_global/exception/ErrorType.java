@@ -49,8 +49,7 @@ public enum ErrorType {
                 .toList();
 
         ErrorType errorType = NOT_ALLOWED_BOOKING_TIME;
-        errorType.msg = dateTimeStrings.toString();
-
+        errorType.msg = "입차 불가한 시간대가 있습니다.\n" + dateTimeStrings;
         return errorType;
     }
 }
