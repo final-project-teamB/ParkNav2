@@ -31,7 +31,7 @@ $(document).ready(function () {
         $("#login-button").show();
         $("#enter-button").show();
         $("#logout-button").hide();
-        $("#parking-list").append(`<tr><td colspan="6">데이터가 없습니다</td></tr>`)
+        $("#parking-list").append(`<tr><td colspan="8">데이터가 없습니다</td></tr>`)
     }
 
     $('#logout-button').click(function () {
@@ -72,10 +72,12 @@ $(document).ready(function () {
             alert("차량 번호를 입력해주세요");
             return false;
         }
-        if (parkingTime > 72) {
-            alert("입차 최대 가능시간은 72시간입니다");
+        if (parkingTime > 168) {
+            alert("입차 최대 가능시간은 168시간입니다");
             return false
         }
+        $("#enterCarNum").val("");
+        $("#enterParkTime").val("");
         body = {
             parkId: parkId,
             carNum: carNum,
@@ -85,6 +87,7 @@ $(document).ready(function () {
             .then(response => {
                 alert(response.data.msg);
                 $('#enterModal').modal('hide');
+
                 fetchData(currentPage);
             })
             .catch(error => {
@@ -92,7 +95,6 @@ $(document).ready(function () {
                 return false;
             });
     });
-
 
 });
 
@@ -169,6 +171,7 @@ function fetchData(page) {
                     <td>${(pageSize * (page)) + num++}</td>
                     <td>${item.carNum}</td>
                     <td>${item.enterTime}</td>
+                    <td>${item.bookingEndTime}</td>
                     <td>${item.exitTime == null ? "-" : item.exitTime}</td>
                     <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
                     <td>${item.exitTime == null ? "주차" : "출차"}</td>

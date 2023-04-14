@@ -214,7 +214,7 @@
                     <form>
                         <div class="input-group mb-3">
                             <input type="text" class="form-control" placeholder="검색어" aria-label="Search"
-                                   id="keyword" aria-describedby="basic-addon2">
+                                   id="keyword" aria-describedby="basic-addon2" maxlength="30">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" id="SearchButton" type="button">
                                     검색
@@ -357,11 +357,11 @@
                     <form>
                         <div class="mb-3">
                             <label for="username" class="form-label">아이디</label>
-                            <input type="text" class="form-control" id="username" aria-describedby="emailHelp">
+                            <input type="text" class="form-control" id="username" aria-describedby="emailHelp" maxlength="20">
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">비밀번호</label>
-                            <input type="password" class="form-control" id="password">
+                            <input type="password" class="form-control" id="password" maxlength="20">
                         </div>
                         <button type="button" id="login-btn" class="btn btn-primary">로그인</button>
                     </form>
@@ -379,15 +379,15 @@
                 <div class="modal-body">
                     <form>
                         <div class="mb-3">
-                            <label for="signup_username" class="form-label">아이디</label>
+                            <label for="signup_username" class="form-label" maxlength="20">아이디</label>
                             <input type="text" class="form-control" id="signup_username" aria-describedby="emailHelp">
                         </div>
                         <div class="mb-3">
-                            <label for="signup_password" class="form-label">비밀번호</label>
+                            <label for="signup_password" class="form-label" maxlength="20">비밀번호</label>
                             <input type="password" class="form-control" id="signup_password">
                         </div>
                         <div class="mb-3">
-                            <label for="signup_password_check" class="form-label">비밀번호 확인</label>
+                            <label for="signup_password_check" class="form-label" maxlength="20">비밀번호 확인</label>
                             <input type="password" class="form-control" id="signup_password_check">
                         </div>
                         <button type="button" id="signup-btn" class="btn btn-primary">회원가입</button>
