@@ -147,18 +147,15 @@
 ## 성능개선
 
 
-- 주차장 검색 성능 개선
-
+- 주차장 검색 성능 개선  
   👉 <a href="https://park-nav.notion.site/fe13e60753af4749912bdb0128d6c7b8" target="_blank"> 주차장 검색 성능 개선 기록 보기 </a>
   <br>
   👉 <a href="https://park-nav.notion.site/93a55b37bc8441e294581fcea80c0a4a" target="_blank"> 주차장 조회 성능 테스트 보기 </a>
 
-- 예약 알고리즘 성능 개선
-
+- 예약 알고리즘 성능 개선  
   👉 <a href="https://park-nav.notion.site/ed0c8d7d03f44b1b84df5864747719a5" target="_blank"> 예약 알고리즘 성능 개선 기록 보기 </a>
 
-- 동시성 제어 성능 테스트
-
+- 동시성 제어 성능 테스트  
   👉 <a href="https://park-nav.notion.site/8462a3eb82484bb7bb3a464e61f4ea31" target="_blank"> 동시성제어 성능 테스트 보기 </a>
 
 #
@@ -167,14 +164,12 @@
 - 예약 알고리즘 version2에 이르기까지 과정  
   👉 <a href="https://www.notion.so/park-nav/152d353a96734bb09175621f933c551e?pvs=4" target="_blank"> version2 알고리즘 트러블슈팅 보기 </a>
 
-- 테스트코드에 대한 고민 
-
+- 테스트코드에 대한 고민
   👉 <a href="https://park-nav.notion.site/Jacoco-0c8a8ee50fb54c17b77e6c45950fab79" target="_blank"> 코드 커버리지 적용 보기 </a>
   <br>
   👉 <a href="https://park-nav.notion.site/7011b2513bdd4589b295f69a0b671db0" target="_blank"> 테스트코드 작성 트러블슈팅 보기 </a>
 
 - Redis SpinLock 적용
-
   👉 <a href="https://park-nav.notion.site/7ec0d3c0bef6487baacd605179d75110" target="_blank"> Redis SpinLock 적용 보기 </a>
 
 
