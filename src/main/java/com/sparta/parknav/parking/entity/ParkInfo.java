@@ -32,9 +32,6 @@ public class ParkInfo {
     @Column(nullable = false, length = 20)
     private String lo;
 
-    @OneToOne(mappedBy = "parkInfo", cascade = CascadeType.ALL)
-    private ParkOperInfo parkOperInfo;
-
     @Builder
     private ParkInfo(String name, String address1, String address2, String la, String lo) {
         this.name = name;

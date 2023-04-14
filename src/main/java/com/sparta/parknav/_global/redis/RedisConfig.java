@@ -1,4 +1,4 @@
-package com.sparta.parknav.redis;
+package com.sparta.parknav._global.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

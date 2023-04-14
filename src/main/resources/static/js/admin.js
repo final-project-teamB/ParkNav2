@@ -2,6 +2,7 @@ const token = localStorage.getItem('Authorization_admin');
 let currentPage = 0;
 const pageSize = 10; // 한 페이지당 보여줄 항목 수
 let totalPages = 0;
+let parkId;
 $(document).ready(function () {
     axios.interceptors.response.use(function (response) {
         // 응답 성공 직전 호출되는 콜백
@@ -22,11 +23,13 @@ $(document).ready(function () {
     if (token && token !== '') {
         axios.defaults.headers.common['Authorization'] = token;
         $("#login-button").hide();
+        $("#enter-button").show();
         $("#logout-button").show();
         fetchData(0);
     } else {
         $("#loginModal").modal('show');
         $("#login-button").show();
+        $("#enter-button").show();
         $("#logout-button").hide();
         $("#parking-list").append(`<tr><td colspan="6">데이터가 없습니다</td></tr>`)
     }
@@ -61,11 +64,59 @@ $(document).ready(function () {
         }
     });
 
+    //모달 아이디에서 Enter 키 입력 시 이벤트
+    $('#enter-btn').click(function () {
+        let carNum = $("#enterCarNum").val();
+        let parkingTime = $("#enterParkTime").val();
+        if (carNum ===""){
+            alert("차량 번호를 입력해주세요");
+            return false;
+        }
+        if (parkingTime > 72) {
+            alert("입차 최대 가능시간은 72시간입니다");
+            return false
+        }
+        body = {
+            parkId: parkId,
+            carNum: carNum,
+            parkingTime: parkingTime
+        }
+        axios.post(`/api/mgt/enter`, body)
+            .then(response => {
+                alert(response.data.msg);
+                $('#enterModal').modal('hide');
+                fetchData(currentPage);
+            })
+            .catch(error => {
+                alert(error.response.data.error.msg);
+                return false;
+            });
+    });
+
+
 });
 
+function carExit(parkId, carNum) {
+    if (confirm(carNum + " 차량을 출차 하시겠습니까?")) {
+        body = {
+            parkId: parkId,
+            carNum: carNum
+        }
+        axios.put("/api/mgt/exit", body)
+            .then(response => {
+                alert(response.data.msg);
+                fetchData(currentPage);
+            })
+            .catch(error => {
+                alert(error.response.data.error.msg)
+                return false;
+            });
+    }
+}
+
 function adminLogin() {
-    const userId = $("#username").val();
-    const password = $("#password").val();
+    let userId = $("#username").val();
+    let password = $("#password").val();
     if (userId === "") {
         alert("아이디를 입력해주세요");
         $("#username").focus();
@@ -107,20 +158,21 @@ function fetchData(page) {
     const params = new URLSearchParams(body).toString();
     axios.get(`/api/mgt/check?${params}`)
         .then(response => {
-            console.log(response);
             const data = response.data.data.page.content;
+            parkId = response.data.data.parkId;
             let num = 1;
             $("#parking-lot-name").text(response.data.data.parkName);
             $("#parking-list").empty();
             data.map((item) => {
                 $("#parking-list").append(`
                   <tr>
-                    <td>${(pageSize*(page))+num++}</td>
+                    <td>${(pageSize * (page)) + num++}</td>
                     <td>${item.carNum}</td>
                     <td>${item.enterTime}</td>
                     <td>${item.exitTime == null ? "-" : item.exitTime}</td>
                     <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
                     <td>${item.exitTime == null ? "주차" : "출차"}</td>
+                    <td>${item.exitTime == null ? `<button type="button" class="btn btn-outline-info btn-sm mx-1" onclick="carExit('${parkId}','${item.carNum}')">출차하기</button>` : '<button type="button" class="btn btn-outline-success btn-sm mx-1">출차완료</button>'}</td>
                   </tr>
                 `);
             });

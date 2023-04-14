@@ -30,7 +30,7 @@ public class ParkBookingInfo {
     private String carNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USERS_ID", nullable = false)
+    @JoinColumn(name = "USERS_ID")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,7 +44,7 @@ public class ParkBookingInfo {
         this.endTime = endTime;
         this.user = user;
         this.parkInfo = parkInfo;
-        this.carNum =carNum;
+        this.carNum = carNum;
     }
 
     public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum) {
@@ -67,4 +67,23 @@ public class ParkBookingInfo {
                 .build();
     }
 
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, ParkInfo parkInfo, String carNum) {
+        return ParkBookingInfo.builder()
+                .startTime(requestDto.getStartDate())
+                .endTime(requestDto.getEndDate())
+                .parkInfo(parkInfo)
+                .carNum(carNum)
+                .build();
+    }
+
+    public void startTimeUpdate(LocalDateTime dateTime) {
+        this.startTime = dateTime;
+    }
+    public void endTimeUpdate(LocalDateTime dateTime) {
+        this.endTime = dateTime;
+    }
+
+    public void endTimePlus(int hour) {
+        this.endTime = this.endTime.plusHours(hour);
+    }
 }
