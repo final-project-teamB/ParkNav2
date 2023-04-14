@@ -89,6 +89,11 @@ public class BookingService {
 
     public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
 
+        // 예약 시간 일주일 이상 차이날시 예외 발생
+        if (Duration.between(requestDto.getStartDate(), requestDto.getEndDate()).toDays() >= 7) {
+            throw new CustomException(ErrorType.FORBIDDEN_TIME);
+        }
+
         // SCENARIO BOOKING PRE 1
         if (!requestDto.getStartDate().isBefore(requestDto.getEndDate())) {
             throw new CustomException(ErrorType.NOT_END_TO_START);

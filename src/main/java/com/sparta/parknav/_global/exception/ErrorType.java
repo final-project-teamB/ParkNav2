@@ -32,7 +32,9 @@ public enum ErrorType {
     NOT_PARKING_SPACE(400, "주차할 공간이 없습니다."),
     NOT_TOKEN(401, "토큰이 없습니다."),
     NOT_VALID_TOKEN(401, "토큰이 유효하지 않습니다."),
-    PARK_TIME_NOT_EXIST(400, "주차 예정 시간을 입력 해주세요.");
+    PARK_TIME_NOT_EXIST(400, "주차 예정 시간을 입력 해주세요."),
+    FORBIDDEN_TIME(400, "예약 시간은 일주일 이하만 가능합니다"),
+    ;
 
     private int code;
     private String msg;
