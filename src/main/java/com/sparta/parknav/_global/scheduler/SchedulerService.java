@@ -12,6 +12,7 @@ import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -28,6 +29,7 @@ public class SchedulerService {
     private final ParkOperInfoRepository parkOperInfoRepository;
 
     @Transactional
+    @PreAuthorize("permitAll()")
     @Scheduled(cron = "0 0 * * * *")
     public void scheduleRun() {
 
