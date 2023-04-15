@@ -20,7 +20,7 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
     Optional<ParkBookingInfo> findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(Long parkInfoId, String carNum, LocalDateTime startTime, LocalDateTime endTime);
 
     @Query(value = "SELECT p from ParkBookingInfo p WHERE p.parkInfo.id = :parkId AND p.carNum = :carNum " +
-            "AND ((p.startTime between :startTime and :endTime) OR (p.endTime between :startTime and :endTime))")
+            "AND ((p.startTime >= :startTime and p.startTime < :endTime) OR (p.endTime > :startTime and p.endTime <= :endTime))")
     ParkBookingInfo getAlreadyBookingInfo(@Param("parkId") Long parkId, @Param("carNum") String carNum, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     ParkBookingInfo findTopByParkInfoIdAndCarNumAndStartTimeGreaterThan(Long id, String carNum, LocalDateTime now);
