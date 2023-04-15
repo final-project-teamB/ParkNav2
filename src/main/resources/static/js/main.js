@@ -212,7 +212,6 @@ $(document).ready(function () {
                             <input class="form-check-input" type="radio" ${num === 2 ? "checked" : null}>
                         </div>
                         </td>
-                        <td><button class="btn btn-outline-danger mx-2" name="car-delete-button">삭제</button></td>
                     </tr>`
                     );
                 })
