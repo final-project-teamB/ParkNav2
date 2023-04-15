@@ -133,7 +133,7 @@ public class BookingService {
         }
 
         // SCENARIO BOOKING PRE 8
-        ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum());
+        ParkBookingInfo bookingInfo = ParkBookingInfo.of(requestDto, user, parkInfo, car.getCarNum(), requestDto.getEndDate());
         parkBookingByHourSave(parkId, parkOperInfo, requestDto.getStartDate(), requestDto.getEndDate());
 
         return BookingResponseDto.of(parkBookingInfoRepository.save(bookingInfo).getId());
@@ -161,7 +161,7 @@ public class BookingService {
         }
 
         // SCENARIO BOOKING NOW 4
-        ParkBookingInfo bookingInfo = ParkBookingInfo.of(bookingInfoRequestDto, parkInfo, carNum);
+        ParkBookingInfo bookingInfo = ParkBookingInfo.of(bookingInfoRequestDto, parkInfo, carNum, bookingInfoRequestDto.getEndDate());
         parkBookingByHourSave(parkInfo.getId(), parkOperInfo, startTime, endTime);
 
         return parkBookingInfoRepository.save(bookingInfo);

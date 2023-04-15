@@ -33,13 +33,21 @@ public class ParkingFeeCalculator {
 
         int parkingFee = calculator.basicCharge;
 
-        if (parkingTime > calculator.basicTime) {
-            long additionalTime = parkingTime - calculator.basicTime;
-            int additionalFee = (int) Math.ceil((double) additionalTime / calculator.additionalUnitTime) * calculator.additionalCharge;
-            parkingFee += additionalFee;
-        }
+        long additionalTime = Math.max(0, parkingTime - calculator.basicTime);
+        int additionalFee = (int) Math.ceil((double) additionalTime / calculator.additionalUnitTime) * calculator.additionalCharge;
+        parkingFee += additionalFee;
 
         return parkingFee;
+    }
+
+    public static int calculateParkingFee(long parkingTime, ParkOperInfo parkOperInfo, long overTime) {
+
+        ParkingFeeCalculator calculator = ParkingFeeCalculator.from(parkOperInfo);
+
+        int parkingFee = calculateParkingFee(parkingTime, parkOperInfo);
+        int penaltyFee = (int) Math.ceil((double) overTime / calculator.additionalUnitTime) * calculator.additionalCharge;
+
+        return parkingFee + penaltyFee;
     }
 
 }

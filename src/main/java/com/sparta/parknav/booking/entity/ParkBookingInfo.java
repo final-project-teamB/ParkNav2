@@ -37,23 +37,27 @@ public class ParkBookingInfo {
     @JoinColumn(name = "PARK_INFO_ID", nullable = false)
     private ParkInfo parkInfo;
 
+    @Column
+    private LocalDateTime exitTime;
 
     @Builder
-    private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum) {
+    private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.user = user;
         this.parkInfo = parkInfo;
         this.carNum = carNum;
+        this.exitTime = exitTime;
     }
 
-    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum) {
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
         return ParkBookingInfo.builder()
                 .startTime(requestDto.getStartDate())
                 .endTime(requestDto.getEndDate())
                 .user(user)
                 .parkInfo(parkInfo)
                 .carNum(carNum)
+                .exitTime(exitTime)
                 .build();
     }
 
@@ -67,12 +71,13 @@ public class ParkBookingInfo {
                 .build();
     }
 
-    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, ParkInfo parkInfo, String carNum) {
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
         return ParkBookingInfo.builder()
                 .startTime(requestDto.getStartDate())
                 .endTime(requestDto.getEndDate())
                 .parkInfo(parkInfo)
                 .carNum(carNum)
+                .exitTime(exitTime)
                 .build();
     }
 
