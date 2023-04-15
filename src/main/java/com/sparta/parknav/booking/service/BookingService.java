@@ -180,7 +180,14 @@ public class BookingService {
         }
 
         List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(bookingInfo.getParkInfo().getId(), bookingInfo.getStartTime(), bookingInfo.getEndTime());
-        hourList.forEach(hour -> hour.updateCnt(1));
+        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(bookingInfo.getParkInfo().getId()).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+        );
+        hourList.forEach(hour -> {
+            if (hour.getAvailable() < parkOperInfo.getCmprtCo()) {
+                hour.updateCnt(1);
+            }
+        });
 
         parkBookingInfoRepository.deleteById(id);
     }
