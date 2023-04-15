@@ -27,6 +27,9 @@ public class ParkBookingInfo {
     private LocalDateTime endTime;
 
     @Column(nullable = false)
+    private LocalDateTime exitTime;
+
+    @Column(nullable = false)
     private String carNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,12 +42,13 @@ public class ParkBookingInfo {
 
 
     @Builder
-    private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum) {
+    private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.user = user;
         this.parkInfo = parkInfo;
         this.carNum = carNum;
+        this.exitTime = exitTime;
     }
 
     public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum) {
@@ -54,6 +58,7 @@ public class ParkBookingInfo {
                 .user(user)
                 .parkInfo(parkInfo)
                 .carNum(carNum)
+                .exitTime(requestDto.getEndDate())
                 .build();
     }
 
@@ -73,17 +78,19 @@ public class ParkBookingInfo {
                 .endTime(requestDto.getEndDate())
                 .parkInfo(parkInfo)
                 .carNum(carNum)
+                .exitTime(requestDto.getEndDate())
                 .build();
     }
 
     public void startTimeUpdate(LocalDateTime dateTime) {
         this.startTime = dateTime;
     }
-    public void endTimeUpdate(LocalDateTime dateTime) {
-        this.endTime = dateTime;
+
+    public void exitTimeUpdate(LocalDateTime dateTime) {
+        this.exitTime = dateTime;
     }
 
-    public void endTimePlus(int hour) {
-        this.endTime = this.endTime.plusHours(hour);
+    public void exitTimePlus(int hour) {
+        this.exitTime = this.exitTime.plusHours(hour);
     }
 }
