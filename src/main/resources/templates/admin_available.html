@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
     <!-- js -->
-    <script src="/js/admin.js"></script>
+    <script src="/js/admin_available.js"></script>
 </head>
 <body>
 <div class="container-fluid">
@@ -31,8 +31,7 @@
             <button class="btn btn-outline-success mx-2" id="login-button" data-toggle="modal"
                     data-target="#loginModal">로그인
             </button>
-            <button class="btn btn-outline-warning mx-2" id="enter-button" data-toggle="modal" data-target="#enterModal">입차하기</button>
-            <button class="btn btn-outline-info mx-2" id="available-button" data-toggle="modal" data-target="#enterModal">예약현황</button>
+            <button class="btn btn-outline-info mx-2" id="main-button">메인으로</button>
             <button class="btn btn-outline-danger mx-2" id="logout-button">로그아웃</button>
 
         </div>
@@ -43,35 +42,23 @@
             <h2 class="text-center mb-4">관리자 페이지</h2>
             <h4 id="parking-lot-name" class="text-center mb-4"></h4>
             <table class="table table-striped table-hover text-center">
-                <thead>
+                <thead id="thead-time">
                 <tr>
-                    <th>번호</th>
-                    <th>차량번호</th>
-                    <th>입차시간</th>
-                    <th>출차시간</th>
-                    <th>주차요금</th>
-                    <th>예약시작시간</th>
-                    <th>예약종료시간</th>
-                    <th>현재상태</th>
-                    <th>출차버튼</th>
+                    <th>시간</th>
+                    <th>2022-04-15</th>
+                    <th>2022-04-16</th>
+                    <th>2022-04-17</th>
+                    <th>2022-04-18</th>
+                    <th>2022-04-19</th>
+                    <th>2022-04-20</th>
+                    <th>2022-04-21</th>
                 </tr>
                 </thead>
-                <tbody id="parking-list">
+                <tbody id="parking-available">
                 </tbody>
             </table>
         </div>
     </div>
-    <nav>
-        <ul class="pagination justify-content-center">
-            <li class="page-item disabled" id="previous-page">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">이전</a>
-            </li>
-            <li class="page-item active" id="page-0"><a class="page-link" href="#">1</a></li>
-            <li class="page-item" id="next-page">
-                <a class="page-link" href="#">다음</a>
-            </li>
-        </ul>
-    </nav>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -96,28 +83,6 @@
         </div>
     </div>
 </div>
-<!-- 입차하기 Modal -->
-<div class="modal fade" id="enterModal" tabindex="-1" aria-labelledby="enterModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="signupModalLabel">입차</h5>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="enterCarNum" class="form-label">차량번호</label>
-                        <input type="text" class="form-control" id="enterCarNum" aria-describedby="emailHelp" maxlength="20">
-                    </div>
-                    <div class="mb-3">
-                        <label for="enterParkTime" class="form-label">입차시간</label>
-                        <input type="number" class="form-control" id="enterParkTime" max="168">
-                    </div>
-                    <button type="button" id="enter-btn" class="btn btn-primary">입차하기</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
 </body>
 </html>

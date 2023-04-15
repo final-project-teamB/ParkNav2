@@ -10,10 +10,7 @@ import com.sparta.parknav.booking.repository.ParkBookingByHourRepositoryCustom;
 import com.sparta.parknav.booking.repository.ParkBookingInfoRepository;
 import com.sparta.parknav.booking.service.BookingService;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
-import com.sparta.parknav.management.dto.response.CarInResponseDto;
-import com.sparta.parknav.management.dto.response.CarOutResponseDto;
-import com.sparta.parknav.management.dto.response.ParkMgtListResponseDto;
-import com.sparta.parknav.management.dto.response.ParkMgtResponseDto;
+import com.sparta.parknav.management.dto.response.*;
 import com.sparta.parknav.management.entity.ParkMgtInfo;
 import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.parking.entity.ParkInfo;
@@ -32,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -265,4 +263,17 @@ public class MgtService {
         return betweenTime;
     }
 
+    public ParkAvailableResponseDto parkAvailable(Admin admin) {
+        LocalDate now = LocalDate.now();
+        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(admin.getParkInfo().getId()).orElseThrow(
+                ()-> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+        );
+        ParkInfo parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId()).orElseThrow(
+                ()-> new CustomException(ErrorType.NOT_FOUND_PARK)
+        );
+
+        List<ParkAvailableDto> parkAvailableDtos = parkBookingByHourRepository.findByParkInfoIdAndDateBetweenOrderByDateAscTimeAsc(admin.getParkInfo().getId(), now, now.plusDays(6))
+                .stream().map(s-> ParkAvailableDto.of(s.getDate(),s.getTime(),s.getAvailable())).toList();
+        return ParkAvailableResponseDto.of(parkOperInfo.getCmprtCo(),parkInfo.getName(),parkAvailableDtos);
+    }
 }

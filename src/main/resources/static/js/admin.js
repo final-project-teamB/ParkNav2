@@ -25,12 +25,14 @@ $(document).ready(function () {
         $("#login-button").hide();
         $("#enter-button").show();
         $("#logout-button").show();
+        $("#available-button-button").show();
         fetchData(0);
     } else {
         $("#loginModal").modal('show');
         $("#login-button").show();
         $("#enter-button").show();
         $("#logout-button").hide();
+        $("#available-button-button").hide();
         $("#parking-list").append(`<tr><td colspan="8">데이터가 없습니다</td></tr>`)
     }
 
@@ -62,6 +64,10 @@ $(document).ready(function () {
             event.preventDefault();
             $('#password').focus();
         }
+    });
+
+    $('#available-button').click(function () {
+        window.location.href = "/admin_available";
     });
 
     //모달 아이디에서 Enter 키 입력 시 이벤트

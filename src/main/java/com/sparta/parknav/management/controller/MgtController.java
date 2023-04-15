@@ -7,6 +7,7 @@ import com.sparta.parknav._global.security.AdminDetailsImpl;
 import com.sparta.parknav.management.dto.request.CarNumRequestDto;
 import com.sparta.parknav.management.dto.response.CarInResponseDto;
 import com.sparta.parknav.management.dto.response.CarOutResponseDto;
+import com.sparta.parknav.management.dto.response.ParkAvailableResponseDto;
 import com.sparta.parknav.management.dto.response.ParkMgtListResponseDto;
 import com.sparta.parknav.management.service.MgtService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,10 @@ public class MgtController {
                                                           @RequestParam int page,
                                                           @RequestParam int size) {
         return ResponseUtils.ok(mgtService.mgtPage(userDetails.getUser(), page, size), MsgType.SEARCH_SUCCESSFULLY);
+    }
+
+    @GetMapping("/available")
+    public ApiResponseDto<ParkAvailableResponseDto> parkAvailable(@AuthenticationPrincipal AdminDetailsImpl adminDetails){
+        return ResponseUtils.ok(mgtService.parkAvailable(adminDetails.getUser()),MsgType.SEARCH_SUCCESSFULLY);
     }
 }
