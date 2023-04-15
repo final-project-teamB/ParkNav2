@@ -107,6 +107,21 @@ $(document).ready(function () {
         }
     });
 
+    //라디오버튼 이벤트
+    $(document).on('click', 'input[type="radio"]', function () {
+        $('input[type="radio"]').not(this).prop('checked', false);
+        const carNum = $(this).closest('tr').find('td:nth-child(2)').text();
+        axios.put("/api/car/rep", {carNum: carNum})
+            .then(response => {
+                alert(response.data.msg);
+                myCarList();
+            })
+            .catch(error => {
+                console.log(error.response.data.error.msg);
+                return false;
+            });
+    });
+
     //예약버튼을 누를경우 이벤트
     $('#parking_reservation_check').click(function () {
         const id = $('#parking-lot-id').val();
@@ -180,6 +195,29 @@ $(document).ready(function () {
                     $("#parking-lot-not-allowed-time-div").hide();
                     $("#parking-lot-price-modal-div").show();
                     $("#parking-lot-price-modal").attr("value", data.charge);
+                    $("#existing-car-numbers").empty();
+                    return axios.get("/api/car/check");
+                }
+            })
+            .then(response2 => {
+                const data = response2.data.data;
+                let num = 1;
+                data.map((item) => {
+                    $("#existing-car-numbers").append(`
+                    <tr>
+                        <td>${num++}</td>
+                        <td>${item.carNum}</td>
+                        <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" ${num === 2 ? "checked" : null}>
+                        </div>
+                        </td>
+                        <td><button class="btn btn-outline-danger mx-2" name="car-delete-button">삭제</button></td>
+                    </tr>`
+                    );
+                })
+                if (data.length == 0) {
+                    $("#existing-car-numbers").append(`<tr><td colspan="4">등록된 차량이 없습니다</td></tr>`)
                 }
             })
             .catch(error => {
