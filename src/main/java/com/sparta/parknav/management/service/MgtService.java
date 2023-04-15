@@ -139,15 +139,27 @@ public class MgtService {
         );
 
         // SCENARIO EXIT 4
-        LocalDateTime now = LocalDateTime.now();
         ParkBookingInfo bookingInfo = parkMgtInfo.getParkBookingInfo();
-        long minutes = Duration.between(bookingInfo.getStartTime(), now).toMinutes();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime enterTime = parkMgtInfo.getEnterTime();
+        LocalDateTime startTime = bookingInfo.getStartTime();
+        LocalDateTime endTime = bookingInfo.getEndTime();
+        long minutes;
+        long overTime;
+        int charge;
 
-        if (bookingInfo.getUser() != null && bookingInfo.getEndTime().isAfter(now)) {
-            minutes = Duration.between(bookingInfo.getStartTime(), bookingInfo.getEndTime()).toMinutes();
+        if (bookingInfo.getUser() == null) {
+            minutes = Duration.between(enterTime, now).toMinutes();
+        } else {
+            minutes = Duration.between(startTime, endTime).toMinutes();
         }
 
-        int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
+        if (endTime.isBefore(now)) {
+            overTime = Duration.between(endTime, now).toMinutes();
+            charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo, overTime);
+        } else {
+            charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
+        }
 
         // SCENARIO EXIT 5
         List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(parkOperInfo.getParkInfo().getId(), now, bookingInfo.getEndTime());
