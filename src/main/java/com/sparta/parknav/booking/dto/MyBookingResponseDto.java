@@ -25,12 +25,18 @@ public class MyBookingResponseDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime enterTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime exitTime;
+
     private Integer charge;
 
     private StatusType status;
 
     @Builder
-    private MyBookingResponseDto(Long bookingId, Long parkId, String parkName, String carNum, LocalDateTime startDate, LocalDateTime endDate, Integer charge, StatusType status) {
+    private MyBookingResponseDto(Long bookingId, Long parkId, String parkName, String carNum, LocalDateTime startDate, LocalDateTime endDate, Integer charge, StatusType status, LocalDateTime enterTime, LocalDateTime exitTime) {
         this.bookingId = bookingId;
         this.parkId = parkId;
         this.parkName = parkName;
@@ -39,9 +45,11 @@ public class MyBookingResponseDto {
         this.endDate = endDate;
         this.charge = charge;
         this.status = status;
+        this.enterTime = enterTime;
+        this.exitTime = exitTime;
     }
 
-    public static MyBookingResponseDto of(ParkBookingInfo parkBookingInfo, Integer charge, StatusType status) {
+    public static MyBookingResponseDto of(ParkBookingInfo parkBookingInfo, Integer charge, StatusType status, LocalDateTime enterTime, LocalDateTime exitTime) {
         return builder()
                 .bookingId(parkBookingInfo.getId())
                 .parkId(parkBookingInfo.getParkInfo().getId())
@@ -51,6 +59,8 @@ public class MyBookingResponseDto {
                 .endDate(parkBookingInfo.getEndTime())
                 .charge(charge)
                 .status(status)
+                .enterTime(enterTime)
+                .exitTime(exitTime)
                 .build();
     }
 

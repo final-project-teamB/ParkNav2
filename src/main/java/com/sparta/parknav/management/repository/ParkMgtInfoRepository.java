@@ -32,6 +32,6 @@ public interface ParkMgtInfoRepository extends JpaRepository<ParkMgtInfo, Long> 
     // @EntityGraph 어노테이션을 사용하여 fetch join을 적용
     // ParkMgtInfo와 함께 ParkBookingInfo 엔티티도 함께 조회할 수 있게 됨
     @EntityGraph(attributePaths = {"parkBookingInfo"})
-    List<ParkMgtInfo> findAllByExitTimeIsNullAndParkBookingInfoEndTimeBefore(@NotNull LocalDateTime now);
+    List<ParkMgtInfo> findAllByExitTimeIsNullAndParkBookingInfoExitTimeBefore(@NotNull LocalDateTime now);
 
 }
