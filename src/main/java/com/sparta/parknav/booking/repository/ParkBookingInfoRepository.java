@@ -24,4 +24,6 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
     ParkBookingInfo getAlreadyBookingInfo(@Param("parkId") Long parkId, @Param("carNum") String carNum, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     ParkBookingInfo findTopByParkInfoIdAndCarNumAndStartTimeGreaterThan(Long id, String carNum, LocalDateTime now);
+
+    Page<ParkBookingInfo> findAllByParkInfoIdOrderByStartTimeDesc(Long id, Pageable pageable);
 }
