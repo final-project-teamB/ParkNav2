@@ -158,7 +158,7 @@ public class MgtService {
         });
 
         // SCENARIO EXIT 6
-        bookingInfo.endTimeUpdate(now);
+        bookingInfo.exitTimeUpdate(now);
 
         parkMgtInfo.update(charge, now);
 
@@ -170,14 +170,30 @@ public class MgtService {
 
         Pageable pageable = PageRequest.of(page, size);
         Optional<ParkInfo> parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId());
+        if (parkInfo.isEmpty()) {
+            throw new CustomException(ErrorType.NOT_FOUND_PARK);
+        }
+        // 예약시간이 종료되지 않은 예약 정보를 불러오기
+        Page<ParkBookingInfo> parkBookingInfos = parkBookingInfoRepository.findAllByParkInfoIdOrderByStartTimeDesc(parkInfo.get().getId(), pageable);
+        List<ParkMgtResponseDto> parkMgtResponseDtos1 = new ArrayList<>();
+
+        for (ParkBookingInfo p : parkBookingInfos) {
+            Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
+            if (parkMgtInfo.isPresent()) {
+                ParkMgtResponseDto parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
+                        , p.getStartTime(), p.getEndTime(), parkMgtInfo.get().getCharge());
+                parkMgtResponseDtos1.add(parkMgtResponseDto);
+            } else {
+                ParkMgtResponseDto parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
+                        , p.getStartTime(), p.getEndTime(), 0);
+                parkMgtResponseDtos1.add(parkMgtResponseDto);
+            }
+        }
+
         String parkName = parkInfo.get().getName();
         Long parkId = parkInfo.get().getId();
-        Page<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByParkInfoIdOrderByEnterTimeDesc(admin.getParkInfo().getId(), pageable);
-        List<ParkMgtResponseDto> parkMgtResponseDtos = parkMgtInfos.stream()
-                .map(p -> ParkMgtResponseDto.of(p.getCarNum(), p.getEnterTime(), p.getExitTime(), p.getParkBookingInfo().getEndTime(), p.getCharge()))
-                .collect(Collectors.toList());
 
-        Page page1 = new PageImpl(parkMgtResponseDtos, pageable, parkMgtInfos.getTotalElements());
+        Page page1 = new PageImpl(parkMgtResponseDtos1, pageable, parkBookingInfos.getTotalElements());
         return ParkMgtListResponseDto.of(page1, parkName, parkId);
     }
 
