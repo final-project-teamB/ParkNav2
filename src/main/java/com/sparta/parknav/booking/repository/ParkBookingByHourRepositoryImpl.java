@@ -31,6 +31,9 @@ public class ParkBookingByHourRepositoryImpl implements ParkBookingByHourReposit
         long days = Period.between(startDay, endDay).getDays();
         int startTime = startDate.getHour();
         int endTime = endDate.getHour();
+        if (endDate.toLocalTime().getMinute() == 0 && endDate.toLocalTime().getSecond() == 0) {
+            endTime = endDate.minusHours(1).getHour();
+        }
 
         List<ParkBookingByHour> result = new ArrayList<>();
         if (days == 0) {

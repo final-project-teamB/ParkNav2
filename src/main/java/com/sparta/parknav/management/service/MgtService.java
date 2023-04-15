@@ -151,7 +151,11 @@ public class MgtService {
 
         // SCENARIO EXIT 5
         List<ParkBookingByHour> hourList = parkBookingByHourRepositoryCustom.findByParkInfoIdAndFromStartDateToEndDate(parkOperInfo.getParkInfo().getId(), now, bookingInfo.getEndTime());
-        hourList.forEach(hour -> hour.updateCnt(1));
+        hourList.forEach(hour -> {
+            if (hour.getAvailable() < parkOperInfo.getCmprtCo()) {
+                hour.updateCnt(1);
+            }
+        });
 
         // SCENARIO EXIT 6
         bookingInfo.endTimeUpdate(now);
