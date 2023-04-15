@@ -33,7 +33,7 @@ public class SchedulerService {
     @Scheduled(cron = "0 0 * * * *")
     public void scheduleRun() {
 
-        List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByExitTimeIsNullAndParkBookingInfoEndTimeBefore(LocalDateTime.now());
+        List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByExitTimeIsNullAndParkBookingInfoExitTimeBefore(LocalDateTime.now());
 
         for (ParkMgtInfo p : parkMgtInfos) {
             ParkBookingInfo parkBookingInfo = p.getParkBookingInfo();
@@ -43,7 +43,7 @@ public class SchedulerService {
             ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(p.getParkInfo().getId()).orElseThrow(
                     () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
             );
-            parkBookingInfo.endTimePlus(1);
+            parkBookingInfo.exitTimePlus(1);
             LocalDateTime endDateTime = parkBookingInfo.getEndTime();
             int endTime = endDateTime.getHour();
             ParkBookingByHour parkBookingByHour = parkBookingByHourRepository

@@ -182,6 +182,7 @@ function fetchData(page) {
                         <td>${item.parkName}</td>
                         <td>${item.carNum}</td>
                         <td>${item.startDate} ~<br> ${item.endDate}</td>
+                        <td>${item.enterTime != null ? item.enterTime + ' ~<br> ' + (item.exitTime != null ? item.exitTime : '-') : '-'}</td>
                         <td>${item.charge + "원"}</td>
                         <td>
                             ${button}

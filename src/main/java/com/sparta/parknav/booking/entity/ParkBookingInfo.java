@@ -27,6 +27,9 @@ public class ParkBookingInfo {
     private LocalDateTime endTime;
 
     @Column(nullable = false)
+    private LocalDateTime exitTime;
+
+    @Column(nullable = false)
     private String carNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,8 +40,6 @@ public class ParkBookingInfo {
     @JoinColumn(name = "PARK_INFO_ID", nullable = false)
     private ParkInfo parkInfo;
 
-    @Column
-    private LocalDateTime exitTime;
 
     @Builder
     private ParkBookingInfo(LocalDateTime startTime, LocalDateTime endTime, User user, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
@@ -50,14 +51,14 @@ public class ParkBookingInfo {
         this.exitTime = exitTime;
     }
 
-    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, User user, ParkInfo parkInfo, String carNum) {
         return ParkBookingInfo.builder()
                 .startTime(requestDto.getStartDate())
                 .endTime(requestDto.getEndDate())
                 .user(user)
                 .parkInfo(parkInfo)
                 .carNum(carNum)
-                .exitTime(exitTime)
+                .exitTime(requestDto.getEndDate())
                 .build();
     }
 
@@ -71,24 +72,25 @@ public class ParkBookingInfo {
                 .build();
     }
 
-    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, ParkInfo parkInfo, String carNum, LocalDateTime exitTime) {
+    public static ParkBookingInfo of(BookingInfoRequestDto requestDto, ParkInfo parkInfo, String carNum) {
         return ParkBookingInfo.builder()
                 .startTime(requestDto.getStartDate())
                 .endTime(requestDto.getEndDate())
                 .parkInfo(parkInfo)
                 .carNum(carNum)
-                .exitTime(exitTime)
+                .exitTime(requestDto.getEndDate())
                 .build();
     }
 
     public void startTimeUpdate(LocalDateTime dateTime) {
         this.startTime = dateTime;
     }
-    public void endTimeUpdate(LocalDateTime dateTime) {
-        this.endTime = dateTime;
+
+    public void exitTimeUpdate(LocalDateTime dateTime) {
+        this.exitTime = dateTime;
     }
 
-    public void endTimePlus(int hour) {
-        this.endTime = this.endTime.plusHours(hour);
+    public void exitTimePlus(int hour) {
+        this.exitTime = this.exitTime.plusHours(hour);
     }
 }

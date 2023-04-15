@@ -170,10 +170,11 @@ function fetchData(page) {
                   <tr>
                     <td>${(pageSize * (page)) + num++}</td>
                     <td>${item.carNum}</td>
-                    <td>${item.enterTime}</td>
-                    <td>${item.bookingEndTime}</td>
+                    <td>${item.enterTime == null ? "-" : item.enterTime}</td>
                     <td>${item.exitTime == null ? "-" : item.exitTime}</td>
                     <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
+                    <td>${item.bookingStartTime}</td>
+                    <td>${item.bookingEndTime}</td>
                     <td>${item.exitTime == null ? "주차" : "출차"}</td>
                     <td>${item.exitTime == null ? `<button type="button" class="btn btn-outline-info btn-sm mx-1" onclick="carExit('${parkId}','${item.carNum}')">출차하기</button>` : '<button type="button" class="btn btn-outline-success btn-sm mx-1">출차완료</button>'}</td>
                   </tr>

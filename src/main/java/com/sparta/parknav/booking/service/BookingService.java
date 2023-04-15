@@ -84,7 +84,7 @@ public class BookingService {
     public BookingResponseDto bookingPark(Long parkId, BookingInfoRequestDto requestDto, User user) {
         return redisLockRepository.runOnLock(
                 parkId,
-                ()->transactionHandler.runOnWriteTransaction(() -> bookingLogic(parkId, requestDto, user)));
+                () -> transactionHandler.runOnWriteTransaction(() -> bookingLogic(parkId, requestDto, user)));
     }
 
     public BookingResponseDto bookingLogic(Long parkId, BookingInfoRequestDto requestDto, User user) {
@@ -227,7 +227,13 @@ public class BookingService {
 
             int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
 
-            MyBookingResponseDto responseDto = MyBookingResponseDto.of(p, charge, status);
+            // 입차를 안했다면 null, 했다면 출차시간 리턴
+            MyBookingResponseDto responseDto;
+            if (parkMgtInfo.isPresent()) {
+                responseDto = MyBookingResponseDto.of(p, charge, status, parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime());
+            } else {
+                responseDto = MyBookingResponseDto.of(p, charge, status, null, null);
+            }
             responseDtoList.add(responseDto);
         }
 
