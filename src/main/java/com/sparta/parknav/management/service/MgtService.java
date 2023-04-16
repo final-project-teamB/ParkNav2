@@ -32,9 +32,10 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -133,6 +134,10 @@ public class MgtService {
                 () -> new CustomException(ErrorType.NOT_FOUND_CAR_IN_PARK)
         );
 
+        if (parkMgtInfo.getEnterTime() == null) {
+            throw new CustomException(ErrorType.NOT_ENTER_CAR);
+        }
+
         // SCENARIO EXIT 3
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkMgtInfo.getParkInfo().getId()).orElseThrow(
                 () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
@@ -185,28 +190,66 @@ public class MgtService {
         if (parkInfo.isEmpty()) {
             throw new CustomException(ErrorType.NOT_FOUND_PARK);
         }
+        ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(parkInfo.get().getId()).orElseThrow(
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+        );
+
+        // 오늘 날짜 해당 요금 작성을 위한 메서드
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDateTime.now().with(LocalTime.MAX);
+        List<ParkBookingInfo> parkBookingInfoToday = parkBookingInfoRepository
+                .findAllByParkInfoIdAndExitTimeBetweenOrderByStartTimeDesc(parkInfo.get().getId(), startOfDay, endOfDay);
+        //  실제요금 = 만료된 예약건의 요금 + 출차 차량 요금
+        //  예상요금 = 모든 예약건의 요금
+        int totalActualCharge = 0;
+        int totalEstimatedCharge = 0;
+        for (ParkBookingInfo p : parkBookingInfoToday) {
+
+            LocalDateTime startTime = p.getStartTime();
+            LocalDateTime exitTime = p.getExitTime();
+            // 모든 예약건의 요금은 예상 요금
+            long minutes = Duration.between(startTime, exitTime).toMinutes();
+            int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
+            totalEstimatedCharge += charge;
+
+            Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
+
+            // 출차한 차량 요금은 실제 요금에 더함
+            if (parkMgtInfo.isPresent() && parkMgtInfo.get().getExitTime() != null) {
+                minutes = Duration.between(parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()).toMinutes();
+                charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
+                totalActualCharge += charge;
+            }
+            // 만료된 예약건의 요금은 실제 요금에 더함
+            else if (p.getExitTime().isBefore(LocalDateTime.now())) {
+                totalActualCharge += charge;
+            }
+        }
+
         // 예약시간이 종료되지 않은 예약 정보를 불러오기
         Page<ParkBookingInfo> parkBookingInfos = parkBookingInfoRepository.findAllByParkInfoIdOrderByStartTimeDesc(parkInfo.get().getId(), pageable);
+
         List<ParkMgtResponseDto> parkMgtResponseDtos1 = new ArrayList<>();
+
 
         for (ParkBookingInfo p : parkBookingInfos) {
             Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
+            ParkMgtResponseDto parkMgtResponseDto;
             if (parkMgtInfo.isPresent()) {
-                ParkMgtResponseDto parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
-                        , p.getStartTime(), p.getEndTime(), parkMgtInfo.get().getCharge());
-                parkMgtResponseDtos1.add(parkMgtResponseDto);
+                parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
+                        , p.getStartTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
             } else {
-                ParkMgtResponseDto parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
-                        , p.getStartTime(), p.getEndTime(), 0);
-                parkMgtResponseDtos1.add(parkMgtResponseDto);
+                parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
+                        , p.getStartTime(), p.getExitTime(), 0);
             }
+            parkMgtResponseDtos1.add(parkMgtResponseDto);
         }
 
         String parkName = parkInfo.get().getName();
         Long parkId = parkInfo.get().getId();
 
         Page page1 = new PageImpl(parkMgtResponseDtos1, pageable, parkBookingInfos.getTotalElements());
-        return ParkMgtListResponseDto.of(page1, parkName, parkId);
+        return ParkMgtListResponseDto.of(page1, parkName, parkId, totalActualCharge, totalEstimatedCharge);
     }
 
 

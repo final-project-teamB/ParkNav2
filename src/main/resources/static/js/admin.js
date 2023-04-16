@@ -164,6 +164,8 @@ function fetchData(page) {
             parkId = response.data.data.parkId;
             let num = 1;
             $("#parking-lot-name").text(response.data.data.parkName);
+            $("#actual-charge").text(response.data.data.totalActualCharge);
+            $("#estimated-charge").text(response.data.data.totalEstimatedCharge);
             $("#parking-list").empty();
             data.map((item) => {
                 $("#parking-list").append(`
