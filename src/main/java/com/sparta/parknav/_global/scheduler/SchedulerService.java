@@ -34,9 +34,7 @@ public class SchedulerService {
     @PreAuthorize("permitAll()")
     @Scheduled(cron = "0 * * * * *")
     public void scheduleRun() {
-        log.info("스케쥴링 시작");
         List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByExitTimeIsNullAndParkBookingInfoExitTimeBefore(LocalDateTime.now());
-        log.info("스케쥴링 중간");
         for (ParkMgtInfo p : parkMgtInfos) {
             ParkBookingInfo parkBookingInfo = p.getParkBookingInfo();
             if (parkBookingInfo == null) {
@@ -59,6 +57,5 @@ public class SchedulerService {
                 parkBookingByHourRepository.save(parkBookingByHour);
             }
         }
-        log.info("스케쥴링 종료");
     }
 }
