@@ -87,11 +87,11 @@ public class MgtService {
         // SCENARIO ENTER 5
         LocalDateTime now = LocalDateTime.now();
         Optional<ParkBookingInfo> parkBookingNow = parkBookingInfoRepository
-                .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now, now);
+                .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndExitTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now, now);
 
         // SCENARIO ENTER 5-1
         Optional<ParkBookingInfo> parkBookingPlusHour = parkBookingInfoRepository
-                .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndEndTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now.plusHours(1), now.plusHours(1));
+                .findTopByParkInfoIdAndCarNumAndStartTimeLessThanEqualAndExitTimeGreaterThan(parkInfo.getId(), requestDto.getCarNum(), now.plusHours(1), now.plusHours(1));
 
         ParkBookingInfo bookingInfo;
         // SCENARIO ENTER 5
@@ -237,10 +237,10 @@ public class MgtService {
             ParkMgtResponseDto parkMgtResponseDto;
             if (parkMgtInfo.isPresent()) {
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
-                        , p.getStartTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
+                        , p.getStartTime(), p.getEndTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
             } else {
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
-                        , p.getStartTime(), p.getExitTime(), 0);
+                        , p.getStartTime(), p.getEndTime(), p.getExitTime(), 0);
             }
             parkMgtResponseDtos1.add(parkMgtResponseDto);
         }

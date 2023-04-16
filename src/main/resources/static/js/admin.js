@@ -168,18 +168,29 @@ function fetchData(page) {
             $("#estimated-charge").text(response.data.data.totalEstimatedCharge);
             $("#parking-list").empty();
             data.map((item) => {
+                const buttons = document.querySelector(".btn-outline-success");
+                let button;
+                if (item.exitTime == null) {
+                    button = `<button type="button" class="btn btn-outline-info btn-sm mx-1" onclick="carExit('${parkId}','${item.carNum}')">출차하기</button>`;
+                    if (buttons.innerText !== "출차완료" && new Date(item.bookingEndTime) < new Date() && item.enterTime == null) {
+                        button = `<button type="button" class="btn btn-outline-danger btn-sm mx-1">예약만료</button>`;
+                    }
+                }else
+                {
+                    button = `<button type="button" class="btn btn-outline-success btn-sm mx-1">출차완료</button>`;
+                }
                 $("#parking-list").append(`
-                  <tr>
+                <tr ${new Date(item.bookingEndTime) < new Date(item.bookingExitTime) && item.exitTime == null ? 'style="color: red;"' : ''}>
                     <td>${(pageSize * (page)) + num++}</td>
                     <td>${item.carNum}</td>
                     <td>${item.enterTime == null ? "-" : item.enterTime}</td>
                     <td>${item.exitTime == null ? "-" : item.exitTime}</td>
                     <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
                     <td>${item.bookingStartTime}</td>
-                    <td>${item.bookingEndTime}</td>
+                    <td>${item.bookingExitTime}</td>
                     <td>${item.exitTime == null ? "주차" : "출차"}</td>
-                    <td>${item.exitTime == null ? `<button type="button" class="btn btn-outline-info btn-sm mx-1" onclick="carExit('${parkId}','${item.carNum}')">출차하기</button>` : '<button type="button" class="btn btn-outline-success btn-sm mx-1">출차완료</button>'}</td>
-                  </tr>
+                    <td>${button}</td>
+                </tr>
                 `);
             });
             currentPage = page; // 현재 페이지 번호 설정

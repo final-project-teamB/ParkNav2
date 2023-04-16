@@ -19,11 +19,13 @@ public class ParkMgtResponseDto {
     private LocalDateTime bookingStartTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime bookingEndTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime bookingExitTime;
     private int charge;
 
     @Builder
     private ParkMgtResponseDto(String carNum, LocalDateTime enterTime,
-                               LocalDateTime exitTime, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, int charge) {
+                               LocalDateTime exitTime, LocalDateTime bookingStartTime, LocalDateTime bookingEndTime, LocalDateTime bookingExitTime, int charge) {
 
         this.carNum = carNum;
         this.enterTime = enterTime;
@@ -31,15 +33,17 @@ public class ParkMgtResponseDto {
         this.bookingStartTime = bookingStartTime;
         this.bookingEndTime = bookingEndTime;
         this.charge = charge;
+        this.bookingExitTime = bookingExitTime;
     }
 
-    public static ParkMgtResponseDto of(String carNum, LocalDateTime enterTime, LocalDateTime exitTime, LocalDateTime startTime, LocalDateTime endTime, int charge) {
+    public static ParkMgtResponseDto of(String carNum, LocalDateTime enterTime, LocalDateTime exitTime, LocalDateTime startTime, LocalDateTime bookingEndTime, LocalDateTime bookingExitTime, int charge) {
         return builder()
                 .carNum(carNum)
                 .enterTime(enterTime)
                 .exitTime(exitTime)
                 .bookingStartTime(startTime)
-                .bookingEndTime(endTime)
+                .bookingEndTime(bookingEndTime)
+                .bookingExitTime(bookingExitTime)
                 .charge(charge)
                 .build();
     }
