@@ -180,7 +180,7 @@ function fetchData(page) {
                     button = `<button type="button" class="btn btn-outline-success btn-sm mx-1">출차완료</button>`;
                 }
                 $("#parking-list").append(`
-                <tr ${new Date(item.bookingEndTime) < new Date(item.bookingExitTime) && item.exitTime == null ? 'style="color: red;"' : ''}>
+                <tr ${new Date(item.bookingEndTime) < new Date() && item.exitTime == null && item.enterTime != null ? 'style="color: red;"' : ''}>
                     <td>${(pageSize * (page)) + num++}</td>
                     <td>${item.carNum}</td>
                     <td>${item.enterTime == null ? "-" : item.enterTime}</td>
