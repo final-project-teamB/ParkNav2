@@ -10,6 +10,7 @@ import com.sparta.parknav.management.repository.ParkMgtInfoRepository;
 import com.sparta.parknav.parking.entity.ParkOperInfo;
 import com.sparta.parknav.parking.repository.ParkOperInfoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @EnableScheduling
+@Slf4j
 public class SchedulerService {
 
     private final ParkBookingByHourRepository parkBookingByHourRepository;
@@ -30,11 +32,11 @@ public class SchedulerService {
 
     @Transactional
     @PreAuthorize("permitAll()")
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void scheduleRun() {
-
+        log.info("스케쥴링 시작");
         List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByExitTimeIsNullAndParkBookingInfoExitTimeBefore(LocalDateTime.now());
-
+        log.info("스케쥴링 중간");
         for (ParkMgtInfo p : parkMgtInfos) {
             ParkBookingInfo parkBookingInfo = p.getParkBookingInfo();
             if (parkBookingInfo == null) {
@@ -44,7 +46,7 @@ public class SchedulerService {
                     () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
             );
             parkBookingInfo.exitTimePlus(1);
-            LocalDateTime endDateTime = parkBookingInfo.getEndTime();
+            LocalDateTime endDateTime = parkBookingInfo.getExitTime();
             int endTime = endDateTime.getHour();
             ParkBookingByHour parkBookingByHour = parkBookingByHourRepository
                     .findByParkInfoIdAndDateAndTime(p.getParkInfo().getId(), endDateTime.toLocalDate(), endTime);
@@ -57,5 +59,6 @@ public class SchedulerService {
                 parkBookingByHourRepository.save(parkBookingByHour);
             }
         }
+        log.info("스케쥴링 종료");
     }
 }
