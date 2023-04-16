@@ -189,7 +189,7 @@ function fetchData(page) {
                     <td>${item.bookingStartTime}</td>
                     <td>${item.bookingExitTime}</td>
                     <td>${item.exitTime == null ? "주차" : "출차"}</td>
-                    <td>${button}</td>
+                    <td>${button}</td> 
                 </tr>
                 `);
             });
