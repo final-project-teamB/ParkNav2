@@ -180,7 +180,7 @@ public class MgtService {
     }
 
     @Transactional
-    public ParkMgtListResponseDto mgtPage(Admin admin, int page, int size) {
+    public ParkMgtListResponseDto mgtPage(Admin admin, int page, int size, int state, int sort) {
 
         Pageable pageable = PageRequest.of(page, size);
         Optional<ParkInfo> parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId());
@@ -232,10 +232,8 @@ public class MgtService {
         }
 
         // 예약시간이 종료되지 않은 예약 정보를 불러오기
-        Page<ParkBookingInfo> parkBookingInfos = parkBookingInfoRepository.findAllByParkInfoIdOrderByStartTimeDesc(parkInfo.get().getId(), pageable);
-
-        List<ParkMgtResponseDto> parkMgtResponseDtos1 = new ArrayList<>();
-
+        List<ParkBookingInfo> parkBookingInfos = parkBookingInfoRepository.findAllByParkInfoIdOrderByStartTimeDesc(parkInfo.get().getId());
+        List<ParkMgtResponseDto> parkMgtResponseDtos = new ArrayList<>();
 
         for (ParkBookingInfo p : parkBookingInfos) {
             Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
@@ -245,19 +243,47 @@ public class MgtService {
             long minutes = Duration.between(startTime, exitTime).toMinutes();
             int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
             if (parkMgtInfo.isPresent()) {
+                if (state == 2 && parkMgtInfo.get().getExitTime() != null || state == 1 && parkMgtInfo.get().getEnterTime() != null) {
+                    continue;
+                }
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
                         , p.getStartTime(), p.getEndTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
-            } else {
+                parkMgtResponseDtos.add(parkMgtResponseDto);
+            } else if (state == 0 || state == 1) {
+                if (state == 1 && p.getEndTime().isBefore(LocalDateTime.now())){
+                    continue;
+                }
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
                         , p.getStartTime(), p.getEndTime(), p.getExitTime(), charge);
+                parkMgtResponseDtos.add(parkMgtResponseDto);
             }
-            parkMgtResponseDtos1.add(parkMgtResponseDto);
         }
 
         String parkName = parkInfo.get().getName();
         Long parkId = parkInfo.get().getId();
 
-        Page page1 = new PageImpl(parkMgtResponseDtos1, pageable, parkBookingInfos.getTotalElements());
+        switch (sort) {
+            case 0:
+                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getEnterTime, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            case 1:
+                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getExitTime, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            case 2:
+                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getBookingStartTime, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            case 3:
+                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getBookingEndTime, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            default:
+                break;
+        }
+
+        int totalElements = parkMgtResponseDtos.size();
+        int fromIndex = (int) pageable.getOffset();
+        int toIndex = Math.min(fromIndex + pageable.getPageSize(), totalElements);
+        List<ParkMgtResponseDto> pagedResponseDtos = parkMgtResponseDtos.subList(fromIndex, toIndex);
+        Page page1 = new PageImpl(pagedResponseDtos, pageable, totalElements);
         return ParkMgtListResponseDto.of(page1, parkName, parkId, totalActualCharge, totalEstimatedCharge);
     }
 
@@ -320,14 +346,14 @@ public class MgtService {
     public ParkAvailableResponseDto parkAvailable(Admin admin) {
         LocalDate now = LocalDate.now();
         ParkOperInfo parkOperInfo = parkOperInfoRepository.findByParkInfoId(admin.getParkInfo().getId()).orElseThrow(
-                ()-> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK_OPER_INFO)
         );
         ParkInfo parkInfo = parkInfoRepository.findById(admin.getParkInfo().getId()).orElseThrow(
-                ()-> new CustomException(ErrorType.NOT_FOUND_PARK)
+                () -> new CustomException(ErrorType.NOT_FOUND_PARK)
         );
 
         List<ParkAvailableDto> parkAvailableDtos = parkBookingByHourRepository.findByParkInfoIdAndDateBetweenOrderByDateAscTimeAsc(admin.getParkInfo().getId(), now, now.plusDays(6))
-                .stream().map(s-> ParkAvailableDto.of(s.getDate(),s.getTime(),s.getAvailable())).toList();
-        return ParkAvailableResponseDto.of(parkOperInfo.getCmprtCo(),parkInfo.getName(),parkAvailableDtos);
+                .stream().map(s -> ParkAvailableDto.of(s.getDate(), s.getTime(), s.getAvailable())).toList();
+        return ParkAvailableResponseDto.of(parkOperInfo.getCmprtCo(), parkInfo.getName(), parkAvailableDtos);
     }
 }
