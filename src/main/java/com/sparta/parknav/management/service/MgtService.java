@@ -203,23 +203,33 @@ public class MgtService {
         for (ParkBookingInfo p : parkBookingInfoToday) {
 
             LocalDateTime startTime = p.getStartTime();
-            LocalDateTime exitTime = p.getExitTime();
+            LocalDateTime endTime = p.getEndTime();
             // 모든 예약건의 요금은 예상 요금
-            long minutes = Duration.between(startTime, exitTime).toMinutes();
-            int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
-            totalEstimatedCharge += charge;
-
+            long minutes;
+            int charge;
             Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
 
             // 출차한 차량 요금은 실제 요금에 더함
-            if (parkMgtInfo.isPresent() && parkMgtInfo.get().getExitTime() != null) {
-                minutes = Duration.between(parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()).toMinutes();
-                charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
-                totalActualCharge += charge;
+            if (parkMgtInfo.isPresent()) {
+                if (parkMgtInfo.get().getExitTime() != null) {
+                    charge = parkMgtInfo.get().getCharge();
+                    totalActualCharge += charge;
+                    totalEstimatedCharge += charge;
+                } else {
+                    if (p.getUser() == null) {
+                        minutes = Duration.between(parkMgtInfo.get().getEnterTime(), LocalDateTime.now()).toMinutes();
+                    } else {
+                        minutes = Duration.between(startTime, endTime).toMinutes();
+                    }
+                    charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
+                    totalEstimatedCharge += charge;
+                }
             }
             // 만료된 예약건의 요금은 실제 요금에 더함
-            else if (p.getExitTime().isBefore(LocalDateTime.now())) {
-                totalActualCharge += charge;
+            else {
+                minutes = Duration.between(startTime, endTime).toMinutes();
+                charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
+                totalEstimatedCharge += charge;
             }
         }
 
