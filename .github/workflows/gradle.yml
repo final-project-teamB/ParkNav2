@@ -114,6 +114,7 @@ jobs:
         script: |
           sudo usermod -aG docker $USER
           newgrp docker
+          sudo docker image prune
           sudo docker stop $(docker ps -a -q) 
           sudo docker rm $(docker ps -a -q)
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
