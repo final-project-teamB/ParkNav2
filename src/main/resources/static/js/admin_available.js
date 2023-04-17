@@ -70,7 +70,7 @@ async function renderTable() {
     let theadTime = "<tr><th>시간</th>";
 
     try {
-        const response = await axios.get("api/mgt/available");
+        const response = await axios.get("/api/mgt/available");
         const data = response.data;
 
         for (let i = 0; i < 7; i++) {

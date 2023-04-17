@@ -67,7 +67,7 @@ $(document).ready(function () {
     });
 
     $('#available-button').click(function () {
-        window.location.href = "/admin_available";
+        window.location.href = "/admin/available";
     });
 
     //모달 아이디에서 Enter 키 입력 시 이벤트

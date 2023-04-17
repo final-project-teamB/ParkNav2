@@ -55,7 +55,7 @@ public class WebSecurityConfig {
                 .antMatchers("/main").permitAll()
                 .antMatchers("/img/**").permitAll()
                 .antMatchers("/admin").permitAll()
-                .antMatchers("/admin_available").permitAll()
+                .antMatchers("/admin/available").permitAll()
                 .antMatchers("/mypage").permitAll()
                 .antMatchers("/data/**").permitAll()
                 .anyRequest().authenticated()

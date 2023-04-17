@@ -29,7 +29,7 @@ public class ParkSearchController {
         return "admin";
     }
 
-    @GetMapping("/admin_available")
+    @GetMapping("/admin/available")
     public String adminAvailable() {
         return "admin_available";
     }
