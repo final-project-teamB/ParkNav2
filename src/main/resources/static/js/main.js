@@ -146,7 +146,7 @@ $(document).ready(function () {
         const endDateTimetoDate = new Date(endDateTime);
         // 년월일시까지만 비교할 현재 시간
         const nowTimeHours = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours());
-        if (endDateTimetoDate.getTime()-startDateTimetoDate.getTime() > 604800000){
+        if (endDateTimetoDate.getTime() - startDateTimetoDate.getTime() > 604800000) {
             alert("일주일 이상 예약 할 수 없습니다");
             return false;
         }
@@ -159,7 +159,7 @@ $(document).ready(function () {
             alert("현재 시간 이후로만 선택 가능합니다")
             return false;
         }
-        console.log(startDateTimetoDate.getTime()-endDateTimetoDate.getTime());
+        console.log(startDateTimetoDate.getTime() - endDateTimetoDate.getTime());
         const body = {
             startDate: startDateTime,
             endDate: endDateTime,
@@ -167,22 +167,21 @@ $(document).ready(function () {
         const params = new URLSearchParams(body).toString();
         // 주차예약 버튼 클릭 시 모달창 띄우기
         $('#reservation-modal').modal('show');
-        $("#parking-lot-booking-modal").attr("class","alert alert-warning")
+        $("#parking-lot-booking-modal").attr("class", "alert alert-warning")
         $('#parking-lot-booking-modal').text("운영시간이 아닙니다");
         $("#parking-lot-not-allowed-time-div").hide();
         $("#parking_reservation").hide();
         axios.get(`/api/booking/${id}?${params}`)
             .then(response => {
-                console.log(response)
                 const data = response.data.data;
                 $("#parking-lot-not-allowed-time").empty();
                 if (data.isOperation === false) {
-                    $("#parking-lot-booking-modal").attr("class","alert alert-warning").text("운영시간이 아닙니다");
+                    $("#parking-lot-booking-modal").attr("class", "alert alert-warning").text("운영시간이 아닙니다");
                     $("#parking-lot-not-allowed-time-div").hide();
                     $("#parking-lot-price-modal-div").hide();
                     $("#parking_reservation").hide();
                 } else if (data.notAllowedTimeList.length > 0) {
-                    $("#parking-lot-booking-modal").attr("class","alert alert-danger").text("예약불가 시간이 있습니다");
+                    $("#parking-lot-booking-modal").attr("class", "alert alert-danger").text("예약불가 시간이 있습니다");
                     $("#parking-lot-not-allowed-time-div").show();
                     $("#parking-lot-price-modal-div").hide();
                     data.notAllowedTimeList.map(s => {
@@ -190,39 +189,16 @@ $(document).ready(function () {
                     })
                     $("#parking_reservation").hide();
                 } else {
-                    $("#parking-lot-booking-modal").attr("class","alert alert-success").text("예약이 가능합니다");
+                    $("#parking-lot-booking-modal").attr("class", "alert alert-success").text("예약이 가능합니다");
                     $("#parking_reservation").show();
                     $("#parking-lot-not-allowed-time-div").hide();
                     $("#parking-lot-price-modal-div").show();
                     $("#parking-lot-price-modal").attr("value", data.charge);
                     $("#existing-car-numbers").empty();
-                    return axios.get("/api/car/check");
+                    getCarList();
                 }
             })
-            .then(response2 => {
-                const data = response2.data.data;
-                let num = 1;
-                data.map((item) => {
-                    $("#existing-car-numbers").append(`
-                    <tr>
-                        <td>${num++}</td>
-                        <td>${item.carNum}</td>
-                        <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" ${num === 2 ? "checked" : null}>
-                        </div>
-                        </td>
-                    </tr>`
-                    );
-                })
-                if (data.length == 0) {
-                    $("#existing-car-numbers").append(`<tr><td colspan="4">등록된 차량이 없습니다</td></tr>`)
-                }
-            })
-            .catch(error => {
-                alert("조회 에러입니다")
-                return false;
-            });
+
     });
 
     $('#parking_reservation').click(function () {
@@ -231,7 +207,7 @@ $(document).ready(function () {
         const endDate = $('#exit-date').val() + "T" + $('#exit-time').val();
         const startDateTimetoDate = new Date(startDate);
         const endDateTimetoDate = new Date(endDate);
-        if (endDateTimetoDate.getTime()-startDateTimetoDate.getTime() > 604800000){
+        if (endDateTimetoDate.getTime() - startDateTimetoDate.getTime() > 604800000) {
             alert("일주일 이상 예약 할 수 없습니다");
             return false;
         }
@@ -396,6 +372,36 @@ async function searchData() {
     axiosMapRenderFromKakao(url);
     searchParktime = parktime;
     searchCharge = charge;
+}
+
+function getCarList() {
+    axios.get("/api/car/check")
+        .then(response2 => {
+            const data = response2.data.data;
+            console.log(data)
+            let num = 1;
+            data.map((item) => {
+                $("#existing-car-numbers").append(`
+                    <tr>
+                        <td>${num++}</td>
+                        <td>${item.carNum}</td>
+                        <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" ${num === 2 ? "checked" : null}>
+                        </div>
+                        </td>
+                    </tr>`
+                );
+            })
+            if (data.length == 0) {
+                $("#existing-car-numbers").append(`<tr><td colspan="4">등록된 차량이 없습니다</td></tr>`)
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            alert("조회 에러입니다")
+            return false;
+        });
 }
 
 function userLogin() {
