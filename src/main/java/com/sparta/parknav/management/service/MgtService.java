@@ -209,7 +209,6 @@ public class MgtService {
             int charge;
             Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
 
-            // 출차한 차량 요금은 실제 요금에 더함
             if (parkMgtInfo.isPresent()) {
                 if (parkMgtInfo.get().getExitTime() != null) {
                     charge = parkMgtInfo.get().getCharge();
@@ -225,7 +224,6 @@ public class MgtService {
                     totalEstimatedCharge += charge;
                 }
             }
-            // 만료된 예약건의 요금은 실제 요금에 더함
             else {
                 minutes = Duration.between(startTime, endTime).toMinutes();
                 charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
