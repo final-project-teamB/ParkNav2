@@ -107,14 +107,12 @@ $(document).ready(function () {
     $("#state-button").change(function() {
         state = $(this).val();
         fetchData(0);
-
     });
 
     //조회 정렬 변경
     $("#sort-button").change(function() {
         sort = $(this).val();
         fetchData(0);
-
     });
 
 });
