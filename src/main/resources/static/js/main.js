@@ -179,6 +179,7 @@ $(document).ready(function () {
                     $("#parking-lot-not-allowed-time-div").hide();
                     $("#parking-lot-price-modal-div").hide();
                     $("#parking_reservation").hide();
+                    $("#existing-car-numbers-div").hide();
                 } else if (data.notAllowedTimeList.length > 0) {
                     $("#parking-lot-booking-modal").attr("class", "alert alert-danger").text("예약불가 시간이 있습니다");
                     $("#parking-lot-not-allowed-time-div").show();
@@ -187,6 +188,7 @@ $(document).ready(function () {
                         $("#parking-lot-not-allowed-time").append("<option>" + s.replace("T", " ") + "</option>")
                     })
                     $("#parking_reservation").hide();
+                    $("#existing-car-numbers-div").hide();
                 } else {
                     $("#parking-lot-booking-modal").attr("class", "alert alert-success").text("예약이 가능합니다");
                     $("#parking_reservation").show();
@@ -194,6 +196,7 @@ $(document).ready(function () {
                     $("#parking-lot-price-modal-div").show();
                     $("#parking-lot-price-modal").attr("value", data.charge);
                     $("#existing-car-numbers").empty();
+                    $("#existing-car-numbers-div").show();
                     getCarList();
                 }
             })
