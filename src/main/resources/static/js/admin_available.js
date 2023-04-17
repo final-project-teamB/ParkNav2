@@ -72,7 +72,6 @@ async function renderTable() {
     try {
         const response = await axios.get("api/mgt/available");
         const data = response.data;
-        console.log(data)
 
         for (let i = 0; i < 7; i++) {
             const plusDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
@@ -92,8 +91,6 @@ async function renderTable() {
                 } else {
                     table += `<td>${data.data.cmprtCo} 구획</td>`
                 }
-                console.log(match)
-
             }
             table += "</tr>";
         }
