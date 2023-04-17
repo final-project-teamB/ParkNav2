@@ -3,6 +3,8 @@ let currentPage = 0;
 const pageSize = 10; // 한 페이지당 보여줄 항목 수
 let totalPages = 0;
 let parkId;
+let state = 0;
+let sort = 0;
 $(document).ready(function () {
     axios.interceptors.response.use(function (response) {
         // 응답 성공 직전 호출되는 콜백
@@ -30,10 +32,10 @@ $(document).ready(function () {
     } else {
         $("#loginModal").modal('show');
         $("#login-button").show();
-        $("#enter-button").show();
+        $("#enter-button").hide();
         $("#logout-button").hide();
         $("#available-button-button").hide();
-        $("#parking-list").append(`<tr><td colspan="8">데이터가 없습니다</td></tr>`)
+        $("#parking-list").append(`<tr><td colspan="9">데이터가 없습니다</td></tr>`)
     }
 
     $('#logout-button').click(function () {
@@ -100,6 +102,17 @@ $(document).ready(function () {
                 alert(error.response.data.error.msg);
                 return false;
             });
+    });
+    //조회 전체, 주차중, 예약중 필터값 변경
+    $("#state-button").change(function() {
+        state = $(this).val();
+        fetchData(0);
+    });
+
+    //조회 정렬 변경
+    $("#sort-button").change(function() {
+        sort = $(this).val();
+        fetchData(0);
     });
 
 });
@@ -179,7 +192,9 @@ function adminLogin() {
 function fetchData(page) {
     const body = {
         page: page,
-        size: pageSize
+        size: pageSize,
+        state: state,
+        sort : sort
     };
     const params = new URLSearchParams(body).toString();
     axios.get(`/api/mgt/check?${params}`)
@@ -191,6 +206,9 @@ function fetchData(page) {
             $("#actual-charge").text(response.data.data.totalActualCharge);
             $("#estimated-charge").text(response.data.data.totalEstimatedCharge);
             $("#parking-list").empty();
+            if (data.length===0){
+                $("#parking-list").append(`<tr><td colspan="9">데이터가 없습니다</td></tr>`);
+            }
             data.map((item) => {
                 const buttons = document.querySelector(".btn-outline-success");
                 let button;
