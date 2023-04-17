@@ -232,12 +232,16 @@ public class MgtService {
         for (ParkBookingInfo p : parkBookingInfos) {
             Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
             ParkMgtResponseDto parkMgtResponseDto;
+            LocalDateTime startTime = p.getStartTime();
+            LocalDateTime exitTime = p.getExitTime();
+            long minutes = Duration.between(startTime, exitTime).toMinutes();
+            int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
             if (parkMgtInfo.isPresent()) {
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
                         , p.getStartTime(), p.getEndTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
             } else {
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
-                        , p.getStartTime(), p.getEndTime(), p.getExitTime(), 0);
+                        , p.getStartTime(), p.getEndTime(), p.getExitTime(), charge);
             }
             parkMgtResponseDtos1.add(parkMgtResponseDto);
         }

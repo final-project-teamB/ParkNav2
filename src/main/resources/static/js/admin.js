@@ -191,7 +191,7 @@ function fetchData(page) {
                     <td>${item.carNum}</td>
                     <td>${item.enterTime == null ? "-" : item.enterTime}</td>
                     <td>${item.exitTime == null ? "-" : item.exitTime}</td>
-                    <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
+                    <td>${item.charge + "원"}</td>
                     <td>${item.bookingStartTime}</td>
                     <td>${item.bookingEndTime}</td>
                     <td>${item.exitTime == null && item.enterTime == null ? "예약" : item.exitTime == null ? "주차" : "출차"}</td>
