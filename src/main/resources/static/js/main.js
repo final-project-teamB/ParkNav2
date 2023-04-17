@@ -159,7 +159,6 @@ $(document).ready(function () {
             alert("현재 시간 이후로만 선택 가능합니다")
             return false;
         }
-        console.log(startDateTimetoDate.getTime() - endDateTimetoDate.getTime());
         const body = {
             startDate: startDateTime,
             endDate: endDateTime,
@@ -378,7 +377,6 @@ function getCarList() {
     axios.get("/api/car/check")
         .then(response2 => {
             const data = response2.data.data;
-            console.log(data)
             let num = 1;
             data.map((item) => {
                 $("#existing-car-numbers").append(`
@@ -398,7 +396,6 @@ function getCarList() {
             }
         })
         .catch(error => {
-            console.log(error);
             alert("조회 에러입니다")
             return false;
         });
