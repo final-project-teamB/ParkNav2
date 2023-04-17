@@ -264,16 +264,16 @@ public class MgtService {
 
         switch (sort) {
             case 0:
-                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getEnterTime, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-            case 1:
-                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getExitTime, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-            case 2:
                 Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getBookingStartTime, Comparator.nullsLast(Comparator.reverseOrder())));
                 break;
-            case 3:
+            case 1:
                 Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getBookingEndTime, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            case 2:
+                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getEnterTime, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            case 3:
+                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getExitTime, Comparator.nullsLast(Comparator.reverseOrder())));
                 break;
             default:
                 break;
