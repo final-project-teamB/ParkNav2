@@ -32,7 +32,7 @@ public class SchedulerService {
 
     @Transactional
     @PreAuthorize("permitAll()")
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void scheduleRun() {
         List<ParkMgtInfo> parkMgtInfos = parkMgtInfoRepository.findAllByExitTimeIsNullAndParkBookingInfoExitTimeBefore(LocalDateTime.now());
         for (ParkMgtInfo p : parkMgtInfos) {
