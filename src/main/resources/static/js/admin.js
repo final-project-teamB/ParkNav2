@@ -3,6 +3,8 @@ let currentPage = 0;
 const pageSize = 10; // 한 페이지당 보여줄 항목 수
 let totalPages = 0;
 let parkId;
+let state = 0;
+let sort = 0;
 $(document).ready(function () {
     axios.interceptors.response.use(function (response) {
         // 응답 성공 직전 호출되는 콜백
@@ -101,6 +103,19 @@ $(document).ready(function () {
                 return false;
             });
     });
+    //조회 전체, 주차중, 예약중 필터값 변경
+    $("#state-button").change(function() {
+        state = $(this).val();
+        fetchData(0);
+
+    });
+
+    //조회 정렬 변경
+    $("#sort-button").change(function() {
+        sort = $(this).val();
+        fetchData(0);
+
+    });
 
 });
 
@@ -179,7 +194,9 @@ function adminLogin() {
 function fetchData(page) {
     const body = {
         page: page,
-        size: pageSize
+        size: pageSize,
+        state: state,
+        sort : sort
     };
     const params = new URLSearchParams(body).toString();
     axios.get(`/api/mgt/check?${params}`)

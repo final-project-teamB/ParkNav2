@@ -36,8 +36,10 @@ public class MgtController {
     @GetMapping("/check")
     public ApiResponseDto<ParkMgtListResponseDto> mgtPage(@AuthenticationPrincipal AdminDetailsImpl userDetails,
                                                           @RequestParam int page,
-                                                          @RequestParam int size) {
-        return ResponseUtils.ok(mgtService.mgtPage(userDetails.getUser(), page, size), MsgType.SEARCH_SUCCESSFULLY);
+                                                          @RequestParam int size,
+                                                          @RequestParam int state,
+                                                          @RequestParam int sort) {
+        return ResponseUtils.ok(mgtService.mgtPage(userDetails.getUser(), page, size, state, sort), MsgType.SEARCH_SUCCESSFULLY);
     }
 
     @GetMapping("/available")
