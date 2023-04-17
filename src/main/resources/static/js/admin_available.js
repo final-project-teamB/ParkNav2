@@ -20,7 +20,7 @@ $(document).ready(function () {
         $("#logout-button").show();
         $("#main-button").show();
         renderTable();
-    }else {
+    } else {
         $("#loginModal").modal('show');
         $("#login-button").show();
         $("#logout-button").hide();
@@ -72,6 +72,7 @@ async function renderTable() {
     try {
         const response = await axios.get("api/mgt/available");
         const data = response.data;
+        console.log(data)
 
         for (let i = 0; i < 7; i++) {
             const plusDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
@@ -83,11 +84,16 @@ async function renderTable() {
             table += `<tr><th>${j}시</th>`;
             for (let i = 0; i < 7; i++) {
                 const plusDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-                const match = data.data.parkAvailableDtos.find(function(slot) {
+                const match = data.data.parkAvailableDtos.find(function (slot) {
                     return slot.date === `${plusDay.getFullYear()}-${(plusDay.getMonth() + 1 < 10 ? "0" + (plusDay.getMonth() + 1) : plusDay.getMonth() + 1)}-${(plusDay.getDate() < 10 ? "0" + plusDay.getDate() : plusDay.getDate())}` && slot.time === j;
                 });
-                const tmp = match ? `<td>${match.available} 자리</td>` : `<td>예약 없음</td>`;
-                table += tmp;
+                if (match) {
+                    table += match.available === 0 ?`<td>자리 없음</td>` : `<td>${match.available} 구획</td>`;
+                } else {
+                    table += `<td>${data.data.cmprtCo} 구획</td>`
+                }
+                console.log(match)
+
             }
             table += "</tr>";
         }
