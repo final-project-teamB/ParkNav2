@@ -32,10 +32,10 @@ $(document).ready(function () {
     } else {
         $("#loginModal").modal('show');
         $("#login-button").show();
-        $("#enter-button").show();
+        $("#enter-button").hide();
         $("#logout-button").hide();
         $("#available-button-button").hide();
-        $("#parking-list").append(`<tr><td colspan="8">데이터가 없습니다</td></tr>`)
+        $("#parking-list").append(`<tr><td colspan="9">데이터가 없습니다</td></tr>`)
     }
 
     $('#logout-button').click(function () {
@@ -206,6 +206,9 @@ function fetchData(page) {
             $("#actual-charge").text(response.data.data.totalActualCharge);
             $("#estimated-charge").text(response.data.data.totalEstimatedCharge);
             $("#parking-list").empty();
+            if (data.length===0){
+                $("#parking-list").append(`<tr><td colspan="9">데이터가 없습니다</td></tr>`);
+            }
             data.map((item) => {
                 const buttons = document.querySelector(".btn-outline-success");
                 let button;

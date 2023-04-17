@@ -235,13 +235,16 @@ public class MgtService {
             long minutes = Duration.between(startTime, exitTime).toMinutes();
             int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
             if (parkMgtInfo.isPresent()) {
-                if (state == 2 && parkMgtInfo.get().getExitTime() != null || state == 1 &&  parkMgtInfo.get().getExitTime() == null) {
+                if (state == 2 && parkMgtInfo.get().getExitTime() != null || state == 1 && parkMgtInfo.get().getEnterTime() != null) {
                     continue;
                 }
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
                         , p.getStartTime(), p.getEndTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
                 parkMgtResponseDtos.add(parkMgtResponseDto);
             } else if (state == 0 || state == 1) {
+                if (state == 1 && p.getEndTime().isBefore(LocalDateTime.now())){
+                    continue;
+                }
                 parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
                         , p.getStartTime(), p.getEndTime(), p.getExitTime(), charge);
                 parkMgtResponseDtos.add(parkMgtResponseDto);
