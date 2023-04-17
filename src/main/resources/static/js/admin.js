@@ -187,8 +187,8 @@ function fetchData(page) {
                     <td>${item.exitTime == null ? "-" : item.exitTime}</td>
                     <td>${item.exitTime == null ? "-" : item.charge + "원"}</td>
                     <td>${item.bookingStartTime}</td>
-                    <td>${item.bookingExitTime}</td>
-                    <td>${item.exitTime == null ? "주차" : "출차"}</td>
+                    <td>${item.bookingEndTime}</td>
+                    <td>${item.exitTime == null && item.enterTime == null ? "예약" : item.exitTime == null ? "주차" : "출차"}</td>
                     <td>${button}</td> 
                 </tr>
                 `);
