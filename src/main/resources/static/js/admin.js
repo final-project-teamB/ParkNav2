@@ -104,6 +104,24 @@ $(document).ready(function () {
 
 });
 
+function carEnter(parkId, carNum) {
+    if (confirm(carNum + " 차량을 입차 하시겠습니까?")) {
+        body = {
+            parkId: parkId,
+            carNum: carNum
+        }
+        axios.post("/api/mgt/enter", body)
+            .then(response => {
+                alert(response.data.msg);
+                fetchData(currentPage);
+            })
+            .catch(error => {
+                alert(error.response.data.error.msg)
+                return false;
+            });
+    }
+}
+
 function carExit(parkId, carNum) {
     if (confirm(carNum + " 차량을 출차 하시겠습니까?")) {
         body = {
@@ -177,7 +195,15 @@ function fetchData(page) {
                 const buttons = document.querySelector(".btn-outline-success");
                 let button;
                 if (item.exitTime == null) {
-                    button = `<button type="button" class="btn btn-outline-info btn-sm mx-1" onclick="carExit('${parkId}','${item.carNum}')">출차하기</button>`;
+                    if (item.enterTime == null ) {
+                        if (new Date(item.bookingStartTime) <= new Date() && new Date(item.bookingEndTime) > new Date()) {
+                            button = `<button type="button" class="btn btn-outline-warning btn-sm mx-1" onclick="carEnter('${parkId}','${item.carNum}')">입차하기</button>`;
+                        } else {
+                            button = `<button type="button" class="btn btn-outline-secondary btn-sm mx-1">예약차량</button>`;
+                        }
+                    } else {
+                        button = `<button type="button" class="btn btn-outline-info btn-sm mx-1" onclick="carExit('${parkId}','${item.carNum}')">출차하기</button>`;
+                    }
                     if (buttons.innerText !== "출차완료" && new Date(item.bookingEndTime) < new Date() && item.enterTime == null) {
                         button = `<button type="button" class="btn btn-outline-danger btn-sm mx-1">예약만료</button>`;
                     }
