@@ -3,6 +3,7 @@ package com.sparta.parknav.management.service;
 import com.sparta.parknav._global.exception.CustomException;
 import com.sparta.parknav._global.exception.ErrorType;
 import com.sparta.parknav._global.handler.TransactionHandler;
+import com.sparta.parknav.booking.dto.ParkBookingInfoMgtDto;
 import com.sparta.parknav.booking.entity.ParkBookingByHour;
 import com.sparta.parknav.booking.entity.ParkBookingInfo;
 import com.sparta.parknav.booking.repository.ParkBookingByHourRepository;
@@ -22,7 +23,6 @@ import com.sparta.parknav.user.entity.Admin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -223,70 +223,18 @@ public class MgtService {
                     charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
                     totalEstimatedCharge += charge;
                 }
-            }
-            else {
+            } else {
                 minutes = Duration.between(startTime, endTime).toMinutes();
                 charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
                 totalEstimatedCharge += charge;
             }
         }
 
-        // 예약시간이 종료되지 않은 예약 정보를 불러오기
-        List<ParkBookingInfo> parkBookingInfos = parkBookingInfoRepository.findAllByParkInfoIdOrderByStartTimeDesc(parkInfo.get().getId());
-        List<ParkMgtResponseDto> parkMgtResponseDtos = new ArrayList<>();
-
-        for (ParkBookingInfo p : parkBookingInfos) {
-            Optional<ParkMgtInfo> parkMgtInfo = parkMgtInfoRepository.findByParkBookingInfoId(p.getId());
-            ParkMgtResponseDto parkMgtResponseDto;
-            LocalDateTime startTime = p.getStartTime();
-            LocalDateTime exitTime = p.getExitTime();
-            long minutes = Duration.between(startTime, exitTime).toMinutes();
-            int charge = ParkingFeeCalculator.calculateParkingFee(minutes, parkOperInfo);
-            if (parkMgtInfo.isPresent()) {
-                if (state == 2 && parkMgtInfo.get().getExitTime() != null || state == 1 && parkMgtInfo.get().getEnterTime() != null) {
-                    continue;
-                }
-                parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), parkMgtInfo.get().getEnterTime(), parkMgtInfo.get().getExitTime()
-                        , p.getStartTime(), p.getEndTime(), p.getExitTime(), parkMgtInfo.get().getCharge());
-                parkMgtResponseDtos.add(parkMgtResponseDto);
-            } else if (state == 0 || state == 1) {
-                if (state == 1 && p.getEndTime().isBefore(LocalDateTime.now())){
-                    continue;
-                }
-                parkMgtResponseDto = ParkMgtResponseDto.of(p.getCarNum(), null, null
-                        , p.getStartTime(), p.getEndTime(), p.getExitTime(), charge);
-                parkMgtResponseDtos.add(parkMgtResponseDto);
-            }
-        }
-
+        Page<ParkBookingInfoMgtDto> parkBookingInfo = parkBookingInfoRepository.findByMgtList(parkInfo.get().getId(), state, sort, pageable);
         String parkName = parkInfo.get().getName();
         Long parkId = parkInfo.get().getId();
-
-        switch (sort) {
-            case 0:
-                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getBookingStartTime, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-            case 1:
-                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getBookingEndTime, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-            case 2:
-                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getEnterTime, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-            case 3:
-                Collections.sort(parkMgtResponseDtos, Comparator.comparing(ParkMgtResponseDto::getExitTime, Comparator.nullsLast(Comparator.reverseOrder())));
-                break;
-            default:
-                break;
-        }
-
-        int totalElements = parkMgtResponseDtos.size();
-        int fromIndex = (int) pageable.getOffset();
-        int toIndex = Math.min(fromIndex + pageable.getPageSize(), totalElements);
-        List<ParkMgtResponseDto> pagedResponseDtos = parkMgtResponseDtos.subList(fromIndex, toIndex);
-        Page page1 = new PageImpl(pagedResponseDtos, pageable, totalElements);
-        return ParkMgtListResponseDto.of(page1, parkName, parkId, totalActualCharge, totalEstimatedCharge);
+        return ParkMgtListResponseDto.of(parkBookingInfo, parkName, parkId, totalActualCharge, totalEstimatedCharge);
     }
-
 
     private ParkBookingInfo getUpdatedBookingInfo(ParkInfo parkInfo, LocalDateTime now, ParkOperInfo parkOperInfo, ParkBookingInfo parkBookingPlusHour) {
         // 즉시 예약 로직이 아닌 기존 예약에 시간을 추가하는것이기 때문에 주차공간이 있는지 여부를 검증하고 available을 추가해줘야함

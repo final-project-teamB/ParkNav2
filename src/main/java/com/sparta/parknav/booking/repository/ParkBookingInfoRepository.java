@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo,Long> {
+public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo,Long>,ParkBookingInfoRepositoryCustom {
 
     Page<ParkBookingInfo> findAllByUserIdOrderByStartTimeDesc(Long id, Pageable pageable);
 
@@ -25,8 +25,5 @@ public interface ParkBookingInfoRepository extends JpaRepository<ParkBookingInfo
 
     ParkBookingInfo findTopByParkInfoIdAndCarNumAndStartTimeGreaterThan(Long id, String carNum, LocalDateTime now);
 
-    Page<ParkBookingInfo> findAllByParkInfoIdOrderByStartTimeDesc(Long id, Pageable pageable);
-
     List<ParkBookingInfo> findAllByParkInfoIdAndExitTimeBetweenOrderByStartTimeDesc(Long parkInfoId, LocalDateTime startOfDay, LocalDateTime endOfDay);
-    List<ParkBookingInfo> findAllByParkInfoIdOrderByStartTimeDesc(Long id);
 }
