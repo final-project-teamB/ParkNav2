@@ -138,7 +138,7 @@
 <summary> 펼쳐보기 </summary>
 <div markdown="1">  
 
-![image](https://user-images.githubusercontent.com/96133075/231802763-02ec2b27-1ffa-4e21-862c-15dd3165ee37.png)
+![API 설계](https://user-images.githubusercontent.com/76714304/233368585-3da8e55e-4125-42fe-84c5-fff1880e6b2b.png)
 
 </div>
 </details>
