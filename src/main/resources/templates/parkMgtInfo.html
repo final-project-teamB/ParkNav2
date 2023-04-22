@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>주차장 관리 페이지</title>
+    <link rel="stylesheet" href="../static/css/parkMgtInfo.css">
+</head>
+<body>
+<div class="container">
+    <h1>주차장 이름</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>차량번호</th>
+            <th>입차시간</th>
+            <th>출차시간</th>
+            <th>주차요금</th>
+            <th> </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>63구5477</td>
+            <td>2023-03-06 18:00:36</td>
+            <td></td>
+            <td>4,000</td>
+            <td colspan="3">
+                <button id="btn1" onclick="showText('btn1', 'text1')">출차</button>
+                <p id="text1" style="display: none;">출차 완료</p>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>34도2566</td>
+            <td>2023-03-06 18:00:36</td>
+            <td></td>
+            <td>4,000</td>
+            <td colspan="3">
+                <button id="btn2" onclick="showText('btn2', 'text2')">출차</button>
+                <p id="text2" style="display: none;">출차 완료</p>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script src="../static/js/parkMgtInfo.js"></script>
+</body>
+</html>

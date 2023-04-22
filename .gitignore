@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+src/main/generated
 
 ### STS ###
 .apt_generated
@@ -37,5 +38,6 @@ out/
 .vscode/
 
 src/main/resources/application.properties
-
 src/main/resources/application.yml
+src/main/resources/application-common.yml
+src/main/resources/application-db.yml

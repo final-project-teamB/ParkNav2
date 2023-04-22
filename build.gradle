@@ -27,11 +27,41 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly('org.projectlombok:lombok')
+    annotationProcessor('org.projectlombok:lombok')
+    testCompileOnly('org.projectlombok:lombok')
+    testAnnotationProcessor('org.projectlombok:lombok')
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+    //텍스트 유사도 검증
+    implementation 'org.apache.commons:commons-text:1.9'
+    //redis 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //QueryDsl
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation 'com.querydsl:querydsl-apt'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jpa" // querydsl JPAAnnotationProcessor 사용 지정
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+//Annotation Processor가 생성한 Q객체를 저장할 디렉토리 경로를 설정합니다.
+def generated='src/main/generated'
+//Java 소스 파일의 위치를 지정합니다.
+sourceSets {
+    //Java 소스 파일의 위치에 Annotation Processor가 생성한 Q객체를 저장하는 디렉토리를 추가합니다.
+    main.java.srcDirs += [ generated ]
+}
+//Java 소스 코드 컴파일 태스크에 대한 설정을 지정합니다.
+tasks.withType(JavaCompile) {
+    //options.annotationProcessorGeneratedSourcesDirectory 옵션에 Annotation Processor가 생성한 Q객체를 저장하는 디렉토리를 지정합니다.
+    options.annotationProcessorGeneratedSourcesDirectory = file(generated)
+}
+
+clean.doLast {
+    //Annotation Processor가 생성한 Q객체를 저장하는 디렉토리를 삭제합니다.
+    file(generated).deleteDir()
 }

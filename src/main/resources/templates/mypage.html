@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Moment -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- js -->
+    <script src="/js/mypage.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light my-2" style="background-color: #e3f2fd;">
+        <a class="navbar-brand" href="#">
+            <span class="material-icons">local_parking</span>
+            Parknav
+        </a>
+        <div class="ml-auto">
+            <button class="btn btn-outline-success mx-2" id="register-button" data-toggle="modal"
+                    data-target="#car-register-modal">차량관리
+            </button>
+            <button class="btn btn-outline-info mx-2" id="main-button">메인으로</button>
+        </div>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <h2 class="text-center mb-4">나의 예약 현황</h2>
+            <table class="table table-striped table-hover text-center">
+                <thead>
+                <tr>
+                    <th>주차장이름</th>
+                    <th>차량번호</th>
+                    <th>예약일시</th>
+                    <th>이용시간</th>
+                    <th>주차요금</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody id="parking-list">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled" id="previous-page">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">이전</a>
+            </li>
+            <li class="page-item active" id="page-0"><a class="page-link" href="#">1</a></li>
+            <li class="page-item" id="page-1"><a class="page-link" href="#">2</a></li>
+            <li class="page-item" id="page-2"><a class="page-link" href="#">3</a></li>
+            <li class="page-item" id="next-page">
+                <a class="page-link" href="#">다음</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<!-- 차량번호 등록 모달 -->
+<div class="modal fade" id="car-register-modal" tabindex="-1" role="dialog" aria-labelledby="car-register-modal-label"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="car-register-modal-label">차량 등록</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row">
+                        <label for="car-number-input" class="col-sm-3 col-form-label">차량번호</label>
+                        <div class="col-sm-7">
+                            <input type="text" class="form-control" id="car-number-input" placeholder="차량번호를 입력하세요" maxlength="20">
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="button" class="btn btn-primary" id="car-number-confirm">확인</button>
+                        </div>
+                    </div>
+                </form>
+                <div class="mt-4">
+                    <table class="table table-hover text-center">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">차량번호</th>
+                            <th scope="col">대표차량</th>
+                            <th scope="col">삭제</th>
+                        </tr>
+                        </thead>
+                        <tbody id="existing-car-numbers">
+                        <tr>
+                            <th scope="row">1</th>
+                            <td>AB가1234</td>
+                            <td class="text-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" checked>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger">삭제</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2</th>
+                            <td>가나다5678</td>
+                            <td class="text-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio">
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger">삭제</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3</th>
+                            <td>다라마1234</td>
+                            <td class="text-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio">
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger">삭제</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 예약확인 모달 -->
+<div class="modal fade" id="reservation-modal" tabindex="-1" role="dialog" aria-labelledby="reservation-modal-label"
+     aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">예약확인</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="parking-lot-available-modal">현재 예약가능 건수:</label>
+                        <input type="text" class="form-control" id="parking-lot-available-modal"
+                               placeholder="예약 가능 건수"
+                               readonly>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="parking-lot-booking-modal">선택 시간 예약 건수:</label>
+                        <input type="text" class="form-control" id="parking-lot-booking-modal"
+                               placeholder="선택 시간 예약 건수"
+                               readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
