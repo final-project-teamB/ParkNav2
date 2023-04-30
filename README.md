@@ -1,5 +1,7 @@
 
 ![image](https://user-images.githubusercontent.com/96133075/232795404-9395fee6-af6a-4f14-9f2e-3c991c5c9adf.png)
+![image](https://user-images.githubusercontent.com/96133075/235163652-c2e89a20-e20a-44af-8df2-74ac90aa13a9.png)
+
 
 # ParkNav 🚌
 ### 주차장을 찾아가는 네비게이션과 같이 쉽게 주차장을 조회하고 예약할 수 있는 플랫폼입니다.
